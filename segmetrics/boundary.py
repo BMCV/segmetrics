@@ -1,17 +1,20 @@
 import numpy as np
 from scipy import ndimage
 from skimage import morphology as morph
+from metric import Metric
 
 
-class Hausdorff:
+class Hausdorff(Metric):
 
-    def compute(self, actual, expected):
-        groundtruth = Hausdorff.prepare_groundtruth(expected)
-        results     = []
+    def set_expected(self, expected):
+        self.expected = Hausdorff.prepare_groundtruth(expected)
+
+    def compute(self, actual):
+        results = []
         for i in xrange(1, actual.max() + 1):
             cc = (actual == i)
             cc_boundary = Hausdorff.binary_boundary(cc)
-            results.append(Hausdorff.compute_from_contour(cc_boundary, groundtruth))
+            results.append(Hausdorff.compute_from_contour(cc_boundary, self.expected))
         return results
 
     @staticmethod
