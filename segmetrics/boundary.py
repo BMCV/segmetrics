@@ -40,5 +40,6 @@ class Hausdorff:
 
     @staticmethod
     def binary_boundary(mask):
-        return np.logical_and(mask, np.logical_not(morph.binary_erosion(mask, morph.disk(1))))
+        dilation = morph.binary_dilation(mask, morph.disk(1))
+        return np.logical_and(dilation, np.logical_not(mask))
 
