@@ -31,5 +31,5 @@ class Accuracy(Metric):
     def compute(self, actual):
         tp = np.logical_and(actual  > 0, self.expected  > 0).sum()
         tn = np.logical_and(actual == 0, self.expected == 0).sum()
-        return [float(tp + tn) / self.expected.sum()]
+        return [float(tp + tn) / np.prod(self.expected.shape)]
 
