@@ -42,7 +42,7 @@ class Hausdorff(Metric):
         return segmented_contour_distances.max()
 
     @staticmethod
-    def binary_boundary(mask):
-        dilation = morph.binary_dilation(mask, morph.disk(1))
+    def binary_boundary(mask, width=1):
+        dilation = morph.binary_dilation(mask, morph.disk(width))
         return np.logical_and(dilation, np.logical_not(mask))
 
