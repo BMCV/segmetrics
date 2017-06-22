@@ -1,4 +1,5 @@
 import numpy as np
+import warnings
 from scipy import ndimage
 from skimage import morphology as morph
 from metric import Metric
@@ -14,7 +15,9 @@ class Hausdorff(Metric):
         for i in xrange(1, actual.max() + 1):
             cc = (actual == i)
             cc_boundary = Hausdorff.binary_boundary(cc)
-            results.append(Hausdorff.compute_from_contour(cc_boundary, self.expected))
+            result = Hausdorff.compute_from_contour(cc_boundary, self.expected)
+            if result is not None: results.append(result)
+            else: warnings.warn('cannot compute Hausdorff distance since no reference object is available')
         return results
 
     @staticmethod
@@ -37,7 +40,7 @@ class Hausdorff(Metric):
             if distance < nearest_distance:
                 nearest_centroid = centroid
                 nearest_distance = distance
-        if nearest_centroid is None: raise ValueError()
+        if nearest_centroid is None: return None
         segmented_contour_distances = groundtruth[nearest_centroid][segmented_contour.astype(bool)]
         return segmented_contour_distances.max()
 
