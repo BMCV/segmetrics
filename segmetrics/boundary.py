@@ -14,6 +14,7 @@ class Hausdorff(Metric):
         results = []
         for i in xrange(1, actual.max() + 1):
             cc = (actual == i)
+            if not cc.any(): continue
             cc_boundary = Hausdorff.binary_boundary(cc)
             result = Hausdorff.compute_from_contour(cc_boundary, self.expected)
             if result is not None: results.append(result)
