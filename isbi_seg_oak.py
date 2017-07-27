@@ -5,16 +5,17 @@ import subprocess
 import sys
 from skimage import io
 
-def oak(groundtruth, result):
+def oak(groundtruth, result, n=1):
     tmp_dir = tempfile.mkdtemp()
     cwd = os.getcwd()
     try:
         os.chdir(tmp_dir)
         os.makedirs('data/01_GT/SEG')
         os.makedirs('data/01_RES')
-    
-        io.imsave('data/01_RES/mask000.tif'      , result     [None, :, :].astype('uint16'), plugin='tifffile')
-        io.imsave('data/01_GT/SEG/man_seg000.tif', groundtruth[None, :, :].astype('uint16'), plugin='tifffile')
+        
+        for i in xrange(n):
+            io.imsave('data/01_RES/mask%03d.tif'       % i, result     [None, :, :].astype('uint16'), plugin='tifffile')
+            io.imsave('data/01_GT/SEG/man_seg%03d.tif' % i, groundtruth[None, :, :].astype('uint16'), plugin='tifffile')
         
         subprocess.call(['wget', 'http://ctc2015.gryf.fi.muni.cz/Public/Software/EvaluationSoftware.zip'])
         subprocess.call(['unzip', '*.zip'])
