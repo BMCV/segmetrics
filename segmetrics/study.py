@@ -4,7 +4,8 @@ class Study:
         self.measures = {}
         self.results  = {}
 
-    def add_measure(self, measure, name):
+    def add_measure(self, measure, name=None):
+        if name is None: name = '%d' % id(measure)
         self.measures[name] = measure
         self.results [name] = []
 
