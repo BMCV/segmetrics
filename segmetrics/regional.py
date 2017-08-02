@@ -51,17 +51,20 @@ class ISBIScore(Metric):
     def compute(self, actual):
         results = []
         for ref_label in xrange(1, self.expected.max() + 1):
-            ref_cc = (self.expected == ref_label)
+            ref_cc = (self.expected == ref_label)  # the reference connected component
+            ref_cc_half_size = 0.5 * ref_cc.sum()
             if not ref_cc.any(): continue
-            actual_cc = np.zeros_like(ref_cc)
+            actual_cc = None  # the segmented object we compare the reference to
             for actual_candidate_label in xrange(1, actual.max() + 1):
                 actual_candidate_cc = (actual == actual_candidate_label)
                 overlap = float(np.logical_and(actual_candidate_cc, ref_cc).sum())
-                if overlap > 0.5 * ref_cc.sum():
+                if overlap > ref_cc_half_size:
                     actual_cc = actual_candidate_cc
                     break
-            if actual_cc is None: overlap = 0
-            jaccard = overlap / np.logical_or(ref_cc, actual_cc).sum()
+            if actual_cc is None:
+                jaccard = 0
+            else:
+                jaccard = overlap / np.logical_or(ref_cc, actual_cc).sum()
             results.append(jaccard)
         return results
 
