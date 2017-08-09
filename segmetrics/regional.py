@@ -48,12 +48,23 @@ class ISBIScore(Metric):
     detection test. See: http://ctc2015.gryf.fi.muni.cz/Public/Documents/SEG.pdf
     """
 
+    def __init__(self, min_ref_size=0):
+        """Instantiates.
+        
+        Skips ground truth objects smaller than `min_ref_size` pixels. It is
+        recommended to set this value to `1`, but it is set to `0` by default for
+        downwards compatibility.
+        """
+        assert min_ref_size >= 0, 'min_ref_size must not be negative'
+        self.min_ref_size = min_ref_size
+
     def compute(self, actual):
         results = []
         for ref_label in xrange(1, self.expected.max() + 1):
             ref_cc = (self.expected == ref_label)  # the reference connected component
-            ref_cc_half_size = 0.5 * ref_cc.sum()
-            if not ref_cc.any(): continue
+            ref_cc_size = ref_cc.sum()
+            ref_cc_half_size = 0.5 * ref_cc_size
+            if ref_cc_size < self.min_ref_size: continue
             actual_cc = None  # the segmented object we compare the reference to
             for actual_candidate_label in xrange(1, actual.max() + 1):
                 actual_candidate_cc = (actual == actual_candidate_label)
