@@ -48,14 +48,14 @@ class ISBIScore(Metric):
     detection test. See: http://ctc2015.gryf.fi.muni.cz/Public/Documents/SEG.pdf
     """
 
-    def __init__(self, min_ref_size=0):
+    def __init__(self, min_ref_size=1):
         """Instantiates.
         
         Skips ground truth objects smaller than `min_ref_size` pixels. It is
-        recommended to set this value to `1`, but it is set to `0` by default for
-        downwards compatibility.
+        recommended to set this value to `2` such that objects of a single pixel in
+        size are skipped, but it is set to `1` by default for downwards compatibility.
         """
-        assert min_ref_size >= 0, 'min_ref_size must not be negative'
+        assert min_ref_size >= 1, 'min_ref_size must be 1 or larger'
         self.min_ref_size = min_ref_size
 
     def compute(self, actual):
