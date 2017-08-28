@@ -26,6 +26,7 @@ class Hausdorff(Metric):
         groundtruth = {}
         for i in xrange(1, expected.max() + 1):
             cc = (expected == i)
+            if not cc.any(): continue
             cc_centroid = ndimage.measurements.center_of_mass(cc)
             cc_boundary = Hausdorff.binary_boundary(cc)
             cc_distance = ndimage.morphology.distance_transform_edt(np.logical_not(cc_boundary))
