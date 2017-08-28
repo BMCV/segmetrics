@@ -5,7 +5,8 @@ import subprocess
 import sys
 from skimage import io
 
-def oak(groundtruth, result, n=1):
+def oak(groundtruth_list, result_list):
+    assert len(groundtruth_list) == len(result_list), 'data mismatch'
     tmp_dir = tempfile.mkdtemp()
     cwd = os.getcwd()
     try:
@@ -13,7 +14,8 @@ def oak(groundtruth, result, n=1):
         os.makedirs('data/01_GT/SEG')
         os.makedirs('data/01_RES')
         
-        for i in xrange(n):
+        for i, data in enumerate(zip(groundtruth_list, result_list)):
+            groundtruth, result = data
             io.imsave('data/01_RES/mask%03d.tif'       % i, result     [None, :, :].astype('uint16'), plugin='tifffile')
             io.imsave('data/01_GT/SEG/man_seg%03d.tif' % i, groundtruth[None, :, :].astype('uint16'), plugin='tifffile')
         
