@@ -1,4 +1,12 @@
 import skimage.measure
+import numpy as np
+
+
+def _is_boolean(narray):
+    return narray.dtype == np.bool
+
+def _is_integral(narray):
+    return issubclass(narray.dtype.type, np.integer)
 
 
 class Study:
@@ -19,14 +27,21 @@ class Study:
         forbidden. If `unique` is `True`, it is assumed that all objects
         are labeled uniquely. Set it to `False`, if this is not sure
         (e.g., if the ground truth image is binary).
+
+        The array `expected` must be of integral datatype. It is also
+        allowed to be boolean if and only if `unique=False` is passed.
         """
         assert expected.min() == 0, 'mis-labeled ground truth'
+        assert _is_integral(expected) or _is_boolean(expected), 'illegal ground truth dtype'
+        assert not unique or not _is_boolean(expected), 'with unique=True a non-boolean ground truth is expected'
+
         if not unique: expected = label(expected)
         for measure_name in self.measures:
             measure = self.measures[measure_name]
             measure.set_expected(expected)
 
     def process(self, actual):
+        assert _is_integral(actual), 'actual image dtype must be integral'
         intermediate_results = {}
         for measure_name in self.measures:
             measure = self.measures[measure_name]
