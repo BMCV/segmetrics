@@ -8,6 +8,14 @@ def _is_boolean(narray):
 def _is_integral(narray):
     return issubclass(narray.dtype.type, np.integer)
 
+def _get_labeled(narray, unique, img_hint):
+    assert _is_integral(narray) or _is_boolean(narray), 'illegal %s dtype' % img_hint
+    assert not unique or not _is_boolean(narray), 'with unique=True a non-boolean %s is expected' % img_hint
+    return narray if unique else label(narray)
+
+def label(im, background=0, neighbors=4):
+    return skimage.measure.label(im, background=background, neighbors=neighbors) + 1
+
 
 class Study:
 
@@ -32,16 +40,22 @@ class Study:
         allowed to be boolean if and only if `unique=False` is passed.
         """
         assert expected.min() == 0, 'mis-labeled ground truth'
-        assert _is_integral(expected) or _is_boolean(expected), 'illegal ground truth dtype'
-        assert not unique or not _is_boolean(expected), 'with unique=True a non-boolean ground truth is expected'
-
-        if not unique: expected = label(expected)
+        expected = _get_labeled(expected, unique, 'ground truth')
         for measure_name in self.measures:
             measure = self.measures[measure_name]
             measure.set_expected(expected)
 
-    def process(self, actual):
-        assert _is_integral(actual), 'actual image dtype must be integral'
+    def process(self, actual, unique=True):
+        """Evaluates `actual` image against the current `set_expected` one.
+        
+        If `unique` is `True`, it is assumed that all objects are labeled
+        uniquely. Set it to `False`, if this is not sure (e.g., if the
+        processed image is binary).
+
+        The array `actual` must be of integral datatype. It is also
+        allowed to be boolean if and only if `unique=False` is passed.
+        """
+        actual = _get_labeled(actual, unique, 'image')
         intermediate_results = {}
         for measure_name in self.measures:
             measure = self.measures[measure_name]
@@ -49,8 +63,4 @@ class Study:
             self.results[measure_name] += result
             intermediate_results[measure_name] = result
         return intermediate_results
-
-
-def label(im, background=0, neighbors=4):
-    return skimage.measure.label(im, background=background, neighbors=neighbors) + 1
 
