@@ -1,8 +1,12 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 
 import numpy as np
 from metric import Metric
 
+## Compatibility with Python 3 -->
+import sys
+if sys.version_info.major == 3: xrange = range
+## <-- Compatibility with Python 3
 
 class Dice(Metric):
 
