@@ -4,6 +4,10 @@ from scipy import ndimage
 from skimage import morphology as morph
 from metric import Metric
 
+## Compatibility with Python 3 -->
+import sys
+if sys.version_info.major == 3: xrange = range
+## <-- Compatibility with Python 3
 
 class Hausdorff(Metric):
 
