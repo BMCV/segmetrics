@@ -40,6 +40,8 @@ class Study:
         allowed to be boolean if and only if `unique=False` is passed.
         """
         assert expected.min() == 0, 'mis-labeled ground truth'
+        expected = expected.squeeze()
+        assert expected.ndim == 2, 'ground truth has wrong dimensions'
         expected = _get_labeled(expected, unique, 'ground truth')
         for measure_name in self.measures:
             measure = self.measures[measure_name]
@@ -55,6 +57,8 @@ class Study:
         The array `actual` must be of integral datatype. It is also
         allowed to be boolean if and only if `unique=False` is passed.
         """
+        actual = actual.squeeze()
+        assert actual.ndim == 2, 'image has wrong dimensions'
         actual = _get_labeled(actual, unique, 'image')
         intermediate_results = {}
         for measure_name in self.measures:
