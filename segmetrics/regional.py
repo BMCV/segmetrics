@@ -8,19 +8,25 @@ import sys
 if sys.version_info.major == 3: xrange = range
 ## <-- Compatibility with Python 3
 
+
 class Dice(Metric):
 
     def compute(self, actual):
-        reference = self.expected > 0
-        result    = actual        > 0
+        reference = np.expand_dims(self.expected > 0, 2)
+        reference = np.concatenate([reference, np.logical_not(reference)], 2)
+
+        result = np.expand_dims(actual > 0, 2)
+        result = np.concatenate([result, np.logical_not(result)], 2)
+
         return [(2. * np.logical_and(reference, result).sum()) / (reference.sum() + result.sum())]
 
 
 class Recall(Metric):
 
     def compute(self, actual):
-        tp = np.logical_and(actual  > 0, self.expected > 0).sum()
+        tp = np.logical_and(actual > 0, self.expected > 0).sum()
         fn = np.logical_and(actual == 0, self.expected > 0).sum()
+        if float(tp+fn) == 0: return []
         return [tp / float(tp + fn)]
 
 
@@ -29,6 +35,7 @@ class Precision(Metric):
     def compute(self, actual):
         tp = np.logical_and(actual > 0, self.expected  > 0).sum()
         fp = np.logical_and(actual > 0, self.expected == 0).sum()
+        if float(tp+fp) == 0: return []
         return [tp / float(tp + fp)]
 
 
@@ -37,6 +44,7 @@ class Accuracy(Metric):
     def compute(self, actual):
         tp = np.logical_and(actual  > 0, self.expected  > 0).sum()
         tn = np.logical_and(actual == 0, self.expected == 0).sum()
+        if np.prod(self.expected.shape) == 0: return []
         return [float(tp + tn) / np.prod(self.expected.shape)]
 
 
@@ -54,7 +62,7 @@ class ISBIScore(Metric):
 
     def __init__(self, min_ref_size=1):
         """Instantiates.
-        
+
         Skips ground truth objects smaller than `min_ref_size` pixels. It is
         recommended to set this value to `2` such that objects of a single pixel in
         size are skipped, but it is set to `1` by default for downwards compatibility.
@@ -82,4 +90,3 @@ class ISBIScore(Metric):
                 jaccard = overlap / np.logical_or(ref_cc, actual_cc).sum()
             results.append(jaccard)
         return results
-
