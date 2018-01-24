@@ -12,22 +12,22 @@ if sys.version_info.major == 3: xrange = range
 class Dice(Metric):
 
     def compute(self, actual):
-        reference = np.expand_dims(self.expected > 0, 2)
-        reference = np.concatenate([reference, np.logical_not(reference)], 2)
-
-        result = np.expand_dims(actual > 0, 2)
-        result = np.concatenate([result, np.logical_not(result)], 2)
-
-        return [(2. * np.logical_and(reference, result).sum()) / (reference.sum() + result.sum())]
+        ref = self.expected > 0
+        res = actual        > 0
+        denominator = ref.sum() + res.sum()
+        if denominator > 0:
+            return [(2. * np.logical_and(ref, res).sum()) / denominator]
+        else:
+            return 1.
 
 
 class Recall(Metric):
 
     def compute(self, actual):
-        tp = np.logical_and(actual > 0, self.expected > 0).sum()
+        tp = np.logical_and(actual  > 0, self.expected > 0).sum()
         fn = np.logical_and(actual == 0, self.expected > 0).sum()
-        if float(tp+fn) == 0: return []
-        return [tp / float(tp + fn)]
+        n  = tp + fn
+        return [tp / float(n)] if n > 0 else []
 
 
 class Precision(Metric):
@@ -35,8 +35,8 @@ class Precision(Metric):
     def compute(self, actual):
         tp = np.logical_and(actual > 0, self.expected  > 0).sum()
         fp = np.logical_and(actual > 0, self.expected == 0).sum()
-        if float(tp+fp) == 0: return []
-        return [tp / float(tp + fp)]
+        n  = tp + fp
+        return [tp / float(n)] if n > 0 else []
 
 
 class Accuracy(Metric):
@@ -44,8 +44,8 @@ class Accuracy(Metric):
     def compute(self, actual):
         tp = np.logical_and(actual  > 0, self.expected  > 0).sum()
         tn = np.logical_and(actual == 0, self.expected == 0).sum()
-        if np.prod(self.expected.shape) == 0: return []
-        return [float(tp + tn) / np.prod(self.expected.shape)]
+        n  = np.prod(self.expected.shape)
+        return [float(tp + tn) / n] if n > 0 else []
 
 
 class ISBIScore(Metric):
