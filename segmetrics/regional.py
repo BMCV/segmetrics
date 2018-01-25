@@ -17,7 +17,8 @@ class Dice(Metric):
         denominator = ref.sum() + res.sum()
         if denominator > 0:
             return [(2. * np.logical_and(ref, res).sum()) / denominator]
-        return [1.]
+        else:
+            return [1.]  # result of zero/zero division
 
 
 class Recall(Metric):
