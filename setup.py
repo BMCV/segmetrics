@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='segmetrics',
-      version='0.6.8',
+      version='0.6.9',
       description='Metrics for Segmentation Results',
       author='Leonid Kostrykin',
       author_email='leonid.kostrykin@iwr.uni-heidelberg.de',
