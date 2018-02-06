@@ -48,7 +48,7 @@ class Study:
         """Resets all results computed so far.
         """
         for measure_name in self.measures:
-            self.measures[measure_name] = []
+            self.results[measure_name] = []
 
     def set_expected(self, expected, unique=True):
         """Sets the `expected` ground truth image.
