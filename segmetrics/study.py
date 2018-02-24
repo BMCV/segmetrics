@@ -1,6 +1,8 @@
 import skimage.measure
 import numpy as np
 
+import itertools
+
 
 def _is_boolean(narray):
     return narray.dtype == np.bool
@@ -38,17 +40,19 @@ class Study:
     def __init__(self):
         self.measures = {}
         self.results  = {}
+        self.results_cache = {}
 
     def add_measure(self, measure, name=None):
         if name is None: name = '%d' % id(measure)
         self.measures[name] = measure
-        self.results [name] = []
+        self.results [name] = {None: []}
 
     def reset(self):
         """Resets all results computed so far.
         """
         for measure_name in self.measures:
-            self.results[measure_name] = []
+            self.results[measure_name] = {None: []}
+        self.results_cache.clear()
 
     def set_expected(self, expected, unique=True):
         """Sets the `expected` ground truth image.
@@ -69,7 +73,7 @@ class Study:
             measure = self.measures[measure_name]
             measure.set_expected(expected)
 
-    def process(self, actual, unique=True):
+    def process(self, actual, unique=True, chunk_id=None):
         """Evaluates `actual` image against the current `set_expected` one.
         
         If `unique` is `True`, it is assumed that all objects are labeled
@@ -78,6 +82,11 @@ class Study:
 
         The array `actual` must be of integral datatype. It is also
         allowed to be boolean if and only if `unique=False` is passed.
+
+        All results ever processed are accumulated, unless `chunk_id` is
+        used. If it is not set to `None`, then a subsequent invocation
+        with the same `chunk_id` will overwrite the results from the
+        previous invocation.
         """
         actual = actual.squeeze()
         assert actual.ndim == 2, 'image has wrong dimensions'
@@ -86,7 +95,18 @@ class Study:
         for measure_name in self.measures:
             measure = self.measures[measure_name]
             result = measure.compute(actual)
-            self.results[measure_name] += result
+
+            if chunk_id is not None: self.results[measure_name][chunk_id] = []
+            self.results[measure_name][chunk_id] += result
+
             intermediate_results[measure_name] = result
+        self.results_cache.clear()
         return intermediate_results
+
+    def __getitem__(self, measure):
+        """Returns list of all values recorded for given `measure`.
+        """
+        if measure not in self.results_cache:
+            self.results_cache[measure] = list(itertools.chain(*[self.results[measure][chunk_id] for chunk_id in self.results[measure]]))
+        return self.results_cache[measure]
 
