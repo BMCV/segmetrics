@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 
+
 from distutils.core import setup
 
+import segmetrics
+
+
 setup(name='segmetrics',
-      version='0.8',
+      version=segmetrics.VERSION,
       description='Metrics for Segmentation Results',
       author='Leonid Kostrykin',
       author_email='leonid.kostrykin@iwr.uni-heidelberg.de',
