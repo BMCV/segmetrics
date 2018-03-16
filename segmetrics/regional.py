@@ -21,6 +21,50 @@ class Dice(Metric):
             return [1.]  # result of zero/zero division
 
 
+class RandIndex(Metric):
+    """Defines the Rand Index.
+
+    See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented
+    dataset and comparison of algorithms", ISBI 2009
+    """
+
+    def compute(self, actual):
+        a, b, c, d = self.compute_parts(actual)
+        return [(a + d) / float(a + b + c + d)]
+
+    def compute_parts(self, actual):
+        R, S = (self.expected > 0), (actual > 0)
+        a, b, c, d = 0, 0, 0, 0
+        RS = np.empty((2, 2), int)
+        RS[0, 0] = ((R == 0) * (S == 0)).sum()
+        RS[0, 1] = ((R == 0) * (S == 1)).sum()
+        RS[1, 0] = ((R == 1) * (S == 0)).sum()
+        RS[1, 1] = ((R == 1) * (S == 1)).sum()
+        for rs in np.ndindex(RS.shape):
+            n  = RS[rs]
+            Ri = rs[0]
+            Si = rs[1]
+            a += n * (((Ri == R) * (Si == S)).sum() - 1)
+            b += n *  ((Ri != R) * (Si == S)).sum()
+            c += n *  ((Ri == R) * (Si != S)).sum()
+            d += n *  ((Ri != R) * (Si != S)).sum()
+        return a, b, c, d
+
+
+class JaccardIndex(RandIndex):
+    """Defines the Jaccard Index, not to be confused with the Jaccard Similarity Index.
+
+    The Jaccard Index is not upper-bounded. Higher values correspond to better agreement.
+
+    See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented
+    dataset and comparison of algorithms", ISBI 2009
+    """
+
+    def compute(self, actual):
+        a, b, c, d = self.compute_parts(actual)
+        return [(a + d) / float(b + c + d)]
+
+
 class ISBIScore(Metric):
     """Computes segmentation score according to ISBI Cell Tracking Challenge.
 
