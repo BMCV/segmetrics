@@ -30,8 +30,11 @@ class Hausdorff(Metric):
             a2e        --  maximum distance of actual foreground to expected foreground
             e2a        --  maximum distance of expected foreground to actual foreground
             symmetric  --  maximum of the two
+
+        Passing the value `sym` is equivalent to `symmetric`.
         """
-        assert mode in ('a2e', 'e2a', 'symmetric')
+        assert mode in ('a2e', 'e2a', 'symmetric', 'sym')
+        if mode == 'symmetric': mode = 'sym'
         self.mode = mode
 
     def set_expected(self, expected):
@@ -43,8 +46,8 @@ class Hausdorff(Metric):
         actual_boundary_distance_map = ndimage.morphology.distance_transform_edt(np.logical_not(actual_boundary))
         if not self.expected_boundary.any() or not actual_boundary.any(): return []
         results = []
-        if self.mode in ('a2e', 'symmetric'): results.append(self.expected_boundary_distance_map[actual_boundary].max())
-        if self.mode in ('e2a', 'symmetric'): results.append(actual_boundary_distance_map[self.expected_boundary].max())
+        if self.mode in ('a2e', 'sym'): results.append(self.expected_boundary_distance_map[actual_boundary].max())
+        if self.mode in ('e2a', 'sym'): results.append(actual_boundary_distance_map[self.expected_boundary].max())
         return [max(results)]
 
 
