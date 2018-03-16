@@ -21,33 +21,6 @@ class Dice(Metric):
             return [1.]  # result of zero/zero division
 
 
-class Recall(Metric):
-
-    def compute(self, actual):
-        tp = np.logical_and(actual  > 0, self.expected > 0).sum()
-        fn = np.logical_and(actual == 0, self.expected > 0).sum()
-        n  = tp + fn
-        return [tp / float(n)] if n > 0 else []
-
-
-class Precision(Metric):
-
-    def compute(self, actual):
-        tp = np.logical_and(actual > 0, self.expected  > 0).sum()
-        fp = np.logical_and(actual > 0, self.expected == 0).sum()
-        n  = tp + fp
-        return [tp / float(n)] if n > 0 else []
-
-
-class Accuracy(Metric):
-
-    def compute(self, actual):
-        tp = np.logical_and(actual  > 0, self.expected  > 0).sum()
-        tn = np.logical_and(actual == 0, self.expected == 0).sum()
-        n  = np.prod(self.expected.shape)
-        return [float(tp + tn) / n] if n > 0 else []
-
-
 class ISBIScore(Metric):
     """Computes segmentation score according to ISBI Cell Tracking Challenge.
 
