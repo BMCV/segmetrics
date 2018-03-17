@@ -53,6 +53,8 @@ class Hausdorff(Metric):
 
 class NSD(Metric):
 
+    FRACTIONAL = True
+
     def set_expected(self, expected):
         self.expected = (expected > 0)
         self.expected_boundary = compute_binary_boundary(self.expected)

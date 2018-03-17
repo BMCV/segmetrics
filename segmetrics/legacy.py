@@ -12,6 +12,8 @@ if sys.version_info.major == 3: xrange = range
 
 class Recall(Metric):
 
+    FRACTIONAL = True
+
     def compute(self, actual):
         tp = np.logical_and(actual  > 0, self.expected > 0).sum()
         fn = np.logical_and(actual == 0, self.expected > 0).sum()
@@ -21,6 +23,8 @@ class Recall(Metric):
 
 class Precision(Metric):
 
+    FRACTIONAL = True
+
     def compute(self, actual):
         tp = np.logical_and(actual > 0, self.expected  > 0).sum()
         fp = np.logical_and(actual > 0, self.expected == 0).sum()
@@ -29,6 +33,8 @@ class Precision(Metric):
 
 
 class Accuracy(Metric):
+
+    FRACTIONAL = True
 
     def compute(self, actual):
         tp = np.logical_and(actual  > 0, self.expected  > 0).sum()

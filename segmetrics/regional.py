@@ -11,6 +11,8 @@ if sys.version_info.major == 3: xrange = range
 
 class Dice(Metric):
 
+    FRACTIONAL = True
+
     def compute(self, actual):
         ref = self.expected > 0
         res = actual        > 0
@@ -27,6 +29,8 @@ class RandIndex(Metric):
     See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented
     dataset and comparison of algorithms", ISBI 2009
     """
+
+    FRACTIONAL = True
 
     def compute(self, actual):
         a, b, c, d = self.compute_parts(actual)
@@ -60,6 +64,8 @@ class JaccardIndex(RandIndex):
     dataset and comparison of algorithms", ISBI 2009
     """
 
+    FRACTIONAL = False
+
     def compute(self, actual):
         a, b, c, d = self.compute_parts(actual)
         return [(a + d) / float(b + c + d)]
@@ -76,6 +82,8 @@ class ISBIScore(Metric):
     reference object, there can be at most one segmented object which satisfies the
     detection test. See: http://ctc2015.gryf.fi.muni.cz/Public/Documents/SEG.pdf
     """
+
+    FRACTIONAL = True
 
     def __init__(self, min_ref_size=1):
         """Instantiates.
@@ -107,3 +115,4 @@ class ISBIScore(Metric):
                 jaccard = overlap / np.logical_or(ref_cc, actual_cc).sum()
             results.append(jaccard)
         return results
+

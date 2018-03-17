@@ -2,6 +2,7 @@ import skimage.measure
 import numpy as np
 
 import itertools
+import sys
 
 
 def _is_boolean(narray):
@@ -109,4 +110,14 @@ class Study:
         if measure not in self.results_cache:
             self.results_cache[measure] = list(itertools.chain(*[self.results[measure][chunk_id] for chunk_id in self.results[measure]]))
         return self.results_cache[measure]
+
+    def print_results(self, write=sys.stdout.write, pad=0, fmt_unbound_float='g', line_suffix='\n'):
+        label_length   = pad + max(len(str(measure_name)) for measure_name in self.results)
+        fmt_fractional = '%%%ds: %%5.2f %%%%' % label_length
+        fmt_unbound    = '%%%ds: %%%s' % (label_length, fmt_unbound_float)
+        for measure_name in self.results:
+            is_fractional = self.measures[measure_name].FRACTIONAL
+            fmt = fmt_fractional if is_fractional else fmt_unbound
+            val = np.mean(self[measure_name]) * (100 if is_fractional else 1)
+            write((fmt % (measure_name, val)) + line_suffix)
 
