@@ -1,6 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 
 import numpy as np
+import sklearn.metrics
 from metric import Metric
 
 ## Compatibility with Python 3 -->
@@ -53,6 +54,18 @@ class RandIndex(Metric):
             c += n *  ((Ri == R) * (Si != S)).sum()
             d += n *  ((Ri != R) * (Si != S)).sum()
         return a, b, c, d
+
+
+class AdjustedRandIndex(Metric):
+    """Adjusted Rand Index.
+
+    See: http://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html
+    """
+
+    FRACTIONAL = True
+
+    def compute(self, actual):
+        return [sklearn.metrics.adjusted_rand_score(self.expected.flat, actual.flat)]
 
 
 class JaccardIndex(RandIndex):
