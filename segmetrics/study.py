@@ -115,9 +115,10 @@ class Study:
         label_length   = pad + max(len(str(measure_name)) for measure_name in self.results)
         fmt_fractional = '%%%ds: %%5.2f %%%%' % label_length
         fmt_unbound    = '%%%ds: %%%s' % (label_length, fmt_unbound_float)
-        for measure_name in self.results:
-            is_fractional = self.measures[measure_name].FRACTIONAL
-            fmt = fmt_fractional if is_fractional else fmt_unbound
-            val = np.mean(self[measure_name]) * (100 if is_fractional else 1)
+        for measure_name in sorted(self.results.keys()):
+            measure = self.measures[measure_name]
+            fmt = fmt_fractional if measure.FRACTIONAL else fmt_unbound
+            fnc = np.sum if measure.ACCUMULATIVE else np.mean
+            val = fnc(self[measure_name]) * (100 if measure.FRACTIONAL else 1)
             write((fmt % (measure_name, val)) + line_suffix)
 
