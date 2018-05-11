@@ -64,8 +64,13 @@ class FalsePositive(Metric):
 
     ACCUMULATIVE = True
 
+    def __init__(self):
+        self.result = None
+
     def compute(self, actual):
         seg_by_ref = _compute_seg_by_ref_assignments(actual, self.expected, include_background=True)
+        self.result = np.zeros_like(actual)
+        for seg_label in seg_by_ref[0]: self.result[actual == seg_label] = seg_label
         return [len(seg_by_ref[0])]
 
 
@@ -78,7 +83,12 @@ class FalseNegative(Metric):
 
     ACCUMULATIVE = True
 
+    def __init__(self):
+        self.result = None
+
     def compute(self, actual):
         ref_by_seg = _compute_ref_by_seg_assignments(actual, self.expected, include_background=True)
+        self.result = np.zeros_like(self.expected)
+        for ref_label in ref_by_seg[0]: self.result[self.expected == ref_label] = ref_label
         return [len(ref_by_seg[0])]
 
