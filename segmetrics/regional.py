@@ -116,7 +116,7 @@ class ISBIScore(Metric):
             ref_cc_half_size = 0.5 * ref_cc_size
             if ref_cc_size < self.min_ref_size: continue
             actual_cc = None  # the segmented object we compare the reference to
-            for actual_candidate_label in set(actual[ref_cc]):
+            for actual_candidate_label in set(actual[ref_cc]) - {0}:
                 actual_candidate_cc = (actual == actual_candidate_label)
                 overlap = float(np.logical_and(actual_candidate_cc, ref_cc).sum())
                 if overlap > ref_cc_half_size:
