@@ -69,3 +69,24 @@ class NSD(Metric):
         nominator       = self.expected_boundary_distance_map[np.logical_and(union, np.logical_not(intersection))].sum()
         return [nominator / (0. + denominator)]
 
+
+class ObjectBasedDistance(Metric):
+    """Decorator for image-based distance measures.
+
+    Computes the decorated distance measure on a per-object level.
+    """
+
+    def __init__(self, distance):
+        self.distance     = distance
+        self.FRACTIONAL   = distance.FRACTIONAL
+        self.ACCUMULATIVE = distance.ACCUMULATIVE
+
+    def compute(self, actual):
+        results = []
+        for ref_label in set(self.expected.flatten()) - {0}:
+            ref_cc = (self.expected == ref_label)
+            seg_candidate_labels = set(actual[ref_cc])
+            self.distance.set_expected(ref_cc.astype('uint8'))
+            results.append(min(self.distance.compute((actual == seg_label).astype('uint8')) for seg_label in seg_candidate_labels))
+        return results
+
