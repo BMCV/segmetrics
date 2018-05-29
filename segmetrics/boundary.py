@@ -71,12 +71,23 @@ class NSD(Metric):
 
 
 class ObjectBasedDistance(Metric):
-    """Decorator for image-based distance measures.
+    """Decorator to apply image-level distance measures on a per-object level.
 
-    Computes the decorated distance measure on a per-object level.
+    Computes the decorated distance measure on a per-object level. Correspondances
+    between the segmented and the ground truth objects are established on a n-to-m
+    basis, such that the resulting distances are minimal.
     """
 
     def __init__(self, distance, skip_fn=False):
+        """Instantiates.
+
+        Parameters
+        ----------
+        distance : Metric
+                   The image-level distance measure, which is to be decorated.
+        skip_fn  : bool
+                   Specifies whether false-negative detections shall be skipped.
+        """
         self.distance     = distance
         self.skip_fn      = skip_fn
         self.FRACTIONAL   = distance.FRACTIONAL
