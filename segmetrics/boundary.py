@@ -76,8 +76,9 @@ class ObjectBasedDistance(Metric):
     Computes the decorated distance measure on a per-object level.
     """
 
-    def __init__(self, distance):
+    def __init__(self, distance, skip_fn=False):
         self.distance     = distance
+        self.skip_fn      = skip_fn
         self.FRACTIONAL   = distance.FRACTIONAL
         self.ACCUMULATIVE = distance.ACCUMULATIVE
 
@@ -85,8 +86,15 @@ class ObjectBasedDistance(Metric):
         results = []
         for ref_label in set(self.expected.flatten()) - {0}:
             ref_cc = (self.expected == ref_label)
-            seg_candidate_labels = set(actual[ref_cc])
-            self.distance.set_expected(ref_cc.astype('uint8'))
-            results.append(min(self.distance.compute((actual == seg_label).astype('uint8')) for seg_label in seg_candidate_labels))
+            seg_candidate_labels = set(actual[ref_cc]) - {0}
+            if len(seg_candidate_labels) == 0:  ## The object was not detected (FN).
+                if self.skip_fn: continue       ## Skip the FN if instructed so.
+                else:                           ## Else, consider all detected objects as possible references.
+                    seg_candidate_labels = set(actual.flatten()) - {0}
+                    if len(seg_candidate_labels) == 0:  ## Not a single object was detected.
+                        continue                        ## The distance is undefined in this case.
+            else:
+                self.distance.set_expected(ref_cc.astype('uint8'))
+                results.append(min(self.distance.compute((actual == seg_label).astype('uint8')) for seg_label in seg_candidate_labels))
         return results
 
