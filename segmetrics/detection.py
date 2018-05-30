@@ -38,7 +38,7 @@ class FalseSplit(Metric):
 
     def compute(self, actual):
         seg_by_ref = _compute_seg_by_ref_assignments(actual, self.expected)
-        return [sum(len(seg_labels) > 1 for seg_labels in seg_by_ref.values())]
+        return [sum(len(seg_by_ref[ref_label]) > 1 for ref_label in seg_by_ref.keys() if ref_label > 0)]
 
 
 class FalseMerge(Metric):
@@ -52,7 +52,7 @@ class FalseMerge(Metric):
 
     def compute(self, actual):
         ref_by_seg = _compute_ref_by_seg_assignments(actual, self.expected)
-        return [sum(len(ref_labels) > 1 for ref_labels in ref_by_seg.values())]
+        return [sum(len(ref_by_seg[seg_label]) > 1 for seg_label in ref_by_seg.keys() if seg_label > 0)]
 
 
 class FalsePositive(Metric):
