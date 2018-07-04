@@ -43,6 +43,20 @@ class Study:
         self.results  = {}
         self.results_cache = {}
 
+    def merge(self, other, chunk_ids='all'):
+        """Merges measures and results from `other` study.
+        """
+        for measure_name in other.measures:
+            if measure_name not in self.measures.keys():
+                self.add_measure(other.measures[measure_name], name=measure_name)
+            for chunk_id in (other.results[measure_name].keys() if chunk_ids == 'all' else chunk_ids):
+                if chunk_id is None:
+                    self.results[measure_name][None] += other.results[measure_name][None]
+                else:
+                    assert chunk_id not in self.results[measure_name]
+                    self.results[measure_name][chunk_id] = list(other.results[measure_name][chunk_id])
+        self.results_cache.clear()
+
     def add_measure(self, measure, name=None):
         if name is None: name = '%d' % id(measure)
         self.measures[name] = measure
