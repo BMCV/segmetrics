@@ -2,6 +2,7 @@ import study
 import multiprocessing
 import signal
 import itertools
+import dill
 
 
 def process(study, get_actual_func, get_expected_func, chunk_ids, num_forks=None, is_actual_unique=True, is_expected_unique=True, callback=None):
@@ -10,8 +11,8 @@ def process(study, get_actual_func, get_expected_func, chunk_ids, num_forks=None
     for chunk_idx, chunk_result in enumerate(fork.imap_unordered(num_forks,
                                                                  _process_chunk,
                                                                  study,
-                                                                 get_actual_func,
-                                                                 get_expected_func,
+                                                                 dill.dumps(get_actual_func),
+                                                                 dill.dumps(get_expected_func),
                                                                  unroll(chunk_ids),
                                                                  is_actual_unique,
                                                                  is_expected_unique)):
@@ -26,24 +27,11 @@ def process_all(*args, **kwargs):
 
 
 def _process_chunk(study, get_actual_func, get_expected_func, chunk_id, is_actual_unique, is_expected_unique):
-    actual   = get_actual_func  (chunk_id)
-    expected = get_expected_func(chunk_id)
+    actual   = dill.loads(get_actual_func  )(chunk_id)
+    expected = dill.loads(get_expected_func)(chunk_id)
     study.set_expected(expected, unique=is_expected_unique)
     study.process(actual, unique=is_actual_unique, chunk_id=chunk_id)
     return chunk_id, study
-
-
-#def _imap(g, unique_candidates, g_superpixels, intensity_thresholds, modelfit_kwargs, out):
-#    for ret_idx, ret in enumerate(mapper.fork.imap_unordered(num_forks,
-#                                                             process_candidate,
-#                                                             mapper.unroll(xrange(len(unique_candidates))),
-#                                                             g, g_superpixels,
-#                                                             mapper.unroll(unique_candidates),
-#                                                             mapper.unroll(intensity_thresholds),
-#                                                             modelfit_kwargs)):
-#        out.intermediate('Processed candidate %d / %d (using %d forks)' % \
-#            (ret_idx + 1, len(unique_candidates), num_forks))
-#        yield ret
 
 
 class _Sequence:
@@ -117,7 +105,13 @@ class fork: # namespace
         n, real_args = _get_args_chain(args)
         real_args = list(zip(*real_args))
     
-        if run_parallel: pool = multiprocessing.Pool(processes=processes)
+        # we need to ensure that SIGINT is handled correctly,
+        # see for reference: http://stackoverflow.com/a/35134329/1444073
+        if run_parallel:
+            original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
+            pool = multiprocessing.Pool(processes=processes)
+            signal.signal(signal.SIGINT, original_sigint_handler)
+
         fork._forked = True
         try:
             if run_parallel:
