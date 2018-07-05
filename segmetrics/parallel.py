@@ -21,6 +21,10 @@ def process(study, get_actual_func, get_expected_func, chunk_ids, num_forks=None
         yield chunk_id
 
 
+def process_all(*args, **kwargs):
+    for _ in process(*args, **kwargs): pass
+
+
 def _process_chunk(study, get_actual_func, get_expected_func, chunk_id, is_actual_unique, is_expected_unique):
     actual   = get_actual_func  (chunk_id)
     expected = get_expected_func(chunk_id)
