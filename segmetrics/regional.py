@@ -24,6 +24,21 @@ class Dice(Metric):
             return [1.]  # result of zero/zero division
 
 
+class JaccardSimilarityIndex(Metric):
+
+    FRACTIONAL = True
+
+    def compute(self, actual):
+        ref = self.expected > 0
+        res = actual        > 0
+        nominator = np.logical_and(ref, res).sum().astype(np.float32)
+        denominator = ref.sum() + res.sum() - nominator
+        if denominator > 0:
+            return [nominator / denominator]
+        else:
+            return [1.]  # result of zero/zero division
+
+
 class RandIndex(Metric):
     """Defines the Rand Index.
 
@@ -128,4 +143,3 @@ class ISBIScore(Metric):
                 jaccard = overlap / np.logical_or(ref_cc, actual_cc).sum()
             results.append(jaccard)
         return results
-
