@@ -106,19 +106,21 @@ class ISBIScore(Metric):
     the sets of pixels of matching objects R and S, where R denotes the set of pixels
     belonging to a reference object and S denotes the set of pixels belonging to its
     matching segmented object. A ground truth object R and a segmented object S are
-    considered matching if and only if |R ∩ S| > 0.5 · |R|. Note that for each
-    reference object, there can be at most one segmented object which satisfies the
-    detection test. See: http://ctc2015.gryf.fi.muni.cz/Public/Documents/SEG.pdf
+    considered matching if and only if |R ∩ S| > 0.5. · Note that for each reference 
+    object, there can be at most one segmented object which satisfies the detection test. 
+    See: http://ctc2015.gryf.fi.muni.cz/Public/Documents/SEG.pdf
     """
 
     FRACTIONAL = True
 
-    def __init__(self, min_ref_size=1):
+    def __init__(self, min_ref_size=1, overlap_threshold=0.5):
         """Instantiates.
 
         Skips ground truth objects smaller than `min_ref_size` pixels. It is
         recommended to set this value to `2` such that objects of a single pixel in
         size are skipped, but it is set to `1` by default for downwards compatibility.
+        Consideres objects matching if a ground truth object R and a segmented object S
+        satisfy |R ∩ S| > 0.5.
         """
         assert min_ref_size >= 1, 'min_ref_size must be 1 or larger'
         self.min_ref_size = min_ref_size
@@ -143,3 +145,4 @@ class ISBIScore(Metric):
                 jaccard = overlap / np.logical_or(ref_cc, actual_cc).sum()
             results.append(jaccard)
         return results
+
