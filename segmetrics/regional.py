@@ -2,7 +2,7 @@
 
 import numpy as np
 import sklearn.metrics
-from metric import Metric
+from segmetrics.metric import Metric
 
 ## Compatibility with Python 3 -->
 import sys

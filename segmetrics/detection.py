@@ -1,5 +1,5 @@
 ﻿import numpy as np
-from metric import Metric
+from segmetrics.metric import Metric
 
 ## Compatibility with Python 3 -->
 import sys

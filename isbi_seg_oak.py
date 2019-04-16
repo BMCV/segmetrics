@@ -18,9 +18,9 @@ def oak(groundtruth_list, result_list):
             groundtruth, result = data
             io.imsave('data/01_RES/mask%03d.tif'       % i, result     [None, :, :].astype('uint16'), plugin='tifffile')
             io.imsave('data/01_GT/SEG/man_seg%03d.tif' % i, groundtruth[None, :, :].astype('uint16'), plugin='tifffile')
-        
-        subprocess.call(['wget', 'http://ctc2015.gryf.fi.muni.cz/Public/Software/EvaluationSoftware.zip'])
-        subprocess.call(['unzip', '*.zip'])
+
+        subprocess.call(['wget', 'http://evoid.de/isbi_evaluation_software.7z'])
+        subprocess.call(['7z', 'x', '-pppy42wGfcrHG9W4Z', 'isbi_evaluation_software.7z'])
         subprocess.call(['chmod', '+w', '-R', '.'])
         
         os.chdir('Linux')

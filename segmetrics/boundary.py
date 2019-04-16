@@ -2,7 +2,7 @@ import numpy as np
 import warnings
 from scipy import ndimage
 from skimage import morphology as morph
-from metric import Metric
+from segmetrics.metric import Metric
 
 ## Compatibility with Python 3 -->
 import sys

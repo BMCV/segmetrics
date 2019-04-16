@@ -1,4 +1,3 @@
-import study
 import multiprocessing
 import signal
 import itertools
