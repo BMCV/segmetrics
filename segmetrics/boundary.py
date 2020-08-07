@@ -3,6 +3,7 @@ import warnings
 from scipy import ndimage
 from skimage import morphology as morph
 from segmetrics.metric import Metric
+from segmetrics.aux import bbox
 
 ## Compatibility with Python 3 -->
 import sys
@@ -105,7 +106,14 @@ class ObjectBasedDistance(Metric):
                     if len(seg_candidate_labels) == 0:  ## Not a single object was detected.
                         continue                        ## The distance is undefined in this case.
             else:
-                self.distance.set_expected(ref_cc.astype('uint8'))
-                results.append(min(self.distance.compute((actual == seg_label).astype('uint8')) for seg_label in seg_candidate_labels))
+                distances = []
+                for seg_label in seg_candidate_labels:
+                    seg_cc = (actual == seg_label)
+                    _bbox  = bbox(ref_cc, seg_cc, margin=1)[0]
+                    self.distance.set_expected(ref_cc[_bbox].astype('uint8'))
+                    distance = self.distance.compute(seg_cc[_bbox].astype('uint8'))
+                    assert len(distance) == 1
+                    distances.append(distance[0])
+                results.append(min(distances))
         return results
 
