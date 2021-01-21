@@ -1,5 +1,6 @@
 import skimage.measure
 import numpy as np
+import math
 
 import itertools
 import sys
@@ -32,7 +33,9 @@ def label(im, background=0, neighbors=4):
     0 and all other connected components are labeled with values larger
     than or equal to 1.
     """
-    return skimage.measure.label(im, background=background, neighbors=neighbors) \
+    assert neighbors in (4, 8)
+    connectivity = int(math.log2(neighbors)) - 1
+    return skimage.measure.label(im, background=background, connectivity=connectivity) \
         - _SKIMAGE_MEASURE_LABEL_BF_LABEL # this is 1 in older versions and 0 in newer
 
 
