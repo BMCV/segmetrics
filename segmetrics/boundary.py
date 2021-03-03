@@ -44,11 +44,12 @@ class Hausdorff(Metric):
 
     def compute(self, actual):
         actual_boundary = compute_binary_boundary(actual > 0)
-        actual_boundary_distance_map = ndimage.morphology.distance_transform_edt(np.logical_not(actual_boundary))
         if not self.expected_boundary.any() or not actual_boundary.any(): return []
         results = []
         if self.mode in ('a2e', 'sym'): results.append(self.expected_boundary_distance_map[actual_boundary].max())
-        if self.mode in ('e2a', 'sym'): results.append(actual_boundary_distance_map[self.expected_boundary].max())
+        if self.mode in ('e2a', 'sym'):
+            actual_boundary_distance_map = ndimage.morphology.distance_transform_edt(np.logical_not(actual_boundary))
+            results.append(actual_boundary_distance_map[self.expected_boundary].max())
         return [max(results)]
 
 
@@ -78,6 +79,8 @@ class ObjectBasedDistance(Metric):
     between the segmented and the ground truth objects are established on a n-to-m
     basis, such that the resulting distances are minimal.
     """
+    
+    obj_mapping = (None, None) ## cache
 
     def __init__(self, distance, skip_fn=False):
         """Instantiates.
@@ -93,27 +96,49 @@ class ObjectBasedDistance(Metric):
         self.skip_fn      = skip_fn
         self.FRACTIONAL   = distance.FRACTIONAL
         self.ACCUMULATIVE = distance.ACCUMULATIVE
+        
+    def set_expected(self, *args, **kwargs):
+        super(ObjectBasedDistance, self).set_expected(*args, **kwargs)
+        ObjectBasedDistance.obj_mapping = (None, dict())
 
     def compute(self, actual):
         results = []
+        seg_labels = frozenset(actual.reshape(-1)) - {0}
+        
+        # Reset the cached object mapping:
+        if ObjectBasedDistance.obj_mapping[0] is not actual: ObjectBasedDistance.obj_mapping = (actual, dict())
+            
         for ref_label in set(self.expected.flatten()) - {0}:
             ref_cc = (self.expected == ref_label)
-            seg_candidate_labels = set(actual[ref_cc]) - {0}
-            if len(seg_candidate_labels) == 0:  ## The object was not detected (FN).
-                if self.skip_fn: continue       ## Skip the FN if instructed so.
-                else:                           ## Else, consider all detected objects as possible references.
-                    seg_candidate_labels = set(actual.flatten()) - {0}
-                    if len(seg_candidate_labels) == 0:  ## Not a single object was detected.
-                        continue                        ## The distance is undefined in this case.
+            
+            if self.skip_fn:
+                potentially_closest_seg_labels = frozenset(actual[ref_cc].reshape(-1)) - {0}
             else:
-                distances = []
-                for seg_label in seg_candidate_labels:
-                    seg_cc = (actual == seg_label)
-                    _bbox  = bbox(ref_cc, seg_cc, margin=1)[0]
-                    self.distance.set_expected(ref_cc[_bbox].astype('uint8'))
-                    distance = self.distance.compute(seg_cc[_bbox].astype('uint8'))
-                    assert len(distance) == 1
-                    distances.append(distance[0])
-                results.append(min(distances))
-        return results
 
+                # Query the cached object mapping:
+                if ref_label in self.obj_mapping[1]: ## cache hit
+
+                    potentially_closest_seg_labels = ObjectBasedDistance.obj_mapping[1][ref_label]
+
+                else: ## cache miss
+
+                    # First, we determine the set of potentially "closest" segmented objects:
+                    ref_distancemap = ndimage.distance_transform_edt(~ref_cc)
+                    closest_potential_seg_label = min(seg_labels, key=lambda seg_label: ref_distancemap[actual == seg_label].min())
+                    max_potential_seg_label_distance = ref_distancemap[actual == closest_potential_seg_label].max()
+                    potentially_closest_seg_labels = [seg_label for seg_label in seg_labels if ref_distancemap[actual == seg_label].min() <= max_potential_seg_label_distance]
+                    ObjectBasedDistance.obj_mapping[1][ref_label] = potentially_closest_seg_labels
+
+            # If not a single object was detected, the distance is undefined:
+            if len(potentially_closest_seg_labels) == 0: continue
+            
+            distances = []
+            for seg_label in potentially_closest_seg_labels:
+                seg_cc = (actual == seg_label)
+                _bbox  = bbox(ref_cc, seg_cc, margin=1)[0]
+                self.distance.set_expected(ref_cc[_bbox].astype('uint8'))
+                distance = self.distance.compute(seg_cc[_bbox].astype('uint8'))
+                assert len(distance) == 1
+                distances.append(distance[0])
+            results.append(min(distances))
+        return results
