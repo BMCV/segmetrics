@@ -8,7 +8,7 @@ import segmetrics.parallel
 
 VERSION_MAJOR = 0
 VERSION_MINOR = 11
-VERSION_PATCH = 0
+VERSION_PATCH = 1
 
 VERSION = '%d.%d%s' % (VERSION_MAJOR, VERSION_MINOR, '.%d' % VERSION_PATCH if VERSION_PATCH > 0 else '')
 

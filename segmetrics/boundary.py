@@ -3,7 +3,7 @@ import warnings
 from scipy import ndimage
 from skimage import morphology as morph
 from segmetrics.metric import Metric
-from segmetrics.aux import bbox
+from segmetrics._aux import bbox
 
 ## Compatibility with Python 3 -->
 import sys
