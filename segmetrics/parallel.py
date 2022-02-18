@@ -1,6 +1,5 @@
 import multiprocessing
 import signal
-import itertools
 import dill
 
 
@@ -16,7 +15,8 @@ def process(study, get_actual_func, get_expected_func, chunk_ids, num_forks=None
                                                                  is_actual_unique,
                                                                  is_expected_unique)):
         chunk_id, chunk_study = chunk_result
-        study.merge(chunk_study, chunk_ids=[chunk_id])
+        if study is not chunk_study: ## this happens when parallelization is off
+            study.merge(chunk_study, chunk_ids=[chunk_id])
         if callback is not None: callback(chunk_idx + 1, len(chunk_ids))
         yield chunk_id
 
@@ -119,7 +119,7 @@ class fork: # namespace
                     yield result
                 pool.close()
             else:
-                for result in itertools.imap(_UnrollArgs(f), real_args):
+                for result in map(_UnrollArgs(f), real_args):
                     yield result
         except:
             if run_parallel: pool.terminate()
