@@ -96,6 +96,7 @@ class ObjectBasedDistance(Metric):
         self.skip_fn      = skip_fn
         self.FRACTIONAL   = distance.FRACTIONAL
         self.ACCUMULATIVE = distance.ACCUMULATIVE
+        self.nodetections = -1
         
     def set_expected(self, *args, **kwargs):
         super(ObjectBasedDistance, self).set_expected(*args, **kwargs)
@@ -110,6 +111,12 @@ class ObjectBasedDistance(Metric):
             
         for ref_label in set(self.expected.flatten()) - {0}:
             ref_cc = (self.expected == ref_label)
+
+            # If there were no detections at all, then no distances can be determined:
+            if len(seg_labels) == 0:
+                if self.nodetections >= 0:
+                    results.append(self.nodetections)
+                continue
             
             if self.skip_fn:
                 potentially_closest_seg_labels = frozenset(actual[ref_cc].reshape(-1)) - {0}
