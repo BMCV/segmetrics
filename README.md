@@ -1,6 +1,6 @@
 # segmetrics.py
 
-A Python package for segmentation performance measures, for biomedical image analysis and beyond.
+A Python package implementing image segmentation and object detection performance measures, for biomedical image analysis and beyond.
 
 The following *region-based* performance measures are currently implemented:
 
