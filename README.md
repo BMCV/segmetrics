@@ -1,4 +1,4 @@
-# segmetrics
+# segmetrics.py
 
 A Python package for segmentation performance measures, for biomedical image analysis and beyond.
 
@@ -6,10 +6,10 @@ The following *region-based* performance measures are currently implemented:
 
  - `regional.Dice`: Dice similarity coefficient
  - `regional.ISBIScore`: ISBI SEG Score [1]
- - `regional.JaccardSimilarityIndex`: [https://en.wikipedia.org/wiki/Jaccard_index](Jaccard coefficient)
+ - `regional.JaccardSimilarityIndex`: [Jaccard coefficient](https://en.wikipedia.org/wiki/Jaccard_index)
  - `regional.JaccardIndex`: Jaccard index [2]
  - `regional.RandIndex`: Rand index [2]
- - `regional.AdjustedRandIndex`: [http://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html](Adjusted Rand index)
+ - `regional.AdjustedRandIndex`: [Adjusted Rand index](http://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html)
 
 The following *contour-based* performance measures are currently implemented:
 
@@ -53,7 +53,7 @@ study.add_measure(sm.boundary.ObjectBasedDistance(sm.boundary.Hausdorff()), 'HSD
 
 The object correspondences between the ground truth objects and the segmented objects are established by choosing the closest object according to the respective distance function.
 
-See <test.ipynb> for more examples.
+See [test.ipynb](test.ipynb) for more examples.
 
 ## References
 
@@ -61,4 +61,4 @@ See <test.ipynb> for more examples.
 
 [2] L. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
 
-[3] P. Bamford, "Empirical comparison of cell segmentation algo- 1611 rithms using an annotated dataset," in Proc. Int. Conf. Image Proc., 1612 vol. 2, 2003, pp. II-1073–1076.
+[3] P. Bamford, "Empirical comparison of cell segmentation algorithms using an annotated dataset," in Proc. Int. Conf. Image Proc., 1612 vol. 2, 2003, pp. II-1073–1076.
