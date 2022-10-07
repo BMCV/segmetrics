@@ -35,7 +35,7 @@ Segmentation performance evaluation is driven by the `Study` class. The general 
 ```python
 import segmetrics as sm
 
-study = sm.Study()
+study = sm.study.Study()
 study.add_measure(sm.regional.Dice(), 'Dice')
 study.add_measure(sm.regional.ISBIScore(), 'SEG')
 
