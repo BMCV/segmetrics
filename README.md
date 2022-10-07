@@ -1,5 +1,9 @@
 # segmetrics.py
 
+[![Anaconda-Server Badge](https://anaconda.org/bioconda/segmetrics/badges/version.svg?)](https://anaconda.org/bioconda/segmetrics)
+[![Anaconda-Server Badge](https://anaconda.org/bioconda/segmetrics/badges/latest_release_date.svg?)](https://anaconda.org/bioconda/segmetrics)
+[![Anaconda-Server Badge](https://anaconda.org/bioconda/segmetrics/badges/installer/conda.svg)](https://conda.anaconda.org/bioconda)
+
 A Python package implementing image segmentation and object detection performance measures, for biomedical image analysis and beyond.
 
 The following *region-based* performance measures are currently implemented:
