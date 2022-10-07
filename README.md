@@ -17,7 +17,7 @@ The following *region-based* performance measures are currently implemented:
 
 The following *contour-based* performance measures are currently implemented:
 
- - `boundary.Hausdorf`: Hausdorff distance (HSD) [3]
+ - `boundary.Hausdorff`: Hausdorff distance (HSD) [3]
  - `boundary.NSD`: Normalized sum of distances (NSD) [2]
  - `boundary.ObjectBasedDistance`: Adapter for object-based HSD and NSD
 
