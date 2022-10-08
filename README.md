@@ -1,8 +1,8 @@
 # segmetrics.py
 
-[![Anaconda-Server Badge](https://img.shields.io/conda/dn/bioconda/segmetrics.svg?label=Conda%20downloads)](https://anaconda.org/bioconda/segmetrics)
-[![Anaconda-Server Badge](https://img.shields.io/conda/v/bioconda/segmetrics.svg?label=Version)](https://anaconda.org/bioconda/segmetrics)
 [![Anaconda-Server Badge](https://img.shields.io/badge/Install%20with-conda-%2387c305)](https://anaconda.org/bioconda/segmetrics)
+[![Anaconda-Server Badge](https://img.shields.io/conda/v/bioconda/segmetrics.svg?label=Version)](https://anaconda.org/bioconda/segmetrics)
+[![Anaconda-Server Badge](https://img.shields.io/conda/dn/bioconda/segmetrics.svg?label=Downloads)](https://anaconda.org/bioconda/segmetrics)
 
 A Python package implementing image segmentation and object detection performance measures, for biomedical image analysis and beyond.
 
