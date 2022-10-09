@@ -4,7 +4,6 @@ import math
 import itertools
 import sys
 import csv
-import json
 
 from segmetrics.metric import Metric
 
@@ -46,24 +45,6 @@ def label(im, background=0, neighbors=4):
         - _SKIMAGE_MEASURE_LABEL_BF_LABEL # this is 1 in older versions and 0 in newer
 
 
-def normalize_type(value):
-    if issubclass(type(value), np.integer):
-        return int(value)
-    elif issubclass(type(value), float):
-        return float(value)
-    else:
-        return value
-
-
-def normalize_types(data):
-    if isinstance(data, dict):
-        return {key: normalize_types(data[key]) for key in data.keys()}
-    elif isinstance(data, list):
-        return [normalize_types(value) for value in data]
-    else:
-        return normalize_type(data)
-
-
 def aggregate(measure, values):
     fnc = np.sum if measure.ACCUMULATIVE else np.mean
     return fnc(values)
@@ -76,6 +57,7 @@ class Study:
         self.sample_ids = list()
         self.results    = dict()
         self.results_cache = dict()
+        self.csv_sample_id_column_name = 'Sample'
 
     def merge(self, other, sample_ids='all'):
         """Merges measures and results from `other` study.
@@ -170,14 +152,6 @@ class Study:
             val = aggregate(measure, self[measure_name]) * (100 if measure.FRACTIONAL else 1)
             write((fmt % (measure_name, val)) + line_suffix)
 
-    def write_json(self, fout):
-        data = dict(sample_ids=self.sample_ids, samples=dict(), summary=dict())
-        for measure_name in self.measures.keys():
-            data['samples'][measure_name] = [self.results[measure_name][sample_id] for sample_id in self.sample_ids]
-            data['summary'][measure_name] = aggregate(self.measures[measure_name], self[measure_name])
-        data = normalize_types(data)
-        json.dump(data, fout)
-
     def write_csv(self, fout, write_samples='auto', write_header=True, write_summary=True, **kwargs):
         kwargs.setdefault('delimiter', ',')
         kwargs.setdefault('quotechar', '"')
@@ -186,7 +160,7 @@ class Study:
 
         # define header
         if write_header:
-            rows += [[''] + [measure_name for measure_name in self.measures.keys()]]
+            rows += [[self.csv_sample_id_column_name] + [measure_name for measure_name in self.measures.keys()]]
 
 	# define samples
         if write_samples == True or (write_samples == 'auto' and len(self.sample_ids) > 1):
@@ -221,5 +195,6 @@ class Study:
         buf = io.StringIO()
         self.write_csv(buf, delimiter=',')
         buf.seek(0)
-        return pd.read_csv(buf, sep=',', )
+        df = pd.read_csv(buf, sep=',', keep_default_na=False)
+        return df
 

@@ -2,8 +2,7 @@ import unittest
 import segmetrics as sm
 import numpy as np
 import pathlib
-import io
-import json
+import pandas as pd
 
 from tests.data import images, CrossSampler
 
@@ -31,21 +30,17 @@ def create_full_study():
     return study
 
 
-def compare_study(test, study, expected_json_filepath):
-    expected_json_filepath = pathlib.Path(expected_json_filepath)
+def compare_study(test, study, expected_csv_filepath):
+    expected_csv_filepath = pathlib.Path(expected_csv_filepath)
     try:
-        study_buf = io.StringIO()
-        study.write_json(study_buf)
-        study_buf.seek(0)
-        study_data = json.load(study_buf)
-        test.assertTrue(expected_json_filepath.is_file())
-        expected_data = json.loads(expected_json_filepath.read_text())
-        test.assertEqual(study_data, expected_data)
-    except AssertionError:
-        actual_json_filepath = f'{expected_json_filepath}-out'
-        with open(actual_json_filepath, 'w') as fout:
-            json.dump(study_data, fout)
-        print(f'Obtained results written to: {actual_json_filepath}')
+        study_df = study.todf().round(3)
+        test.assertTrue(expected_csv_filepath.is_file())
+        expected_df = pd.read_csv(str(expected_csv_filepath), sep=',', keep_default_na=False).round(3)
+        test.assertTrue(study_df.equals(expected_df))
+    except:
+        actual_csv_filepath = f'{expected_csv_filepath}-out'
+        study_df.to_csv(actual_csv_filepath, index=False)
+        print(f'Obtained results written to: {actual_csv_filepath}')
         raise
 
 
@@ -61,7 +56,7 @@ class FullStudyTest(unittest.TestCase):
             with self.subTest(sample_id=sample_id):
                 self.study.set_expected(ref, unique=True)
                 self.study.process(sample_id, seg, unique=True)
-        compare_study(self, self.study, 'tests/full-study-test.json')
+        compare_study(self, self.study, 'tests/full-study-test.csv')
 
     #def parallel(self):
     #    from tests.data import images
