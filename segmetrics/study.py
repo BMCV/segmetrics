@@ -1,13 +1,16 @@
 import skimage.measure
 import numpy as np
 import math
-
 import itertools
 import sys
+import csv
+import json
+
+from segmetrics.metric import Metric
 
 
 def _is_boolean(narray):
-    return narray.dtype == np.bool
+    return narray.dtype == bool
 
 
 def _is_integral(narray):
@@ -43,6 +46,24 @@ def label(im, background=0, neighbors=4):
         - _SKIMAGE_MEASURE_LABEL_BF_LABEL # this is 1 in older versions and 0 in newer
 
 
+def normalize_type(value):
+    if issubclass(type(value), np.integer):
+        return int(value)
+    elif issubclass(type(value), float):
+        return float(value)
+    else:
+        return value
+
+
+def normalize_types(data):
+    if isinstance(data, dict):
+        return {key: normalize_types(data[key]) for key in data.keys()}
+    elif isinstance(data, list):
+        return [normalize_types(value) for value in data]
+    else:
+        return normalize_type(data)
+
+
 def aggregate(measure, values):
     fnc = np.sum if measure.ACCUMULATIVE else np.mean
     return fnc(values)
@@ -51,26 +72,27 @@ def aggregate(measure, values):
 class Study:
 
     def __init__(self):
-        self.measures  = dict()
-        self.chunk_ids = list()
-        self.results   = dict()
+        self.measures   = dict()
+        self.sample_ids = list()
+        self.results    = dict()
         self.results_cache = dict()
 
-    def merge(self, other, chunk_ids='all'):
+    def merge(self, other, sample_ids='all'):
         """Merges measures and results from `other` study.
         """
         for measure_name in other.measures:
             if measure_name not in self.measures.keys():
                 self.add_measure(other.measures[measure_name], name=measure_name)
-            for chunk_id in (other.results[measure_name].keys() if chunk_ids == 'all' else chunk_ids):
-                if chunk_id is None:
+            for sample_id in (other.results[measure_name].keys() if sample_ids == 'all' else sample_ids):
+                if sample_id is None:
                     self.results[measure_name][None] += other.results[measure_name][None]
                 else:
-                    assert chunk_id not in self.results[measure_name]
-                    self.results[measure_name][chunk_id] = list(other.results[measure_name][chunk_id])
+                    assert sample_id not in self.results[measure_name]
+                    self.results[measure_name][sample_id] = list(other.results[measure_name][sample_id])
         self.results_cache.clear()
 
     def add_measure(self, measure, name=None):
+        if not isinstance(measure, Metric): raise ValueError('measure must be a Metric object')
         if name is None: name = '%d' % id(measure)
         self.measures[name] = measure
         self.results [name] = {None: []}
@@ -81,7 +103,7 @@ class Study:
         for measure_name in self.measures:
             self.results[measure_name] = {None: []}
         self.results_cache.clear()
-        self.chunk_ids.clear()
+        self.sample_ids.clear()
 
     def set_expected(self, expected, unique=True):
         """Sets the `expected` ground truth image.
@@ -102,7 +124,7 @@ class Study:
             measure = self.measures[measure_name]
             measure.set_expected(expected)
 
-    def process(self, actual, unique=True, chunk_id=None):
+    def process(self, sample_id, actual, unique=True):
         """Evaluates `actual` image against the current `set_expected` one.
         
         If `unique` is `True`, it is assumed that all objects are labeled
@@ -120,24 +142,22 @@ class Study:
         actual = actual.squeeze()
         assert actual.ndim == 2, 'image has wrong dimensions'
         actual = _get_labeled(actual, unique, 'image')
+        if sample_id in self.sample_ids: raise ValueError(f'sample_id="{sample_id}" already used')
         intermediate_results = {}
         for measure_name in self.measures:
             measure = self.measures[measure_name]
             result = measure.compute(actual)
-
-            if chunk_id is not None: self.results[measure_name][chunk_id] = []
-            self.results[measure_name][chunk_id] += result
-            self.chunk_ids.append(chunk_id)
-
+            self.results[measure_name][sample_id] = result
             intermediate_results[measure_name] = result
         self.results_cache.clear()
+        self.sample_ids.append(sample_id)
         return intermediate_results
 
     def __getitem__(self, measure):
         """Returns list of all values recorded for given `measure`.
         """
         if measure not in self.results_cache:
-            self.results_cache[measure] = list(itertools.chain(*[self.results[measure][chunk_id] for chunk_id in self.results[measure]]))
+            self.results_cache[measure] = list(itertools.chain(*[self.results[measure][sample_id] for sample_id in self.results[measure]]))
         return self.results_cache[measure]
 
     def print_results(self, write=sys.stdout.write, pad=0, fmt_unbound_float='g', line_suffix='\n'):
@@ -150,7 +170,15 @@ class Study:
             val = aggregate(measure, self[measure_name]) * (100 if measure.FRACTIONAL else 1)
             write((fmt % (measure_name, val)) + line_suffix)
 
-    def write_csv(self, fout, write_chunks='auto', write_header=True, write_summary=True, **kwargs):
+    def write_json(self, fout):
+        data = dict(sample_ids=self.sample_ids, samples=dict(), summary=dict())
+        for measure_name in self.measures.keys():
+            data['samples'][measure_name] = [self.results[measure_name][sample_id] for sample_id in self.sample_ids]
+            data['summary'][measure_name] = aggregate(self.measures[measure_name], self[measure_name])
+        data = normalize_types(data)
+        json.dump(data, fout)
+
+    def write_csv(self, fout, write_samples='auto', write_header=True, write_summary=True, **kwargs):
         kwargs.setdefault('delimiter', ',')
         kwargs.setdefault('quotechar', '"')
         kwargs.setdefault('quoting', csv.QUOTE_MINIMAL)
@@ -160,21 +188,21 @@ class Study:
         if write_header:
             rows += [[''] + [measure_name for measure_name in self.measures.keys()]]
 
-	# define rows
-        if write_chunks == True or (write_chunks == 'auto' and len(self.chunks) > 1):
-            for chunk_id in self.chunk_ids:
-                row = [chunk_id]
+	# define samples
+        if write_samples == True or (write_samples == 'auto' and len(self.sample_ids) > 1):
+            for sample_id in self.sample_ids:
+                row = [sample_id]
                 for measure_name in self.measures.keys():
-                    measure = study.measures[measure_name]
-                    chunks = study.results[measure_name]
-                    row += [aggregate(measure, chunks[chunk_id])]
+                    measure = self.measures[measure_name]
+                    samples = self.results[measure_name]
+                    row += [aggregate(measure, samples[sample_id])]
                 rows.append(row)
 
         # define summary
         if write_summary:
             rows.append([''])
             for measure_name in self.measures.keys():
-                measure = study.measures[measure_name]
+                measure = self.measures[measure_name]
                 value = aggregate(measure, self[measure_name])
                 rows[-1].append(value)
 

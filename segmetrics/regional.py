@@ -1,13 +1,9 @@
 ﻿# -*- coding: utf-8 -*-
 
+import sys
 import numpy as np
 import sklearn.metrics
 from segmetrics.metric import Metric
-
-## Compatibility with Python 3 -->
-import sys
-if sys.version_info.major == 3: xrange = range
-## <-- Compatibility with Python 3
 
 
 class Dice(Metric):
@@ -24,7 +20,7 @@ class Dice(Metric):
             return [1.]  # result of zero/zero division
 
 
-class JaccardSimilarityIndex(Metric):
+class JaccardCoefficient(Metric):
 
     FRACTIONAL = True
 
@@ -125,7 +121,7 @@ class ISBIScore(Metric):
 
     def compute(self, actual):
         results = []
-        for ref_label in xrange(1, self.expected.max() + 1):
+        for ref_label in range(1, self.expected.max() + 1):
             ref_cc = (self.expected == ref_label)  # the reference connected component
             ref_cc_size = ref_cc.sum()
             ref_cc_half_size = 0.5 * ref_cc_size
