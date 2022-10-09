@@ -3,6 +3,8 @@ from segmetrics.regional import Dice, JaccardCoefficient, JaccardIndex, RandInde
 from segmetrics.detection import FalsePositive, FalseNegative, FalseSplit, FalseMerge
 from segmetrics.study import Study
 
+import segmetrics.parallel
+
 
 VERSION_MAJOR = 1
 VERSION_MINOR = 0

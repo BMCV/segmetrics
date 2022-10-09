@@ -66,11 +66,9 @@ class Study:
             if measure_name not in self.measures.keys():
                 self.add_measure(other.measures[measure_name], name=measure_name)
             for sample_id in (other.results[measure_name].keys() if sample_ids == 'all' else sample_ids):
-                if sample_id is None:
-                    self.results[measure_name][None] += other.results[measure_name][None]
-                else:
-                    assert sample_id not in self.results[measure_name]
-                    self.results[measure_name][sample_id] = list(other.results[measure_name][sample_id])
+                assert sample_id not in self.results[measure_name]
+                self.results[measure_name][sample_id] = list(other.results[measure_name][sample_id])
+                if sample_id not in self.sample_ids: self.sample_ids.append(sample_id)
         self.results_cache.clear()
 
     def add_measure(self, measure, name=None):
@@ -124,7 +122,7 @@ class Study:
         actual = actual.squeeze()
         assert actual.ndim == 2, 'image has wrong dimensions'
         actual = _get_labeled(actual, unique, 'image')
-        if sample_id in self.sample_ids: raise ValueError(f'sample_id="{sample_id}" already used')
+        assert sample_id not in self.sample_ids
         intermediate_results = {}
         for measure_name in self.measures:
             measure = self.measures[measure_name]
@@ -164,7 +162,7 @@ class Study:
 
 	# define samples
         if write_samples == True or (write_samples == 'auto' and len(self.sample_ids) > 1):
-            for sample_id in self.sample_ids:
+            for sample_id in sorted(self.sample_ids):
                 row = [sample_id]
                 for measure_name in self.measures.keys():
                     measure = self.measures[measure_name]

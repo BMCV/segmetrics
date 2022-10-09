@@ -3,34 +3,34 @@ import signal
 import dill
 
 
-def process(study, get_actual_func, get_expected_func, chunk_ids, num_forks=None, is_actual_unique=True, is_expected_unique=True, callback=None):
+def process(study, get_actual_func, get_expected_func, sample_ids, num_forks=None, is_actual_unique=True, is_expected_unique=True, callback=None):
     if num_forks is None: num_forks = multiprocessing.cpu_count()
-    num_forks = min([num_forks, len(chunk_ids)])
-    for chunk_idx, chunk_result in enumerate(fork.imap_unordered(num_forks,
-                                                                 _process_chunk,
-                                                                 study,
-                                                                 dill.dumps(get_actual_func),
-                                                                 dill.dumps(get_expected_func),
-                                                                 unroll(chunk_ids),
-                                                                 is_actual_unique,
-                                                                 is_expected_unique)):
-        chunk_id, chunk_study = chunk_result
-        if study is not chunk_study: ## this happens when parallelization is off
-            study.merge(chunk_study, chunk_ids=[chunk_id])
-        if callback is not None: callback(chunk_idx + 1, len(chunk_ids))
-        yield chunk_id
+    num_forks = min([num_forks, len(sample_ids)])
+    for sample_idx, sample_result in enumerate(fork.imap_unordered(num_forks,
+                                                                   _process_sample,
+                                                                   study,
+                                                                   dill.dumps(get_actual_func),
+                                                                   dill.dumps(get_expected_func),
+                                                                   unroll(sample_ids),
+                                                                   is_actual_unique,
+                                                                   is_expected_unique)):
+        sample_id, sample_study = sample_result
+        if study is not sample_study: ## this happens when parallelization is off
+            study.merge(sample_study, sample_ids=[sample_id])
+        if callback is not None: callback(sample_idx + 1, len(sample_ids))
+        yield sample_id
 
 
 def process_all(*args, **kwargs):
     for _ in process(*args, **kwargs): pass
 
 
-def _process_chunk(study, get_actual_func, get_expected_func, chunk_id, is_actual_unique, is_expected_unique):
-    actual   = dill.loads(get_actual_func  )(chunk_id)
-    expected = dill.loads(get_expected_func)(chunk_id)
+def _process_sample(study, get_actual_func, get_expected_func, sample_id, is_actual_unique, is_expected_unique):
+    actual   = dill.loads(get_actual_func  )(sample_id)
+    expected = dill.loads(get_expected_func)(sample_id)
     study.set_expected(expected, unique=is_expected_unique)
-    study.process(actual, unique=is_actual_unique, chunk_id=chunk_id)
-    return chunk_id, study
+    study.process(sample_id, actual, unique=is_actual_unique)
+    return sample_id, study
 
 
 class _Sequence:

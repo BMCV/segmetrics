@@ -3,6 +3,7 @@ import segmetrics as sm
 import numpy as np
 import pathlib
 import pandas as pd
+import time
 
 from tests.data import images, CrossSampler
 
@@ -30,39 +31,51 @@ def create_full_study():
     return study
 
 
-def compare_study(test, study, expected_csv_filepath):
+def compare_study(test, study, expected_csv_filepath, tag):
     expected_csv_filepath = pathlib.Path(expected_csv_filepath)
+    actual_csv_filepath = f'{expected_csv_filepath}-out-{tag}'
+    failure_message = f'Obtained results written to: {actual_csv_filepath}'
     try:
-        study_df = study.todf().round(3)
-        test.assertTrue(expected_csv_filepath.is_file())
-        expected_df = pd.read_csv(str(expected_csv_filepath), sep=',', keep_default_na=False).round(3)
-        test.assertTrue(study_df.equals(expected_df))
+        study_df = study.todf()
+        test.assertTrue(expected_csv_filepath.is_file(), failure_message)
+        expected_df = pd.read_csv(str(expected_csv_filepath), sep=',', keep_default_na=False)
+        test.assertTrue(study_df.round(3).equals(expected_df.round(3)), failure_message)
     except:
-        actual_csv_filepath = f'{expected_csv_filepath}-out'
         study_df.to_csv(actual_csv_filepath, index=False)
-        print(f'Obtained results written to: {actual_csv_filepath}')
         raise
 
 
 class FullStudyTest(unittest.TestCase):
 
-    def setup(self):
+    def setUp(self):
+        self.started_at = time.time()
         self.study   = create_full_study()
         self.sampler = CrossSampler(images, images)
 
+    def tearDown(self):
+        elapsed = time.time() - self.started_at
+        FullStudyTest.times[self.id()] = round(elapsed, 2)
+
     def test_sequential(self):
-        self.setup()
         for sample_id, ref, seg in self.sampler.all():
             with self.subTest(sample_id=sample_id):
                 self.study.set_expected(ref, unique=True)
                 self.study.process(sample_id, seg, unique=True)
-        compare_study(self, self.study, 'tests/full-study-test.csv')
+        compare_study(self, self.study, 'tests/full-study-test.csv', 'sequential')
 
-    #def parallel(self):
-    #    from tests.data import images
-    #    study = create_full_study()
-    #    pass
+    def test_parallel(self):
+        sm.parallel.process_all(self.study, lambda sid: self.sampler.img2(sid), lambda sid: self.sampler.img1(sid), self.sampler.sample_ids, num_forks=2, is_actual_unique=True, is_expected_unique=True)
+        compare_study(self, self.study, 'tests/full-study-test.csv', 'parallel')
 
+    @classmethod
+    def setUpClass(cls):
+        cls.times = dict()
+
+    @classmethod
+    def tearDownClass(cls):
+        print('\nPerformance:')
+        for test_id, duration in cls.times.items():
+            print(f'  {test_id}: {duration} sec')
 
 if __name__ == '__main__':
     unittest.main()

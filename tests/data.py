@@ -1,4 +1,5 @@
 import numpy as np
+import re
 
 
 # Four square objects uniformly distributed.
@@ -88,4 +89,16 @@ class CrossSampler:
     def all(self):
         for pos in range(len(self)):
             yield self[pos]
+
+    @property
+    def sample_ids(self):
+        return [sid for sid, _, _ in self.all()]
+
+    def img1(self, sample_id):
+        i = int(re.match(r'^sample-([0-9]+)-[0-9]+$', sample_id).group(1))
+        return self.images1[i]
+
+    def img2(self, sample_id):
+        j = int(re.match(r'^sample-[0-9]+-([0-9]+)$', sample_id).group(1))
+        return self.images2[j]
 

@@ -3,4 +3,4 @@ __pycache__
 .ipynb_checkpoints
 /build
 *.swp
-*-out
+tests/*-out-*
