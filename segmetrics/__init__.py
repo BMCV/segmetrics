@@ -1,4 +1,4 @@
-from segmetrics.boundary import Hausdorff, NSD, ObjectBasedDistance as object_based_distance
+from segmetrics.boundary import Hausdorff, NSD
 from segmetrics.regional import Dice, JaccardCoefficient, JaccardIndex, RandIndex, AdjustedRandIndex, ISBIScore
 from segmetrics.detection import FalsePositive, FalseNegative, FalseSplit, FalseMerge
 from segmetrics.study import Study

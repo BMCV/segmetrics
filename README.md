@@ -8,25 +8,24 @@ The goal of this package is to provide a low-threshold and standardized way of e
 
 The following *region-based* performance measures are currently implemented:
 
- - `regional.Dice`: Dice similarity coefficient
- - `regional.ISBIScore`: ISBI SEG Score [1]
- - `regional.JaccardSimilarityIndex`: [Jaccard coefficient](https://en.wikipedia.org/wiki/Jaccard_index)
- - `regional.JaccardIndex`: Jaccard index [2]
- - `regional.RandIndex`: Rand index [2]
- - `regional.AdjustedRandIndex`: [Adjusted Rand index](http://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html)
+ - `Dice`: Dice similarity coefficient
+ - `ISBIScore`: ISBI SEG Score [1]
+ - `JaccardSimilarityIndex`: [Jaccard coefficient](https://en.wikipedia.org/wiki/Jaccard_index)
+ - `JaccardIndex`: Jaccard index [2]
+ - `RandIndex`: Rand index [2]
+ - `AdjustedRandIndex`: [Adjusted Rand index](http://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html)
 
 The following *contour-based* performance measures are currently implemented:
 
- - `boundary.Hausdorff`: Hausdorff distance (HSD) [3]
- - `boundary.NSD`: Normalized sum of distances (NSD) [2]
- - `boundary.ObjectBasedDistance`: Adapter for object-based HSD and NSD
+ - `Hausdorff`: Hausdorff distance (HSD) [3]
+ - `NSD`: Normalized sum of distances (NSD) [2]
 
 The following *detection-based* performance measures [2] are currently implemented:
 
- - `detection.FalseSplit`: Falsely split objects per image
- - `detection.FalseMerge`: Falsely merged objects per image
- - `detection.FalsePositive`: Falsely detected objects per image
- - `detection.FalseNegative`: Undetected objects per image
+ - `FalseSplit`: Falsely split objects per image
+ - `FalseMerge`: Falsely merged objects per image
+ - `FalsePositive`: Falsely detected objects per image
+ - `FalseNegative`: Undetected objects per image
 
 ## Usage
 
@@ -35,9 +34,9 @@ Segmentation performance evaluation is driven by the `Study` class. The general 
 ```python
 import segmetrics as sm
 
-study = sm.study.Study()
-study.add_measure(sm.regional.Dice(), 'Dice')
-study.add_measure(sm.regional.ISBIScore(), 'SEG')
+study = sm.Study()
+study.add_measure(sm.Dice(), 'Dice')
+study.add_measure(sm.ISBIScore(), 'SEG')
 
 for gt_img, seg_img in zip(gt_list, seg_list):
     study.set_expected(gt_img)
@@ -51,8 +50,8 @@ In the example above, it is presumed that `gt_list` and `seg_list` are two itera
 The following code can be used to include *object-based* distance measures:
 
 ```python
-study.add_measure(sm.boundary.ObjectBasedDistance(sm.boundary.NSD()), 'NSD')
-study.add_measure(sm.boundary.ObjectBasedDistance(sm.boundary.Hausdorff()), 'HSD')
+study.add_measure(sm.NSD().object_based(), 'NSD')
+study.add_measure(sm.Hausdorff().object_based(), 'HSD')
 ```
 
 The object correspondences between the ground truth objects and the segmented objects are established by choosing the closest object according to the respective distance function.
