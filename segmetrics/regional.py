@@ -3,10 +3,11 @@
 import sys
 import numpy as np
 import sklearn.metrics
-from segmetrics.metric import Metric
+
+from segmetrics.measure import Measure
 
 
-class Dice(Metric):
+class Dice(Measure):
 
     FRACTIONAL = True
 
@@ -20,7 +21,7 @@ class Dice(Metric):
             return [1.]  # result of zero/zero division
 
 
-class JaccardCoefficient(Metric):
+class JaccardCoefficient(Measure):
 
     FRACTIONAL = True
 
@@ -35,7 +36,7 @@ class JaccardCoefficient(Metric):
             return [1.]  # result of zero/zero division
 
 
-class RandIndex(Metric):
+class RandIndex(Measure):
     """Defines the Rand Index.
 
     See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented
@@ -67,7 +68,7 @@ class RandIndex(Metric):
         return a, b, c, d
 
 
-class AdjustedRandIndex(Metric):
+class AdjustedRandIndex(Measure):
     """Adjusted Rand Index.
 
     See: http://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html
@@ -95,7 +96,7 @@ class JaccardIndex(RandIndex):
         return [(a + d) / float(b + c + d)]
 
 
-class ISBIScore(Metric):
+class ISBIScore(Measure):
     """Computes segmentation score according to ISBI Cell Tracking Challenge.
 
     The SEG measure is based on the Jaccard similarity index J = |R ∩ S| / |R ∪ S| of

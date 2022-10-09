@@ -5,7 +5,7 @@ import itertools
 import sys
 import csv
 
-from segmetrics.metric import Metric
+from segmetrics.measure import Measure
 
 
 def _is_boolean(narray):
@@ -72,7 +72,7 @@ class Study:
         self.results_cache.clear()
 
     def add_measure(self, measure, name=None):
-        if not isinstance(measure, Metric): raise ValueError('measure must be a Metric object')
+        if not isinstance(measure, Measure): raise ValueError('measure must be a Measure object')
         if name is None: name = '%d' % id(measure)
         self.measures[name] = measure
         self.results [name] = {None: []}

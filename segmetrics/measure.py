@@ -1,4 +1,4 @@
-class Metric(object):
+class Measure:
 
     FRACTIONAL   = False
     ACCUMULATIVE = False

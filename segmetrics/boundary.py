@@ -1,14 +1,12 @@
 import numpy as np
 import warnings
+import sys
+
 from scipy import ndimage
 from skimage import morphology as morph
-from segmetrics.metric import Metric
-from segmetrics._aux import bbox
 
-## Compatibility with Python 3 -->
-import sys
-if sys.version_info.major == 3: xrange = range
-## <-- Compatibility with Python 3
+from segmetrics.measure import Measure
+from segmetrics._aux import bbox
 
 
 def compute_binary_boundary(mask, width=1):
@@ -21,7 +19,7 @@ def compute_boundary_distance_map(mask):
     return ndimage.morphology.distance_transform_edt(np.logical_not(boundary))
 
 
-class Hausdorff(Metric):
+class Hausdorff(Measure):
 
     def __init__(self, mode='symmetric'):
         """Initializes Hausdorff metric.
@@ -53,7 +51,7 @@ class Hausdorff(Metric):
         return [max(results)]
 
 
-class NSD(Metric):
+class NSD(Measure):
 
     FRACTIONAL = True
 
@@ -72,7 +70,7 @@ class NSD(Metric):
         return [nominator / (0. + denominator)]
 
 
-class ObjectBasedDistance(Metric):
+class ObjectBasedDistance(Measure):
     """Decorator to apply image-level distance measures on a per-object level.
 
     Computes the decorated distance measure on a per-object level. Correspondances
@@ -87,7 +85,7 @@ class ObjectBasedDistance(Metric):
 
         Parameters
         ----------
-        distance : Metric
+        distance : Measure
                    The image-level distance measure, which is to be decorated.
         skip_fn  : bool
                    Specifies whether false-negative detections shall be skipped.

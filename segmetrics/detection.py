@@ -1,10 +1,7 @@
 ﻿import numpy as np
-from segmetrics.metric import Metric
-
-## Compatibility with Python 3 -->
 import sys
-if sys.version_info.major == 3: xrange = range
-## <-- Compatibility with Python 3
+
+from segmetrics.measure import Measure
 
 
 def _assign(assignments, key, value):
@@ -15,7 +12,7 @@ def _assign(assignments, key, value):
 def _compute_seg_by_ref_assignments(seg, ref, include_background=False):
     seg_by_ref = {}
     if include_background: seg_by_ref[0] = set()
-    for seg_label in xrange(1, seg.max() + 1):
+    for seg_label in range(1, seg.max() + 1):
         seg_cc = (seg == seg_label)
         if not seg_cc.any(): continue
         ref_label = np.bincount(ref[seg_cc]).argmax()
@@ -27,7 +24,7 @@ def _compute_ref_by_seg_assignments(seg, ref, *args, **kwargs):
     return _compute_seg_by_ref_assignments(ref, seg, *args, **kwargs)
 
 
-class FalseSplit(Metric):
+class FalseSplit(Measure):
     """Counts falsely split objects.
 
     See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented
@@ -41,7 +38,7 @@ class FalseSplit(Metric):
         return [sum(len(seg_by_ref[ref_label]) > 1 for ref_label in seg_by_ref.keys() if ref_label > 0)]
 
 
-class FalseMerge(Metric):
+class FalseMerge(Measure):
     """Counts falsely merged objects.
 
     See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented
@@ -55,7 +52,7 @@ class FalseMerge(Metric):
         return [sum(len(ref_by_seg[seg_label]) > 1 for seg_label in ref_by_seg.keys() if seg_label > 0)]
 
 
-class FalsePositive(Metric):
+class FalsePositive(Measure):
     """Counts falsely detected (added) objects.
 
     See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented
@@ -74,7 +71,7 @@ class FalsePositive(Metric):
         return [len(seg_by_ref[0])]
 
 
-class FalseNegative(Metric):
+class FalseNegative(Measure):
     """Counts falsely missed (removed) objects.
 
     See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented
@@ -93,7 +90,7 @@ class FalseNegative(Metric):
         return [len(ref_by_seg[0])]
 
 
-class COCOmAP(Metric):
+class COCOmAP(Measure):
     """Calculate mean Average Precision for multiple intersection over union thresholds
 
     This metric is used in the COCO or 2018 Data Science Bowl challenge.
@@ -135,14 +132,14 @@ class COCOmAP(Metric):
             fp = 0.
             fn = 0.
 
-            for actual_label in xrange(1, actual.max() + 1):
+            for actual_label in range(1, actual.max() + 1):
                 found_match = self._find_match_for_label(actual, self.expected, actual_label, iou_threshold)
                 if found_match:
                     tp += 1
                 else:
                     fp += 1
 
-            for ref_label in xrange(1, self.expected.max() + 1):
+            for ref_label in range(1, self.expected.max() + 1):
                 ref_cc = (self.expected == ref_label)  # the reference connected component
                 ref_cc_size = ref_cc.sum()
                 if ref_cc_size < self.min_ref_size: continue
