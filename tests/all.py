@@ -6,6 +6,7 @@ import pandas as pd
 import time
 
 from tests.data import images, CrossSampler
+from tests.isbi_seg import isbi_seg_official
 
 
 def create_full_study():
@@ -76,6 +77,22 @@ class FullStudyTest(unittest.TestCase):
         print('\nPerformance:')
         for test_id, duration in cls.times.items():
             print(f'  {test_id}: {duration} sec')
+
+
+class SEGTest(unittest.TestCase):
+
+    def setUp(self):
+        self.study = sm.Study()
+        self.study.add_measure(sm.ISBIScore(), 'SEG')
+        self.sampler = CrossSampler(images, images)
+
+    def test_sequential(self):
+        sm.parallel.process_all(self.study, lambda sid: self.sampler.img2(sid), lambda sid: self.sampler.img1(sid), self.sampler.sample_ids, num_forks=2, is_actual_unique=True, is_expected_unique=True)
+        seg_expected = isbi_seg_official(self.sampler.img2_list, self.sampler.img1_list)
+        seg_actual = np.mean(self.study['SEG'])
+        error = abs(seg_actual - seg_expected)
+        self.assertTrue(error < 1e-5, f'Expected {seg_expected}, but got {seg_actual} (error: {error}')
+
 
 if __name__ == '__main__':
     unittest.main()

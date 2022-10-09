@@ -94,6 +94,14 @@ class CrossSampler:
     def sample_ids(self):
         return [sid for sid, _, _ in self.all()]
 
+    @property
+    def img1_list(self):
+        return [img1 for _, img1, _ in self.all()]
+
+    @property
+    def img2_list(self):
+        return [img2 for _, _, img2 in self.all()]
+
     def img1(self, sample_id):
         i = int(re.match(r'^sample-([0-9]+)-[0-9]+$', sample_id).group(1))
         return self.images1[i]
