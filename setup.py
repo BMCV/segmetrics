@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 from distutils.core import setup
 
 import segmetrics
@@ -15,4 +14,5 @@ setup(
     url = 'https://kostrykin.com',
     license = 'MIT',
     packages = ['segmetrics'],
+    test_suite = 'tests.all',
 )

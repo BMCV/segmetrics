@@ -27,6 +27,8 @@ The following *detection-based* performance measures [2] are currently implement
  - `FalsePositive`: Falsely detected objects per image
  - `FalseNegative`: Undetected objects per image
 
+Use `python -m tests.all` to run the test suite.
+
 ## Usage
 
 Segmentation performance evaluation is driven by the `Study` class. The general procedure is to instantiate a `Study` object, add the required performance measures, and then to process the segmentation results. A simple example is:
