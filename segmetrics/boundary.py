@@ -26,7 +26,7 @@ class DistanceMeasure(Measure):
     """
 
     def object_based(self):
-        """Returns measure for computation of performance measure for individual objects (rather than their union).
+        """Returns measure for computation regarding individual objects (rather than their union).
         
         :returns: This measure decorated using :class:`ObjectBasedDistanceMeasure`.
         """
