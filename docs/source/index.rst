@@ -9,5 +9,4 @@ Contents
 .. toctree::
 
    usage
-   api
    segmetrics
