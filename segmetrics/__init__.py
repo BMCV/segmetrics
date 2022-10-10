@@ -1,3 +1,8 @@
+"""
+Image segmentation and object detection performance measures.
+"""
+
+
 from segmetrics.boundary import Hausdorff, NSD
 from segmetrics.regional import Dice, JaccardCoefficient, JaccardIndex, RandIndex, AdjustedRandIndex, ISBIScore
 from segmetrics.detection import FalsePositive, FalseNegative, FalseSplit, FalseMerge
