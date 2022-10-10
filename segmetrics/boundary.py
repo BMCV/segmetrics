@@ -39,17 +39,15 @@ class Hausdorff(DistanceMeasure):
     The Hausdorff distsance is not upper-bounded. Lower values correspond to better segmentation performance.
     
     See: P. Bamford, "Empirical comparison of cell segmentation algorithms using an annotated dataset," in Proc. Int. Conf. Image Proc., 1612 vol. 2, 2003, pp. II-1073–1076.
+    
+    :param mode: Specifies how the Hausdorff distance is to be computed:
+
+    - ``a2e``: Maximum distance of actual foreground to expected foreground.
+    - ``e2a``: Maximum distance of expected foreground to actual foreground.
+    - ``sym``: Maximum of the two (equivalent to ``symmetric``).
     """
 
     def __init__(self, mode='sym'):
-        """Instantiates.
-
-        :param mode: Specifies how the Hausdorff distance is to be computed:
-
-        - ``a2e``: Maximum distance of actual foreground to expected foreground.
-        - ``e2a``: Maximum distance of expected foreground to actual foreground.
-        - ``sym``: Maximum of the two (equivalent to ``symmetric``).
-        """
         assert mode in ('a2e', 'e2a', 'symmetric', 'sym')
         if mode == 'symmetric': mode = 'sym'
         self.mode = mode
@@ -100,16 +98,14 @@ class ObjectBasedDistanceMeasure(Measure):
     """Decorator to apply image-level distance measures on a per-object level.
 
     Computes the decorated distance measure on a per-object level. Object correspondances between the segmented and the ground truth objects are established on a many-to-many basis, so that the resulting distances are minimal.
+    
+    :param distance: The image-level distance measure, which is to be decorated.
+    :param skip_fn: Specifies whether false-negative detections shall be skipped.
     """
     
     obj_mapping = (None, None) ## cache
 
     def __init__(self, distance, skip_fn=False):
-        """Instantiates.
-
-        :param distance: The image-level distance measure, which is to be decorated.
-        :param skip_fn: Specifies whether false-negative detections shall be skipped.
-        """
         self.distance     = distance
         self.skip_fn      = skip_fn
         self.FRACTIONAL   = distance.FRACTIONAL
