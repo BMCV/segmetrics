@@ -14,27 +14,27 @@ The goal of this package is to provide a low-threshold and standardized way of e
 
 The following *region-based* performance measures are currently implemented:
 
- - ``Dice``: Dice similarity coefficient
- - ``ISBIScore``: ISBI SEG Score [1]_
- - ``JaccardSimilarityIndex``: `Jaccard coefficient`_
- - ``JaccardIndex``: Jaccard index [2]_
- - ``RandIndex``: Rand index [2]_
- - ``AdjustedRandIndex``: `Adjusted Rand index`_
+- ``Dice``: Dice similarity coefficient
+- ``ISBIScore``: ISBI SEG Score [1]
+- ``JaccardSimilarityIndex``: `Jaccard coefficient`_
+- ``JaccardIndex``: Jaccard index [2]
+- ``RandIndex``: Rand index [2]
+- ``AdjustedRandIndex``: `Adjusted Rand index`_
 
 .. _`Jaccard coefficient`: https://en.wikipedia.org/wiki/Jaccard_index
 .. _`Adjusted Rand index`: http://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html
 
 The following *contour-based* performance measures are currently implemented:
 
- - ``Hausdorff``: Hausdorff distance (HSD) [3]_
- - ``NSD``: Normalized sum of distances (NSD) [2]_
+- ``Hausdorff``: Hausdorff distance (HSD) [3]
+- ``NSD``: Normalized sum of distances (NSD) [2]
 
-The following *detection-based* performance measures [2]_ are currently implemented:
+The following *detection-based* performance measures [2] are currently implemented:
 
- - ``FalseSplit``: Falsely split objects per image
- - ``FalseMerge``: Falsely merged objects per image
- - ``FalsePositive``: Falsely detected objects per image
- - ``FalseNegative``: Undetected objects per image
+- ``FalseSplit``: Falsely split objects per image
+- ``FalseMerge``: Falsely merged objects per image
+- ``FalsePositive``: Falsely detected objects per image
+- ``FalseNegative``: Undetected objects per image
 
 Use ``python -m tests.all`` to run the test suite.
 
@@ -71,8 +71,8 @@ The object correspondences between the ground truth objects and the segmented ob
 References
 ----------
 
-.. [1] M. Maska et al., "A benchmark for comparison of cell tracking 1609 algorithms," Bioinformatics, vol. 30, no. 11, pp. 1609–1617, 2014.
+[1] M. Maska et al., "A benchmark for comparison of cell tracking 1609 algorithms," Bioinformatics, vol. 30, no. 11, pp. 1609–1617, 2014.
 
-.. [2] L. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
+[2] L. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
 
-.. [3] P. Bamford, "Empirical comparison of cell segmentation algorithms using an annotated dataset," in Proc. Int. Conf. Image Proc., 1612 vol. 2, 2003, pp. II-1073–1076.
+[3] P. Bamford, "Empirical comparison of cell segmentation algorithms using an annotated dataset," in Proc. Int. Conf. Image Proc., 1612 vol. 2, 2003, pp. II-1073–1076.
