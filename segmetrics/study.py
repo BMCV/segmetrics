@@ -52,6 +52,8 @@ def _aggregate(measure, values):
 
 class Study:
     """Computes different performance measures for different image data.
+    
+    Performance measures must be added prior to performing evaluation.
     """
 
     def __init__(self):
@@ -62,7 +64,11 @@ class Study:
         self.csv_sample_id_column_name = 'Sample'
 
     def merge(self, other, sample_ids='all', replace=True):
-        """Merges measures and results from `other` study.
+        """Merges measures and results from ``other`` study.
+	
+	:param other: The study which is to be merged into this study.
+	:param sample_ids: The identifiers of the samples which are to be merged (or ``'all'``).
+	:param replace: Whether conflicting identifiers are to be replaced (``True``) or prohibited (``False``).
         """
         for measure_name in other.measures:
             if measure_name not in self.measures.keys():
@@ -74,13 +80,18 @@ class Study:
         self.results_cache.clear()
 
     def add_measure(self, measure, name=None):
+	"""Adds a performance measure to this study.
+	
+	:param measure: The performance measure to be added.
+	:param name: An arbitrary name which uniquely identifies the performance measure within this study.
+	"""
         if not isinstance(measure, Measure): raise ValueError('measure must be a Measure object')
         if name is None: name = '%d' % id(measure)
         self.measures[name] = measure
         self.results [name] = {None: []}
 
     def reset(self):
-        """Resets all results computed so far.
+        """Resets all results computed so far in this study.
         """
         for measure_name in self.measures:
             self.results[measure_name] = {None: []}
@@ -88,15 +99,14 @@ class Study:
         self.sample_ids.clear()
 
     def set_expected(self, expected, unique=True):
-        """Sets the `expected` ground truth image.
+        """Sets the expected ground truth segmentation result.
         
-        The background must be labeled as 0. Negative object labels are
-        forbidden. If `unique` is `True`, it is assumed that all objects
-        are labeled uniquely. Set it to `False`, if this is not sure
-        (e.g., if the ground truth image is binary).
+        The background of the image must be labeled as ``0``. Negative object labels are forbidden. If ``unique`` is ``True``, it is assumed that all objects are labeled uniquely. Use ``unique=False`` if this is not guaranteed (e.g., if ``expected`` is a binary image which represents the union of the individual object masks).
 
-        The array `expected` must be of integral datatype. It is also
-        allowed to be boolean if and only if `unique=False` is passed.
+        The image ``expected`` must be a numpy array of integral data type. It is also allowed to be boolean if and only if ``unique=False`` is used.
+	
+	:param expected: An image containing object masks corresponding to the ground truth.
+	:param unique: Whether the individual object masks are uniquely labeled.
         """
         assert expected.min() == 0, 'mis-labeled ground truth'
         expected = expected.squeeze()
@@ -107,19 +117,16 @@ class Study:
             measure.set_expected(expected)
 
     def process(self, sample_id, actual, unique=True, replace=True):
-        """Evaluates `actual` image against the current `set_expected` one.
+        """Evaluates a segmentation result based on the previously set expected result.
         
-        If `unique` is `True`, it is assumed that all objects are labeled
-        uniquely. Set it to `False`, if this is not sure (e.g., if the
-        processed image is binary).
+        If ``unique`` is ``True``, it is assumed that all objects are labeled uniquely. Use ``unique=False`` if this is not guaranteed (e.g., if ``actual`` is a binary image which represents the union of the individual object masks).
+	
+	The image ``actual`` must be a numpy array of integral data type. It is also allowed to be boolean if and only if ``unique=False`` is used.
 
-        The array `actual` must be of integral datatype. It is also
-        allowed to be boolean if and only if `unique=False` is passed.
-
-        All results ever processed are accumulated, unless `chunk_id` is
-        used. If it is not set to `None`, then a subsequent invocation
-        with the same `chunk_id` will overwrite the results from the
-        previous invocation.
+        :param sample_id: An arbitrary indentifier of the segmentation image (e.g., the file name).
+	:param actual: An image containing object masks corresponding to the segmentation result.
+	:param unique: Whether the individual object masks are uniquely labeled.
+	:param replace: Whether previous results computed for the same ``sample_id`` should be replaced (``True``) or forbidden (``False``).
         """
         actual = actual.squeeze()
         assert actual.ndim == 2, 'image has wrong dimensions'
