@@ -143,13 +143,20 @@ class Study:
         return intermediate_results
 
     def __getitem__(self, measure):
-        """Returns list of all values recorded for given `measure`.
+        """Returns list of all values recorded for ``measure``.
         """
         if measure not in self.results_cache:
             self.results_cache[measure] = list(itertools.chain(*[self.results[measure][sample_id] for sample_id in self.results[measure]]))
         return self.results_cache[measure]
 
     def print_results(self, write=sys.stdout.write, pad=0, fmt_unbound_float='g', line_suffix='\n'):
+        """Prints the results of this study.
+        
+        :param write: Function used for output.
+        :param pad: Number of whitespaces at the start of each line.
+        :param fmt_unbound_float: Formatting literal used for decimals not presented as percentages.
+        :param line_suffix: Suffix of each line.
+        """
         label_length   = pad + max(len(str(measure_name)) for measure_name in self.results)
         fmt_fractional = '%%%ds: %%5.2f %%%%' % label_length
         fmt_unbound    = '%%%ds: %%%s' % (label_length, fmt_unbound_float)
@@ -160,6 +167,14 @@ class Study:
             write((fmt % (measure_name, val)) + line_suffix)
 
     def write_csv(self, fout, write_samples='auto', write_header=True, write_summary=True, **kwargs):
+        """Writes the results of this study as CSV.
+        
+        :param fout: File descriptor used for output.
+        :param write_samples: Whether all samples should be written separately.
+        :param write_header: Whether a header should be included (measure names).
+        :param write_summary: Whether a summary should be included in the last row.
+        :param kwargs: Additional parameters for ``csv.writer``, see: https://docs.python.org/3/library/csv.html#csv.writer
+        """
         kwargs.setdefault('delimiter', ',')
         kwargs.setdefault('quotechar', '"')
         kwargs.setdefault('quoting', csv.QUOTE_MINIMAL)
@@ -193,10 +208,17 @@ class Study:
             csv_writer.writerow(row)
 
     def write_tsv(self, fout, **kwargs):
+        """Writes the results of this study as TSV.
+        
+        :param fout: File descriptor used for output.
+        :param kwargs: Additional parameters passed to :meth:`write_csv`.
+        """
         kwargs.setdefault('delimiter', '\t')
         return self.write_csv(fout, **kwargs)
 
     def todf(self):
+        """Returns the results of this study as a pandas dataframe.
+        """
         import pandas as pd
         import io
         buf = io.StringIO()
