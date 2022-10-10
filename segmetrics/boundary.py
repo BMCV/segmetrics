@@ -20,8 +20,16 @@ def _compute_boundary_distance_map(mask):
 
 
 class DistanceMeasure(Measure):
+    """Defines a performance measure which is based on the spatial distances of binary volumes (images).
+    
+    The computation of such measures only regards the union of the individual objects, not the individual objects themselves.
+    """
 
     def object_based(self):
+        """Returns measure for computation of performance measure for individual objects (rather than their union).
+        
+        :returns: This measure decorated using :class:`ObjectBasedDistanceMeasure`.
+        """
         return ObjectBasedDistanceMeasure(self)
 
 
