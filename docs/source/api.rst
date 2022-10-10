@@ -2,7 +2,6 @@ API
 ===
 
 .. autosummary::
-    :toctree: generated
     
     segmetrics.study
     segmetrics.regional
