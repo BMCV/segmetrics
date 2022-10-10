@@ -8,3 +8,4 @@ API
     segmetrics.regional
     segmetrics.boundary
     segmetrics.detection
+    segmetrics.parallel
