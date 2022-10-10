@@ -6,14 +6,14 @@ import dill
 def process(study, get_actual_func, get_expected_func, sample_ids, num_forks=None, is_actual_unique=True, is_expected_unique=True, callback=None):
     if num_forks is None: num_forks = multiprocessing.cpu_count()
     num_forks = min([num_forks, len(sample_ids)])
-    for sample_idx, sample_result in enumerate(fork.imap_unordered(num_forks,
-                                                                   _process_sample,
-                                                                   study,
-                                                                   dill.dumps(get_actual_func),
-                                                                   dill.dumps(get_expected_func),
-                                                                   unroll(sample_ids),
-                                                                   is_actual_unique,
-                                                                   is_expected_unique)):
+    for sample_idx, sample_result in enumerate(_fork.imap_unordered(num_forks,
+                                                                    _process_sample,
+                                                                    study,
+                                                                    dill.dumps(get_actual_func),
+                                                                    dill.dumps(get_expected_func),
+                                                                    _unroll(sample_ids),
+                                                                    is_actual_unique,
+                                                                    is_expected_unique)):
         sample_id, sample_study = sample_result
         if study is not sample_study: ## this happens when parallelization is off
             study.merge(sample_study, sample_ids=[sample_id])
@@ -38,7 +38,7 @@ class _Sequence:
             self.val = val
 
 
-def unroll(seq):
+def _unroll(seq):
     return _Sequence(seq)
 
 
@@ -55,7 +55,7 @@ class _UnrollArgs:
         return self.f(*args)
 
 
-class fork: # namespace
+class _fork: # namespace
 
     _forked = False
     DEBUG   = False
@@ -63,9 +63,9 @@ class fork: # namespace
     @staticmethod
     def map(processes, f, *args):
         assert processes >= 1, 'number of processes must be at least 1'
-        assert not fork._forked, 'process was already forked before'
+        assert not _fork._forked, 'process was already forked before'
 
-        run_parallel = processes >= 2 and not fork.DEBUG
+        run_parallel = processes >= 2 and not _fork.DEBUG
         n, real_args = _get_args_chain(args)
         real_args = list(zip(*real_args))
     
@@ -76,7 +76,7 @@ class fork: # namespace
             pool = multiprocessing.Pool(processes=processes)
             signal.signal(signal.SIGINT, original_sigint_handler)
         
-        fork._forked = True
+        _fork._forked = True
         try:
             if run_parallel:
                 chunksize = int(round(float(n) / processes))
@@ -89,18 +89,18 @@ class fork: # namespace
             if run_parallel: pool.terminate()
             raise
         finally:
-            fork._forked = False
+            _fork._forked = False
     
     @staticmethod
     def apply(processes, f, *args):
-        fork.map(processes, f, *args)
+        _fork.map(processes, f, *args)
 
     @staticmethod
     def imap_unordered(processes, f, *args, **kwargs):
         assert processes >= 1, 'number of processes must be at least 1'
-        assert not fork._forked, 'process was already forked before'
+        assert not _fork._forked, 'process was already forked before'
 
-        run_parallel = processes >= 2 and not fork.DEBUG
+        run_parallel = processes >= 2 and not _fork.DEBUG
         n, real_args = _get_args_chain(args)
         real_args = list(zip(*real_args))
     
@@ -111,7 +111,7 @@ class fork: # namespace
             pool = multiprocessing.Pool(processes=processes)
             signal.signal(signal.SIGINT, original_sigint_handler)
 
-        fork._forked = True
+        _fork._forked = True
         try:
             if run_parallel:
                 chunksize = int(round(float(n) / processes)) if kwargs.get('use_chunks') else 1
@@ -125,5 +125,5 @@ class fork: # namespace
             if run_parallel: pool.terminate()
             raise
         finally:
-            fork._forked = False
+            _fork._forked = False
 

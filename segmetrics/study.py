@@ -19,7 +19,7 @@ def _is_integral(narray):
 def _get_labeled(narray, unique, img_hint):
     assert _is_integral(narray) or _is_boolean(narray), 'illegal %s dtype' % img_hint
     assert not unique or not _is_boolean(narray), 'with unique=True a non-boolean %s is expected' % img_hint
-    return narray if unique else label(narray)
+    return narray if unique else _label(narray)
 
 
 def _get_skimage_measure_label_bg_label():
@@ -32,7 +32,7 @@ def _get_skimage_measure_label_bg_label():
 _SKIMAGE_MEASURE_LABEL_BF_LABEL = _get_skimage_measure_label_bg_label()
 
 
-def label(im, background=0, neighbors=4):
+def _label(im, background=0, neighbors=4):
     """Labels the given image `im`.
     
     Returns a labeled version of `im` where `background` is labeled with
@@ -45,7 +45,7 @@ def label(im, background=0, neighbors=4):
         - _SKIMAGE_MEASURE_LABEL_BF_LABEL # this is 1 in older versions and 0 in newer
 
 
-def aggregate(measure, values):
+def _aggregate(measure, values):
     fnc = np.sum if measure.ACCUMULATIVE else np.mean
     return fnc(values)
 
@@ -149,7 +149,7 @@ class Study:
         for measure_name in sorted(self.results.keys()):
             measure = self.measures[measure_name]
             fmt = fmt_fractional if measure.FRACTIONAL else fmt_unbound
-            val = aggregate(measure, self[measure_name]) * (100 if measure.FRACTIONAL else 1)
+            val = _aggregate(measure, self[measure_name]) * (100 if measure.FRACTIONAL else 1)
             write((fmt % (measure_name, val)) + line_suffix)
 
     def write_csv(self, fout, write_samples='auto', write_header=True, write_summary=True, **kwargs):
@@ -169,7 +169,7 @@ class Study:
                 for measure_name in self.measures.keys():
                     measure = self.measures[measure_name]
                     samples = self.results[measure_name]
-                    row += [aggregate(measure, samples[sample_id])]
+                    row += [_aggregate(measure, samples[sample_id])]
                 rows.append(row)
 
         # define summary
@@ -177,7 +177,7 @@ class Study:
             rows.append([''])
             for measure_name in self.measures.keys():
                 measure = self.measures[measure_name]
-                value = aggregate(measure, self[measure_name])
+                value = _aggregate(measure, self[measure_name])
                 rows[-1].append(value)
 
         # write results
