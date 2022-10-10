@@ -9,7 +9,7 @@ API
    segmetrics.regional.Dice
    segmetrics.regional.JaccardCoefficient
    segmetrics.regional.JaccardIndex
-   segmetrics.regional.Rand
+   segmetrics.regional.RandIndex
    segmetrics.regional.AdjustedRandIndex
    segmetrics.regional.ISBIScore
    
