@@ -13,6 +13,6 @@ segmetrics
 .. image:: https://readthedocs.org/projects/segmetrics/badge/?version=latest
     :target: https://segmetrics.readthedocs.io/en/latest/?badge=latest
 
-The goal of this package is to provide a low-threshold and standardized way of evaluating the performance of segmentation methods in biomedical image analysis and beyond, and to fasciliate the comparison of different methods. This package currently only supports 2-D image data, which may be extended to 3-D in the future.
+The goal of this package is to provide easy-to-use tools for evaluation of the performance of segmentation methods in biomedical image analysis and beyond, and to fasciliate the comparison of different methods by providing standardized implementations. This package currently only supports 2-D image data.
 
 The documentation is available here: https://segmetrics.readthedocs.io
