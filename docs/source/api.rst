@@ -5,6 +5,4 @@ API
    :toctree: generated
 
    segmetrics
-   
-.. automodule:: segmetrics
-   :members:
+   segmetrics.study.Study
