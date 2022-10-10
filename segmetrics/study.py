@@ -51,6 +51,8 @@ def aggregate(measure, values):
 
 
 class Study:
+    """Computes different performance measures for different image data.
+    """
 
     def __init__(self):
         self.measures   = dict()
