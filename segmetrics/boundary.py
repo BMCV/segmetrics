@@ -41,6 +41,8 @@ class Hausdorff(DistanceMeasure):
     See: P. Bamford, "Empirical comparison of cell segmentation algorithms using an annotated dataset," in Proc. Int. Conf. Image Proc., 1612 vol. 2, 2003, pp. II-1073–1076.
     
     :param mode: Specifies how the Hausdorff distance is to be computed:
+    
+    The following values are allowed for the ``mode`` parameter:
 
     - ``a2e``: Maximum distance of actual foreground to expected foreground.
     - ``e2a``: Maximum distance of expected foreground to actual foreground.
@@ -103,7 +105,7 @@ class ObjectBasedDistanceMeasure(Measure):
     :param skip_fn: Specifies whether false-negative detections shall be skipped.
     """
     
-    obj_mapping = (None, None) ## cache
+    _obj_mapping = (None, None) ## cache
 
     def __init__(self, distance, skip_fn=False):
         self.distance     = distance
@@ -114,14 +116,14 @@ class ObjectBasedDistanceMeasure(Measure):
         
     def set_expected(self, *args, **kwargs):
         super().set_expected(*args, **kwargs)
-        ObjectBasedDistanceMeasure.obj_mapping = (None, dict())
+        ObjectBasedDistanceMeasure._obj_mapping = (None, dict())
 
     def compute(self, actual):
         results = []
         seg_labels = frozenset(actual.reshape(-1)) - {0}
         
         # Reset the cached object mapping:
-        if ObjectBasedDistanceMeasure.obj_mapping[0] is not actual: ObjectBasedDistanceMeasure.obj_mapping = (actual, dict())
+        if ObjectBasedDistanceMeasure._obj_mapping[0] is not actual: ObjectBasedDistanceMeasure._obj_mapping = (actual, dict())
             
         for ref_label in set(self.expected.flatten()) - {0}:
             ref_cc = (self.expected == ref_label)
@@ -137,9 +139,9 @@ class ObjectBasedDistanceMeasure(Measure):
             else:
 
                 # Query the cached object mapping:
-                if ref_label in self.obj_mapping[1]: ## cache hit
+                if ref_label in self._obj_mapping[1]: ## cache hit
 
-                    potentially_closest_seg_labels = ObjectBasedDistanceMeasure.obj_mapping[1][ref_label]
+                    potentially_closest_seg_labels = ObjectBasedDistanceMeasure._obj_mapping[1][ref_label]
 
                 else: ## cache miss
 
@@ -148,7 +150,7 @@ class ObjectBasedDistanceMeasure(Measure):
                     closest_potential_seg_label = min(seg_labels, key=lambda seg_label: ref_distancemap[actual == seg_label].min())
                     max_potential_seg_label_distance = ref_distancemap[actual == closest_potential_seg_label].max()
                     potentially_closest_seg_labels = [seg_label for seg_label in seg_labels if ref_distancemap[actual == seg_label].min() <= max_potential_seg_label_distance]
-                    ObjectBasedDistanceMeasure.obj_mapping[1][ref_label] = potentially_closest_seg_labels
+                    ObjectBasedDistanceMeasure._obj_mapping[1][ref_label] = potentially_closest_seg_labels
 
             # If not a single object was detected, the distance is undefined:
             if len(potentially_closest_seg_labels) == 0: continue
