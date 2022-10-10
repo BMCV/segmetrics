@@ -33,6 +33,11 @@ Segmentation performance evaluation is driven by the ``Study`` class. The genera
 
 In the example above, it is presumed that ``gt_list`` and ``seg_list`` are two iterables of ground truth segmentation and segmentation result images, respectively.
 
+Implemented measures
+********************
+
+—
+
 Object-based distance measures
 ******************************
 
