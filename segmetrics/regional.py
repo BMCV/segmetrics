@@ -6,7 +6,13 @@ from segmetrics.measure import Measure
 
 
 class Dice(Measure):
-    """Defines the Dice coefficient.
+    r"""Defines the Dice coefficient.
+    
+    Let :math:`R` be the set of all image pixels corresponding to the ground truth segmentation, and :math:`S` the set of those corresponding to the segmentation result. Then, the Dice coefficient is defined as
+    
+    .. math:: \mathrm{DC} = \frac{2 \cdot \left|R \cap S\right|}{\left|R\right| + \left|S\right|}
+    
+    and attains values between :math:`0` and :math:`1`. Higher values correspond to better segmentation performance.
     """
 
     FRACTIONAL = True
@@ -22,7 +28,15 @@ class Dice(Measure):
 
 
 class JaccardCoefficient(Measure):
-    """Defines the Jaccard coefficient.
+    r"""Defines the Jaccard coefficient.
+    
+    Let :math:`R` be the set of all image pixels corresponding to the ground truth segmentation, and :math:`S` the set of those corresponding to the segmentation result. Then, the Jaccard coefficient is defined as the *intersection over the union*,
+    
+    .. math:: \mathrm{JC} = \frac{\left|R \cap S\right|}{\left|R \cup S\right|},
+    
+    and attains values between :math:`0` and :math:`1`. Higher values correspond to better segmentation performance.
+    
+    The Jaccard coefficient equals :math:`\mathrm{JC} = \mathrm{DC} / \left(2 - \mathrm{DC}\right)`, where $\mathrm{DC}$ is the Dice coefficient. Note that this equation only holds for individual $\mathrm{JC}$ and $\mathrm{DC}$ values, but not for sums or mean values thereof.
     """
 
     FRACTIONAL = True
@@ -39,7 +53,22 @@ class JaccardCoefficient(Measure):
 
 
 class RandIndex(Measure):
-    """Defines the Rand Index.
+    r"""Defines the Rand Index.
+    
+    Let :math:`R` be the set of all image pixels corresponding to the ground truth segmentation, and :math:`S` the set of those corresponding to the segmentation result. Moreover, let :math:`a, b, c, d` be the quantities of the events
+    
+    .. math::
+
+        &\text{(a) } R_i = R_j \text{ and } S_i = S_j \quad
+        &\text{(b) } R_i \neq R_j \text{ and } S_i = S_j \\
+        &\text{(c) } R_i = R_j \text{ and } S_i \neq S_j \quad
+        &\text{(d) } R_i \neq R_j \text{ and } S_i \neq S_j
+
+    for :math:`i` and :math:`j` ranging over all pair of pixels in :math:`R` and :math:`S`. Then, the Rand index is defined as
+    
+    .. math:: \mathrm{RI} = \frac{a + d}{a + b + c + d}.
+    
+    The Rand index attains values between :math:`0` and :math:`1`. Higher values correspond to better segmentation performance.
 
     See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms", ISBI 2009
     """
@@ -88,16 +117,16 @@ class JaccardIndex(RandIndex):
     
     .. math::
 
-        &\text{(a) } R_i = R_j \text{ and } S_i = S_j
+        &\text{(a) } R_i = R_j \text{ and } S_i = S_j \quad
         &\text{(b) } R_i \neq R_j \text{ and } S_i = S_j \\
-        &\text{(c) } R_i = R_j \text{ and } S_i \neq S_j
+        &\text{(c) } R_i = R_j \text{ and } S_i \neq S_j \quad
         &\text{(d) } R_i \neq R_j \text{ and } S_i \neq S_j
 
-    for :math:`i` and :math:`j` ranging over all pair of pixels in :math:`R` and :math:`S`. Then, the Jaccard index as defined as
+    for :math:`i` and :math:`j` ranging over all pair of pixels in :math:`R` and :math:`S`. Then, the Jaccard index is defined as
     
     .. math:: \mathrm{JI} = \frac{a + d}{b + c + d}.
 
-    The Jaccard index is not upper-bounded. Higher values correspond to better agreement.
+    The Jaccard index is not upper-bounded. Higher values correspond to better segmentation performance.
 
     See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms", ISBI 2009
     """
