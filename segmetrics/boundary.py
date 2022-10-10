@@ -35,18 +35,20 @@ class DistanceMeasure(Measure):
 
 class Hausdorff(DistanceMeasure):
     """Defines the Hausdorff distsance between two binary images.
+    
+    The Hausdorff distsance is not upper-bounded. Lower values correspond to better segmentation performance.
+    
+    See: P. Bamford, "Empirical comparison of cell segmentation algorithms using an annotated dataset," in Proc. Int. Conf. Image Proc., 1612 vol. 2, 2003, pp. II-1073–1076.
     """
 
-    def __init__(self, mode='symmetric'):
-        """Initializes Hausdorff metric.
+    def __init__(self, mode='sym'):
+        """Instantiates.
 
-        The parameter `mode` specifies how the Hausdorff distance is to be computed:
+        :param mode: Specifies how the Hausdorff distance is to be computed:
 
-            a2e        --  maximum distance of actual foreground to expected foreground
-            e2a        --  maximum distance of expected foreground to actual foreground
-            symmetric  --  maximum of the two
-
-        Passing the value `sym` is equivalent to `symmetric`.
+        - ``a2e``: Maximum distance of actual foreground to expected foreground.
+        - ``e2a``: Maximum distance of expected foreground to actual foreground.
+        - ``sym``: Maximum of the two (equivalent to ``symmetric``).
         """
         assert mode in ('a2e', 'e2a', 'symmetric', 'sym')
         if mode == 'symmetric': mode = 'sym'
@@ -68,7 +70,15 @@ class Hausdorff(DistanceMeasure):
 
 
 class NSD(DistanceMeasure):
-    """Defines the normalized sum of distsances between two binary images.
+    r"""Defines the normalized sum of distsances between two binary images.
+    
+    Let :math:`R` be the set of all image pixels corresponding to the ground truth segmentation, and :math:`S` the set of those corresponding to the segmentation result. Then, the normalized sum of distances is defined as
+    
+    .. math::
+    
+        \mathrm{NSD} = \sum_{x \in R \triangle S} \operatorname{dist}_{\partial R}\left(x\right) / \sum_{x \in R \cup S} \operatorname{dist}_{\partial R}\left(x\right)
+    
+    and attains values between :math:`0` and :math:`1`. Lower values correspond to better segmentation performance.
     """
 
     FRACTIONAL = True
@@ -91,9 +101,7 @@ class NSD(DistanceMeasure):
 class ObjectBasedDistanceMeasure(Measure):
     """Decorator to apply image-level distance measures on a per-object level.
 
-    Computes the decorated distance measure on a per-object level. Correspondances
-    between the segmented and the ground truth objects are established on a n-to-m
-    basis, such that the resulting distances are minimal.
+    Computes the decorated distance measure on a per-object level. Object correspondances between the segmented and the ground truth objects are established on a many-to-many basis, so that the resulting distances are minimal.
     """
     
     obj_mapping = (None, None) ## cache
@@ -101,12 +109,8 @@ class ObjectBasedDistanceMeasure(Measure):
     def __init__(self, distance, skip_fn=False):
         """Instantiates.
 
-        Parameters
-        ----------
-        distance : Measure
-                   The image-level distance measure, which is to be decorated.
-        skip_fn  : bool
-                   Specifies whether false-negative detections shall be skipped.
+        :param distance: The image-level distance measure, which is to be decorated.
+        :param skip_fn: Specifies whether false-negative detections shall be skipped.
         """
         self.distance     = distance
         self.skip_fn      = skip_fn
