@@ -31,7 +31,7 @@ Segmentation performance evaluation is driven by the ``Study`` class. The genera
     
     study.print_results()
 
-In the example above, it is presumed that ``gt_list`` and ``seg_list`` are two iterables of ground truth segmentation and segmentation result images, respectively.
+In the example above, it is presumed that ``gt_list`` and ``seg_list`` are two iterables of ground truth segmentation and segmentation result images, respectively (they contain numpy arrays which represent segmentation masks). The method ``study.process`` computes the performance measures for the segmentation ``seg_img`` with respect to the ground truth segmentation ``gt_img``. The first argument is an arbitrary indentifier of the segmentation image. Supplying the same identifier multiple times overrides any previously computed results for that identifier. This is particularily handy in an interactive environment, such as Jupyter notebooks. The identifier is also used in the detailed output of the study (e.g., ``study.tocsv()``).
 
 Implemented measures
 ********************
