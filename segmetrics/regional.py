@@ -1,13 +1,3 @@
-"""
-The following region-based performance measures are available:
-- :obj:`Dice`
-- :obj:`.JaccardCoefficient`
-- :obj:`segmetrics.regional.JaccardIndex`
-- RandIndex
-- AdjustedRandIndex
-- ISBIScore
-"""
-
 import sys
 import numpy as np
 import sklearn.metrics
