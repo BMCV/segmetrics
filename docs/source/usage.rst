@@ -41,6 +41,23 @@ Implemented measures
 Region-based performance measures:
 
 - :class:`segmetrics.regional.Dice`
+- :class:`segmetrics.regional.ISBIScore`
+- :class:`segmetrics.regional.JaccardCoefficient`
+- :class:`segmetrics.regional.JaccardIndex`
+- :class:`segmetrics.regional.RandIndex`
+- :class:`segmetrics.regional.AdjustedRandIndex`
+
+Contour-based performance measures:
+
+- :class:`segmetrics.boundary.Hausdorff`
+- :class:`segmetrics.boundary.NSD`
+
+Detection-based performance measures:
+
+- :class:`segmetrics.detection.FalseSplit`
+- :class:`segmetrics.detection.FalseMerge`
+- :class:`segmetrics.detection.FalsePositive`
+- :class:`segmetrics.detection.FalseNegative`
 
 Object-based distance measures
 ******************************
