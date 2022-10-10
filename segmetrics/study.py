@@ -61,14 +61,14 @@ class Study:
         self.results_cache = dict()
         self.csv_sample_id_column_name = 'Sample'
 
-    def merge(self, other, sample_ids='all'):
+    def merge(self, other, sample_ids='all', replace=True):
         """Merges measures and results from `other` study.
         """
         for measure_name in other.measures:
             if measure_name not in self.measures.keys():
                 self.add_measure(other.measures[measure_name], name=measure_name)
             for sample_id in (other.results[measure_name].keys() if sample_ids == 'all' else sample_ids):
-                assert sample_id not in self.results[measure_name]
+                assert replace or sample_id not in self.results[measure_name]
                 self.results[measure_name][sample_id] = list(other.results[measure_name][sample_id])
                 if sample_id not in self.sample_ids: self.sample_ids.append(sample_id)
         self.results_cache.clear()
@@ -106,7 +106,7 @@ class Study:
             measure = self.measures[measure_name]
             measure.set_expected(expected)
 
-    def process(self, sample_id, actual, unique=True):
+    def process(self, sample_id, actual, unique=True, replace=True):
         """Evaluates `actual` image against the current `set_expected` one.
         
         If `unique` is `True`, it is assumed that all objects are labeled
@@ -124,7 +124,7 @@ class Study:
         actual = actual.squeeze()
         assert actual.ndim == 2, 'image has wrong dimensions'
         actual = _get_labeled(actual, unique, 'image')
-        assert sample_id not in self.sample_ids
+        assert replace or sample_id not in self.sample_ids
         intermediate_results = {}
         for measure_name in self.measures:
             measure = self.measures[measure_name]
