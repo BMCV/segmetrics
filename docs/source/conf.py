@@ -2,9 +2,9 @@
 
 # -- Project information
 
-project = 'Lumache'
-copyright = '2021, Graziella'
-author = 'Graziella'
+project = 'segmetrics.py'
+copyright = '2017-2022 Leonid Kostrykin, Biomedical Computer Vision Group, Heidelberg University'
+author = 'Leonid Kostrykin'
 
 release = '0.1'
 version = '0.1.0'
