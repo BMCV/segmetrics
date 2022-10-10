@@ -4,4 +4,4 @@ API
 .. autosummary::
    :recursive:
    
-   segmetrics
+   segmetrics.regional
