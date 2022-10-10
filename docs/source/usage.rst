@@ -10,7 +10,7 @@ To use segmetrics, first install it using conda:
 
 .. code-block:: console
 
-   conda install segmetrics -c bioconda
+   conda install -c bioconda segmetrics
 
 Usage
 -----
