@@ -25,13 +25,16 @@ Segmentation performance evaluation is driven by the ``Study`` class. The genera
     study.add_measure(sm.Dice(), 'Dice')
     study.add_measure(sm.ISBIScore(), 'SEG')
     
-    for gt_img, seg_img in zip(gt_list, seg_list):
+    for file_idx, (gt_img, seg_img) in enumerate(zip(gt_list, seg_list):
         study.set_expected(gt_img)
-        study.process(seg_img)
+        study.process(f'file-{file_idx}', seg_img)
     
     study.print_results()
 
 In the example above, it is presumed that ``gt_list`` and ``seg_list`` are two iterables of ground truth segmentation and segmentation result images, respectively.
+
+Object-based distance measures
+******************************
 
 The following code can be used to include *object-based* distance measures:
 
@@ -41,3 +44,21 @@ The following code can be used to include *object-based* distance measures:
     study.add_measure(sm.Hausdorff().object_based(), 'HSD')
 
 The object correspondences between the ground truth objects and the segmented objects are established by choosing the closest object according to the respective distance function.
+
+Parallel computing
+******************
+
+It is also easy to exploit the computational advantages of multi-core systems by evaluating multiple images in parallel via the ``parallel`` interface:
+
+.. code-block:: python
+
+    sample_ids = list(range(len(seg_list)))
+    for sample_id in sm.parallel.process(study, seg_list.__getitem__, gt_list.__getitem__, sample_ids, num_forks=2):
+        print(f'Finished processing: {sample_id}')
+    
+Or even more simply:
+
+.. code-block:: python
+
+    sample_ids = list(range(len(seg_list)))
+    sm.parallel.process_all(study, seg_list.__getitem__, gt_list.__getitem__, sample_ids, num_forks=2)
