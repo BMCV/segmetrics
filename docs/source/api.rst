@@ -1,8 +1,6 @@
 API
 ===
 
-.. currentmodule:: segmetrics
-
 .. autosummary::
     :toctree: generated
     
