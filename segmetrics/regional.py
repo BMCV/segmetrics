@@ -99,7 +99,7 @@ class JaccardIndex(RandIndex):
 class ISBIScore(Measure):
     """Defines the SEG performance measure (used in the ISBI Cell Tracking Challenge).
 
-    The SEG measure is based on the Jaccard similarity index ``J = |R ∩ S| / |R ∪ S|`` of the sets of pixels of matching objects ``R`` and ``S``, where ``R`` denotes the set of pixels belonging to a reference object and S denotes the set of pixels belonging to its matching segmented object. A ground truth object ``R`` and a segmented object ``S`` are considered matching if and only if ``|R ∩ S| > 0.5 · |R|``. Note that for each reference object, there can be at most one segmented object which satisfies the detection test. See: http://ctc2015.gryf.fi.muni.cz/Public/Documents/SEG.pdf
+    The SEG measure is based on the Jaccard similarity index :math:`J = \left|R \cap S\right| / \left|R \cup S\right|` of the sets of pixels of matching objects :math:`R` and :math:`S`, where :math:`R` denotes the set of pixels belonging to a reference object and :math:`S` denotes the set of pixels belonging to its matching segmented object. A ground truth object :math:`R` and a segmented object :math:`S` are considered matching if and only if :math:`\left|R \cap S\right| > 0.5 \cdot \left|R\right|`. Note that for each reference object, there can be at most one segmented object which satisfies the detection test. See: http://ctc2015.gryf.fi.muni.cz/Public/Documents/SEG.pdf
     """
 
     FRACTIONAL = True
