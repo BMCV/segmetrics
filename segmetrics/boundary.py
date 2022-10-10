@@ -40,7 +40,7 @@ class Hausdorff(DistanceMeasure):
     
     See: P. Bamford, "Empirical comparison of cell segmentation algorithms using an annotated dataset," in Proc. Int. Conf. Image Proc., 1612 vol. 2, 2003, pp. II-1073–1076.
     
-    :param mode: Specifies how the Hausdorff distance is to be computed:
+    :param mode: Specifies how the Hausdorff distance is to be computed.
     
     The following values are allowed for the ``mode`` parameter:
 
