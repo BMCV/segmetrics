@@ -74,9 +74,7 @@ class NSD(DistanceMeasure):
     
     Let :math:`R` be the set of all image pixels corresponding to the ground truth segmentation, and :math:`S` the set of those corresponding to the segmentation result. Then, the normalized sum of distances is defined as
     
-    .. math::
-    
-        \mathrm{NSD} = \sum_{x \in R \triangle S} \operatorname{dist}_{\partial R}\left(x\right) / \sum_{x \in R \cup S} \operatorname{dist}_{\partial R}\left(x\right)
+    .. math:: \mathrm{NSD} = \sum_{x \in R \triangle S} \operatorname{dist}_{\partial R}\left(x\right) / \sum_{x \in R \cup S} \operatorname{dist}_{\partial R}\left(x\right)
     
     and attains values between :math:`0` and :math:`1`. Lower values correspond to better segmentation performance.
     """
