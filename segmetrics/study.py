@@ -65,10 +65,10 @@ class Study:
 
     def merge(self, other, sample_ids='all', replace=True):
         """Merges measures and results from ``other`` study.
-	
-	:param other: The study which is to be merged into this study.
-	:param sample_ids: The identifiers of the samples which are to be merged (or ``'all'``).
-	:param replace: Whether conflicting identifiers are to be replaced (``True``) or prohibited (``False``).
+    
+        :param other: The study which is to be merged into this study.
+        :param sample_ids: The identifiers of the samples which are to be merged (or ``'all'``).
+        :param replace: Whether conflicting identifiers are to be replaced (``True``) or prohibited (``False``).
         """
         for measure_name in other.measures:
             if measure_name not in self.measures.keys():
@@ -80,11 +80,11 @@ class Study:
         self.results_cache.clear()
 
     def add_measure(self, measure, name=None):
-	"""Adds a performance measure to this study.
-	
-	:param measure: The performance measure to be added.
-	:param name: An arbitrary name which uniquely identifies the performance measure within this study.
-	"""
+        """Adds a performance measure to this study.
+        
+        :param measure: The performance measure to be added.
+        :param name: An arbitrary name which uniquely identifies the performance measure within this study.
+        """
         if not isinstance(measure, Measure): raise ValueError('measure must be a Measure object')
         if name is None: name = '%d' % id(measure)
         self.measures[name] = measure
@@ -104,9 +104,9 @@ class Study:
         The background of the image must be labeled as ``0``. Negative object labels are forbidden. If ``unique`` is ``True``, it is assumed that all objects are labeled uniquely. Use ``unique=False`` if this is not guaranteed (e.g., if ``expected`` is a binary image which represents the union of the individual object masks).
 
         The image ``expected`` must be a numpy array of integral data type. It is also allowed to be boolean if and only if ``unique=False`` is used.
-	
-	:param expected: An image containing object masks corresponding to the ground truth.
-	:param unique: Whether the individual object masks are uniquely labeled.
+
+        :param expected: An image containing object masks corresponding to the ground truth.
+        :param unique: Whether the individual object masks are uniquely labeled.
         """
         assert expected.min() == 0, 'mis-labeled ground truth'
         expected = expected.squeeze()
@@ -120,13 +120,13 @@ class Study:
         """Evaluates a segmentation result based on the previously set expected result.
         
         If ``unique`` is ``True``, it is assumed that all objects are labeled uniquely. Use ``unique=False`` if this is not guaranteed (e.g., if ``actual`` is a binary image which represents the union of the individual object masks).
-	
-	The image ``actual`` must be a numpy array of integral data type. It is also allowed to be boolean if and only if ``unique=False`` is used.
+
+        The image ``actual`` must be a numpy array of integral data type. It is also allowed to be boolean if and only if ``unique=False`` is used.
 
         :param sample_id: An arbitrary indentifier of the segmentation image (e.g., the file name).
-	:param actual: An image containing object masks corresponding to the segmentation result.
-	:param unique: Whether the individual object masks are uniquely labeled.
-	:param replace: Whether previous results computed for the same ``sample_id`` should be replaced (``True``) or forbidden (``False``).
+        :param actual: An image containing object masks corresponding to the segmentation result.
+        :param unique: Whether the individual object masks are uniquely labeled.
+        :param replace: Whether previous results computed for the same ``sample_id`` should be replaced (``True``) or forbidden (``False``).
         """
         actual = actual.squeeze()
         assert actual.ndim == 2, 'image has wrong dimensions'
@@ -169,7 +169,7 @@ class Study:
         if write_header:
             rows += [[self.csv_sample_id_column_name] + [measure_name for measure_name in self.measures.keys()]]
 
-	# define samples
+        # define samples
         if write_samples == True or (write_samples == 'auto' and len(self.sample_ids) > 1):
             for sample_id in sorted(self.sample_ids):
                 row = [sample_id]
