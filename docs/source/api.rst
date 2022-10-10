@@ -6,8 +6,8 @@ API
 .. autosummary::
     :toctree: generated
     
-    study
-    regional
-    boundary
-    detection
-    parallel
+    segmetrics.study
+    segmetrics.regional
+    segmetrics.boundary
+    segmetrics.detection
+    segmetrics.parallel
