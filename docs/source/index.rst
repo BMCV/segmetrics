@@ -1,17 +1,7 @@
-Welcome to Lumache's documentation!
-===================================
+segmetrics
+==========
 
-**Lumache** (/lu'make/) is a Python library for cooks and food lovers
-that creates recipes mixing random ingredients.
-It pulls data from the `Open Food Facts database <https://world.openfoodfacts.org/>`_
-and offers a *simple* and *intuitive* API.
-
-Check out the :doc:`usage` section for further information, including
-how to :ref:`installation` the project.
-
-.. note::
-
-   This project is under active development.
+The goal of this package is to provide a low-threshold and standardized way of evaluating the performance of segmentation methods in biomedical image analysis and beyond, and to fasciliate the comparison of different methods. This package currently only supports 2-D image data, which may be extended to 3-D in the future.
 
 Contents
 --------
