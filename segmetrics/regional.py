@@ -39,8 +39,7 @@ class JaccardCoefficient(Measure):
 class RandIndex(Measure):
     """Defines the Rand Index.
 
-    See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented
-    dataset and comparison of algorithms", ISBI 2009
+    See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms", ISBI 2009
     """
 
     FRACTIONAL = True
@@ -85,8 +84,7 @@ class JaccardIndex(RandIndex):
 
     The Jaccard Index is not upper-bounded. Higher values correspond to better agreement.
 
-    See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented
-    dataset and comparison of algorithms", ISBI 2009
+    See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms", ISBI 2009
     """
 
     FRACTIONAL = False
@@ -99,13 +97,7 @@ class JaccardIndex(RandIndex):
 class ISBIScore(Measure):
     """Computes segmentation score according to ISBI Cell Tracking Challenge.
 
-    The SEG measure is based on the Jaccard similarity index J = |R ∩ S| / |R ∪ S| of
-    the sets of pixels of matching objects R and S, where R denotes the set of pixels
-    belonging to a reference object and S denotes the set of pixels belonging to its
-    matching segmented object. A ground truth object R and a segmented object S are
-    considered matching if and only if |R ∩ S| > 0.5 · |R|. Note that for each
-    reference object, there can be at most one segmented object which satisfies the
-    detection test. See: http://ctc2015.gryf.fi.muni.cz/Public/Documents/SEG.pdf
+    The SEG measure is based on the Jaccard similarity index ``J = |R ∩ S| / |R ∪ S|`` of the sets of pixels of matching objects ``R`` and ``S``, where ``R`` denotes the set of pixels belonging to a reference object and S denotes the set of pixels belonging to its matching segmented object. A ground truth object ``R`` and a segmented object ``S`` are considered matching if and only if ``|R ∩ S| > 0.5 · |R|``. Note that for each reference object, there can be at most one segmented object which satisfies the detection test. See: http://ctc2015.gryf.fi.muni.cz/Public/Documents/SEG.pdf
     """
 
     FRACTIONAL = True
@@ -113,9 +105,7 @@ class ISBIScore(Measure):
     def __init__(self, min_ref_size=1):
         """Instantiates.
 
-        Skips ground truth objects smaller than `min_ref_size` pixels. It is
-        recommended to set this value to `2` such that objects of a single pixel in
-        size are skipped, but it is set to `1` by default for downwards compatibility.
+        Skips ground truth objects smaller than ``min_ref_size`` pixels. It is recommended to set this value to ``2`` such that objects of a single pixel in size are skipped, but it is set to ``1`` by default for downwards compatibility.
         """
         assert min_ref_size >= 1, 'min_ref_size must be 1 or larger'
         self.min_ref_size = min_ref_size
