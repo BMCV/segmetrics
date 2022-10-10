@@ -99,7 +99,7 @@ class JaccardIndex(RandIndex):
 class ISBIScore(Measure):
     """Defines the SEG performance measure (used in the ISBI Cell Tracking Challenge).
 
-    The SEG measure is based on the Jaccard similarity index :math:`a^2 + b^2 = c^2`
+    The SEG measure is based on the Jaccard similarity index :math:`J = \left|R \cap S\right| / \left|R \cup S\right|`
     """
 
     FRACTIONAL = True
