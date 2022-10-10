@@ -1,8 +1,15 @@
 API
 ===
 
-- :class:`segmetrics.study.Study`
-- :class:`segmetrics.regional.Dice`
+.. autoclass:: segmetrics.study.Study
+
+.. automodule:: segmetrics.regional
+   :members:
+
+.. automodule:: segmetrics.boundary
+   :members:
+   
+asdf
 
 .. autosummary::
    :toctree: generated
