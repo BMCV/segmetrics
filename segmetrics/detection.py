@@ -53,7 +53,7 @@ class FalseMerge(Measure):
 
 
 class FalsePositive(Measure):
-    """Counts falsely detected (added) objects.
+    """Counts spurious objects.
 
     See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented
     dataset and comparison of algorithms", ISBI 2009
@@ -72,7 +72,7 @@ class FalsePositive(Measure):
 
 
 class FalseNegative(Measure):
-    """Counts falsely missed (removed) objects.
+    """Counts missing objects.
 
     See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented
     dataset and comparison of algorithms", ISBI 2009
