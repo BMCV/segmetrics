@@ -14,4 +14,10 @@ class Measure:
         :param expected: An image containing uniquely labeled object masks corresponding to the ground truth.
         """
         self.expected = expected
-
+        
+    def compute(self, actual):
+        """Computes the performance measure for the given segmentation results based on the previously set expected result.
+        
+        :param actual: An image containing uniquely labeled object masks corresponding to the segmentation results.
+        """
+        return NotImplemented
