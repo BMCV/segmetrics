@@ -4,7 +4,7 @@ API
 .. autosummary::
     :toctree: generated
     
-    segmetrics
-    segmetrics.regional
-    segmetrics.regional.Dice
     segmetrics.study
+    segmetrics.regional
+    segmetrics.boundary
+    segmetrics.detection
