@@ -72,11 +72,11 @@ class Hausdorff(DistanceMeasure):
 class NSD(DistanceMeasure):
     r"""Defines the normalized sum of distsances between two binary images.
     
-    Let :math:`R` be the set of all image pixels corresponding to the ground truth segmentation, and :math:`S` the set of those corresponding to the segmentation result. Then, the normalized sum of distances is defined as
+    Let :math:`R` be the set of all image pixels corresponding to the ground truth segmentation, and :math:`S` the set of those corresponding to the segmentation result. Moreover, let :math:`\operatorname{dist}_{\partial R}\left(x\right) = \min_{x' \in \partial R}\left\|x - x'\right\|` be the Euclidean distance of an image point :math:`x` to the contour :math:`\partial R` of the ground truth segmentation :math:`R`. Then, the normalized sum of distances is defined as
     
-    .. math:: \mathrm{NSD} = \sum_{x \in R \triangle S} \operatorname{dist}_{\partial R}\left(x\right) / \sum_{x \in R \cup S} \operatorname{dist}_{\partial R}\left(x\right)
+    .. math:: \mathrm{NSD} = \sum_{x \in R \triangle S} \operatorname{dist}_{\partial R}\left(x\right) / \sum_{x \in R \cup S} \operatorname{dist}_{\partial R}\left(x\right),
     
-    and attains values between :math:`0` and :math:`1`. Lower values correspond to better segmentation performance.
+    where :math:`R \triangle S = \left(R \setminus S\right) \cup \left(S \setminus R\right)` is the symmetric difference of :math:`R` and :math:`S`. :math:`\mathrm{NSD}` attains values between :math:`0` and :math:`1`. Lower values correspond to better segmentation performance.
     """
 
     FRACTIONAL = True
