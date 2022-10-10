@@ -1,6 +1,9 @@
 API
 ===
 
+- :class:`segmetrics.study.Study`
+- :class:`segmetrics.regional.Dice`
+
 .. autosummary::
    :toctree: generated
 
