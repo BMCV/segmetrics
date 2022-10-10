@@ -6,7 +6,7 @@ from segmetrics.measure import Measure
 
 
 class Dice(Measure):
-    """The Dice coefficient.
+    """Defines the Dice coefficient.
     """
 
     FRACTIONAL = True
@@ -22,6 +22,8 @@ class Dice(Measure):
 
 
 class JaccardCoefficient(Measure):
+    """Defines the Jaccard coefficient.
+    """
 
     FRACTIONAL = True
 
@@ -68,7 +70,7 @@ class RandIndex(Measure):
 
 
 class AdjustedRandIndex(Measure):
-    """Adjusted Rand Index.
+    """Defines the Adjusted Rand Index.
 
     See: http://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html
     """
@@ -95,7 +97,7 @@ class JaccardIndex(RandIndex):
 
 
 class ISBIScore(Measure):
-    """Computes segmentation score according to ISBI Cell Tracking Challenge.
+    """Defines the SEG performance measure (used in the ISBI Cell Tracking Challenge).
 
     The SEG measure is based on the Jaccard similarity index ``J = |R ∩ S| / |R ∪ S|`` of the sets of pixels of matching objects ``R`` and ``S``, where ``R`` denotes the set of pixels belonging to a reference object and S denotes the set of pixels belonging to its matching segmented object. A ground truth object ``R`` and a segmented object ``S`` are considered matching if and only if ``|R ∩ S| > 0.5 · |R|``. Note that for each reference object, there can be at most one segmented object which satisfies the detection test. See: http://ctc2015.gryf.fi.muni.cz/Public/Documents/SEG.pdf
     """

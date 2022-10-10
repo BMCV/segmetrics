@@ -26,6 +26,8 @@ class DistanceMeasure(Measure):
 
 
 class Hausdorff(DistanceMeasure):
+    """Defines the Hausdorff distsance between two binary images.
+    """
 
     def __init__(self, mode='symmetric'):
         """Initializes Hausdorff metric.
@@ -58,6 +60,8 @@ class Hausdorff(DistanceMeasure):
 
 
 class NSD(DistanceMeasure):
+    """Defines the normalized sum of distsances between two binary images.
+    """
 
     FRACTIONAL = True
 

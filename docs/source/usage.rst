@@ -38,7 +38,9 @@ The method ``study.process`` computes the performance measures for the segmentat
 Implemented measures
 ********************
 
-—
+Region-based performance measures:
+
+- :class:`segmetrics.regional.Dice`
 
 Object-based distance measures
 ******************************
