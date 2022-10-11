@@ -18,3 +18,10 @@ The goal of this package is to provide easy-to-use tools for evaluation of the p
 The documentation is available here: https://segmetrics.readthedocs.io
 
 Use ``python -m tests.all`` to run the test suite.
+
+----
+
+Copyright (c) 2017-2022 Leonid Kostrykin, Biomedical Computer Vision Group, Heidelberg University
+
+This work is licensed under the terms of the MIT license.  
+For a copy, see `LICENSE </LICENSE>`_.
