@@ -46,7 +46,7 @@ def _label(im, background=0, neighbors=4):
 
 
 def _aggregate(measure, values):
-    fnc = np.sum if measure.ACCUMULATIVE else np.mean
+    fnc = np.sum if measure.accumulative else np.mean
     return fnc(values)
 
 

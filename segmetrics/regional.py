@@ -149,6 +149,7 @@ class ISBIScore(Measure):
     FRACTIONAL = True
 
     def __init__(self, min_ref_size=1):
+        super().__init__()
         assert min_ref_size >= 1, 'min_ref_size must be 1 or larger'
         self.min_ref_size = min_ref_size
 

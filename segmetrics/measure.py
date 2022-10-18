@@ -1,12 +1,14 @@
 class Measure:
     """Defines a performance measure.
+
+    :param accumulative: Indicates whether the results from this measure are aggregated by summing (``True``) or by taking the average (``False``).
     """
 
     """Indicates whether the results from this measure should be presented as percentages."""
-    FRACTIONAL   = False
-    
-    """Indicates whether the results from this measure are aggregated by summing (``True``) or by taking the average (``False``)."""
-    ACCUMULATIVE = False
+    FRACTIONAL = False
+
+    def __init__(self, accumulative=False):
+        self.accumulative = accumulative
 
     def set_expected(self, expected):
         """Sets the expected result for evaluation.

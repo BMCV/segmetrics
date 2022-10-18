@@ -50,6 +50,7 @@ class Hausdorff(DistanceMeasure):
     """
 
     def __init__(self, mode='sym'):
+        super().__init__()
         assert mode in ('a2e', 'e2a', 'symmetric', 'sym')
         if mode == 'symmetric': mode = 'sym'
         self.mode = mode
@@ -108,10 +109,11 @@ class ObjectBasedDistanceMeasure(Measure):
     _obj_mapping = (None, None) ## cache
 
     def __init__(self, distance, skip_fn=False):
+        super().__init__()
         self.distance     = distance
         self.skip_fn      = skip_fn
         self.FRACTIONAL   = distance.FRACTIONAL
-        self.ACCUMULATIVE = distance.ACCUMULATIVE
+        self.accumulative = distance.accumulative
         self.nodetections = -1
         
     def set_expected(self, *args, **kwargs):

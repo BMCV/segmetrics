@@ -31,7 +31,9 @@ class FalseSplit(Measure):
     dataset and comparison of algorithms", ISBI 2009
     """
 
-    ACCUMULATIVE = True
+    def __init__(self, **kwargs):
+        kwargs.setdefault('accumulative', False)
+        super().__init__(**kwargs)
 
     def compute(self, actual):
         seg_by_ref = _compute_seg_by_ref_assignments(actual, self.expected)
@@ -45,7 +47,9 @@ class FalseMerge(Measure):
     dataset and comparison of algorithms", ISBI 2009
     """
 
-    ACCUMULATIVE = True
+    def __init__(self, **kwargs):
+        kwargs.setdefault('accumulative', False)
+        super().__init__(**kwargs)
 
     def compute(self, actual):
         ref_by_seg = _compute_ref_by_seg_assignments(actual, self.expected)
@@ -59,9 +63,9 @@ class FalsePositive(Measure):
     dataset and comparison of algorithms", ISBI 2009
     """
 
-    ACCUMULATIVE = True
-
-    def __init__(self):
+    def __init__(self, **kwargs):
+        kwargs.setdefault('accumulative', False)
+        super().__init__(**kwargs)
         self.result = None
 
     def compute(self, actual):
@@ -78,9 +82,9 @@ class FalseNegative(Measure):
     dataset and comparison of algorithms", ISBI 2009
     """
 
-    ACCUMULATIVE = True
-
-    def __init__(self):
+    def __init__(self, **kwargs):
+        kwargs.setdefault('accumulative', False)
+        super().__init__(**kwargs)
         self.result = None
 
     def compute(self, actual):
