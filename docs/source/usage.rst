@@ -88,3 +88,24 @@ Or even more simply:
 
     sample_ids = list(range(len(seg_list)))
     sm.parallel.process_all(study, seg_list.__getitem__, gt_list.__getitem__, sample_ids, num_forks=2)
+
+Command line interface
+**********************
+
+For example, assume the following directory structure:
+
+.. code-block::
+    ./seg/t02.png
+    ./seg/t04.png
+    ./seg/t12.png
+    ./gt/man_seg02.tif
+    ./gt/man_seg04.tif
+    ./gt/man_seg12.tif
+
+Then, an evaluation of the segmentation performance can be performed using the following command:
+
+.. code-block:: bash
+
+    python -m segmetrics.cli ./seg ".*t([0-9]+).png" ./gt/man_seg\\1.tif GOWT1-1.csv "sm.ISBIScore()" "sm.FalseMerge()" "sm.FalseSplit()"
+
+This will write the results to the file ``GOWT1-1.csv``. The list of performance measures is arbitrary. Refer to ``python -m segmetrics.cli --help`` for details.

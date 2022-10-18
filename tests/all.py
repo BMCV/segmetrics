@@ -4,6 +4,10 @@ import numpy as np
 import pathlib
 import pandas as pd
 import time
+import os
+import tempfile
+import skimage.io
+import warnings
 
 from tests.data import images, CrossSampler
 from tests.isbi_seg import isbi_seg_official
@@ -32,12 +36,15 @@ def create_full_study():
     return study
 
 
-def compare_study(test, study, expected_csv_filepath, tag):
+def compare_study(test, study, *args, **kwargs):
+    compare_dataframe(test, study.todf(), *args, **kwargs)
+
+
+def compare_dataframe(test, study_df, expected_csv_filepath, tag=None):
     expected_csv_filepath = pathlib.Path(expected_csv_filepath)
-    actual_csv_filepath = f'{expected_csv_filepath}-out-{tag}'
+    actual_csv_filepath = f'{expected_csv_filepath}-out-{tag}' if tag else f'{expected_csv_filepath}-out'
     failure_message = f'Obtained results written to: {actual_csv_filepath}'
     try:
-        study_df = study.todf()
         test.assertTrue(expected_csv_filepath.is_file(), failure_message)
         expected_df = pd.read_csv(str(expected_csv_filepath), sep=',', keep_default_na=False)
         test.assertTrue(study_df.round(3).equals(expected_df.round(3)), failure_message)
@@ -92,6 +99,22 @@ class SEGTest(unittest.TestCase):
         seg_actual = np.mean(self.study['SEG'])
         error = abs(seg_actual - seg_expected)
         self.assertTrue(error < 1e-5, f'Expected {seg_expected}, but got {seg_actual} (error: {error}')
+
+
+class CLITest(unittest.TestCase):
+
+    def test_cli(self):
+        with tempfile.TemporaryDirectory() as tempdir:
+            segdir = tempdir + '/seg'
+            os.mkdir(segdir)
+            for img_num, image in enumerate(images, start=1):
+                with warnings.catch_warnings():
+                    warnings.simplefilter('ignore', UserWarning)
+                    skimage.io.imsave(f'{segdir}/img{img_num}.png', image)
+            with tempfile.NamedTemporaryFile(suffix='.csv') as result_file:
+                os.system(fr'python -m segmetrics.cli {segdir} ".*img([0-9]+).png" {segdir}/img\\1.png {result_file.name} "sm.Dice()" "sm.ISBIScore()" "sm.FalseMerge()" "sm.FalseSplit()" >/dev/null')
+                actual_df = pd.read_csv(result_file.name, sep=',', keep_default_na=False)
+            compare_dataframe(self, actual_df, 'tests/cli-test.csv')
 
 
 if __name__ == '__main__':
