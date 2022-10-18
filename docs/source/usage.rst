@@ -95,6 +95,7 @@ Command line interface
 For example, assume the following directory structure:
 
 .. code-block::
+
     ./seg/t02.png
     ./seg/t04.png
     ./seg/t12.png
