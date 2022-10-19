@@ -35,7 +35,7 @@ if __name__ == '__main__':
     for measure_spec in args.measures:
         print(f'  - {measure_spec}')
         measure = eval(measure_spec)
-        study.add_measure(measure, type(measure).__name__)
+        study.add_measure(measure)
 
     seg_file_pattern = re.compile(args.seg_file)
 
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     print(f'**********')
     print(f'')
 
-    for filepath in glob.glob(args.seg_dir + '*' if args.seg_dir.endswith('/') else args.seg_dir + '/*', recursive=args.recursive):
+    for filepath in glob.glob(args.seg_dir + '**' if args.seg_dir.endswith('/') else args.seg_dir + '/**', recursive=args.recursive):
         match = seg_file_pattern.match(filepath)
         if match is None: continue
         gt_file = args.gt_file

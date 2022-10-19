@@ -83,10 +83,10 @@ class Study:
         """Adds a performance measure to this study.
         
         :param measure: The performance measure to be added.
-        :param name: An arbitrary name which uniquely identifies the performance measure within this study.
+        :param name: An arbitrary name which uniquely identifies the performance measure within this study. Uses ``measure.default_name()`` if ``None`` is given.
         """
         if not isinstance(measure, Measure): raise ValueError('measure must be a Measure object')
-        if name is None: name = '%d' % id(measure)
+        if name is None: name = measure.default_name()
         self.measures[name] = measure
         self.results [name] = {None: []}
 

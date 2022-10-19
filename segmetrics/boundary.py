@@ -69,6 +69,9 @@ class Hausdorff(DistanceMeasure):
             results.append(actual_boundary_distance_map[self.expected_boundary].max())
         return [max(results)]
 
+    def default_name(self):
+        return f'HSD ({self.mode})'
+
 
 class NSD(DistanceMeasure):
     r"""Defines the normalized sum of distsances between two binary images.
@@ -167,3 +170,6 @@ class ObjectBasedDistanceMeasure(Measure):
                 distances.append(distance[0])
             results.append(min(distances))
         return results
+
+    def default_name(self):
+        return f'Ob. {self.distance.default_name()}'

@@ -39,6 +39,9 @@ class FalseSplit(Measure):
         seg_by_ref = _compute_seg_by_ref_assignments(actual, self.expected)
         return [sum(len(seg_by_ref[ref_label]) > 1 for ref_label in seg_by_ref.keys() if ref_label > 0)]
 
+    def default_name(self):
+        return 'Split'
+
 
 class FalseMerge(Measure):
     """Counts falsely merged objects.
@@ -54,6 +57,9 @@ class FalseMerge(Measure):
     def compute(self, actual):
         ref_by_seg = _compute_ref_by_seg_assignments(actual, self.expected)
         return [sum(len(ref_by_seg[seg_label]) > 1 for seg_label in ref_by_seg.keys() if seg_label > 0)]
+
+    def default_name(self):
+        return 'Merge'
 
 
 class FalsePositive(Measure):
@@ -74,6 +80,9 @@ class FalsePositive(Measure):
         for seg_label in seg_by_ref[0]: self.result[actual == seg_label] = seg_label
         return [len(seg_by_ref[0])]
 
+    def default_name(self):
+        return 'Spurious'
+
 
 class FalseNegative(Measure):
     """Counts missing objects.
@@ -92,6 +101,9 @@ class FalseNegative(Measure):
         self.result = np.zeros_like(self.expected)
         for ref_label in ref_by_seg[0]: self.result[self.expected == ref_label] = ref_label
         return [len(ref_by_seg[0])]
+
+    def default_name(self):
+        return 'Missing'
 
 
 class COCOmAP(Measure):

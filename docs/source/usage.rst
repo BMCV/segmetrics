@@ -22,8 +22,8 @@ Segmentation performance evaluation is driven by the ``Study`` class. The genera
     import segmetrics as sm
     
     study = sm.Study()
-    study.add_measure(sm.Dice(), 'Dice')
-    study.add_measure(sm.ISBIScore(), 'SEG')
+    study.add_measure(sm.Dice())
+    study.add_measure(sm.ISBIScore())
     
     for file_idx, (gt_img, seg_img) in enumerate(zip(gt_list, seg_list):
         study.set_expected(gt_img)
@@ -66,8 +66,8 @@ The following code can be used to include *object-based* distance measures:
 
 .. code-block:: python
 
-    study.add_measure(sm.NSD().object_based(), 'NSD')
-    study.add_measure(sm.Hausdorff().object_based(), 'HSD')
+    study.add_measure(sm.NSD().object_based())
+    study.add_measure(sm.Hausdorff().object_based())
 
 The object correspondences between the ground truth objects and the segmented objects are established by choosing the closest object according to the respective distance function.
 

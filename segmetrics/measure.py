@@ -23,3 +23,8 @@ class Measure:
         :param actual: An image containing uniquely labeled object masks corresponding to the segmentation results.
         """
         return NotImplemented
+
+    def default_name(self):
+        """Returns the default name of this measure.
+        """
+        return type(self).__name__

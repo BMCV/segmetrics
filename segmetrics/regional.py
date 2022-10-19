@@ -51,6 +51,9 @@ class JaccardCoefficient(Measure):
         else:
             return [1.]  # result of zero/zero division
 
+    def default_name(self):
+        return 'Jaccard coef.'
+
 
 class RandIndex(Measure):
     r"""Defines the Rand Index.
@@ -97,6 +100,9 @@ class RandIndex(Measure):
             d += n *  ((Ri != R) * (Si != S)).sum()
         return a, b, c, d
 
+    def default_name(self):
+        return 'Rand'
+
 
 class AdjustedRandIndex(Measure):
     """Defines the Adjusted Rand Index.
@@ -108,6 +114,9 @@ class AdjustedRandIndex(Measure):
 
     def compute(self, actual):
         return [sklearn.metrics.adjusted_rand_score(self.expected.flat, actual.flat)]
+
+    def default_name(self):
+        return 'ARI'
 
 
 class JaccardIndex(RandIndex):
@@ -136,6 +145,9 @@ class JaccardIndex(RandIndex):
     def compute(self, actual):
         a, b, c, d = self.compute_parts(actual)
         return [(a + d) / float(b + c + d)]
+
+    def default_name(self):
+        return 'Jaccard index'
 
 
 class ISBIScore(Measure):
@@ -173,3 +185,6 @@ class ISBIScore(Measure):
                 jaccard = overlap / np.logical_or(ref_cc, actual_cc).sum()
             results.append(jaccard)
         return results
+
+    def default_name(self):
+        return 'SEG'

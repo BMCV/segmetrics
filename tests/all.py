@@ -53,6 +53,29 @@ def compare_dataframe(test, study_df, expected_csv_filepath, tag=None):
         raise
 
 
+class MeasureTest(unittest.TestCase):
+
+    def test_default_name(self):
+        self.assertEqual(sm.Dice().default_name(), 'Dice')
+        self.assertEqual(sm.ISBIScore().default_name(), 'SEG')
+        self.assertEqual(sm.JaccardCoefficient().default_name(), 'Jaccard coef.')
+        self.assertEqual(sm.JaccardIndex().default_name(), 'Jaccard index')
+        self.assertEqual(sm.RandIndex().default_name(), 'Rand')
+        self.assertEqual(sm.AdjustedRandIndex().default_name(), 'ARI')
+        self.assertEqual(sm.Hausdorff('sym').default_name(), 'HSD (sym)')
+        self.assertEqual(sm.Hausdorff('e2a').default_name(), 'HSD (e2a)')
+        self.assertEqual(sm.Hausdorff('a2e').default_name(), 'HSD (a2e)')
+        self.assertEqual(sm.NSD().default_name(), 'NSD')
+        self.assertEqual(sm.Hausdorff('sym').object_based().default_name(), 'Ob. HSD (sym)')
+        self.assertEqual(sm.Hausdorff('e2a').object_based().default_name(), 'Ob. HSD (e2a)')
+        self.assertEqual(sm.Hausdorff('a2e').object_based().default_name(), 'Ob. HSD (a2e)')
+        self.assertEqual(sm.NSD().object_based().default_name(), 'Ob. NSD')
+        self.assertEqual(sm.FalseSplit().default_name(), 'Split')
+        self.assertEqual(sm.FalseMerge().default_name(), 'Merge')
+        self.assertEqual(sm.FalsePositive().default_name(), 'Spurious')
+        self.assertEqual(sm.FalseNegative().default_name(), 'Missing')
+
+
 class FullStudyTest(unittest.TestCase):
 
     def setUp(self):
