@@ -22,18 +22,21 @@ if __name__ == '__main__':
 
     measure_spec_pattern = re.compile(r'([a-zA-Z]+)((:?_o)?)')
 
+    print(f'')
     print(f'Summary')
     print(f'*******')
     print(f'')
-    print(f'  Reading segmentation results from: {args.seg_dir}')
-    print(f'  Pattern used for parsing file name: {args.seg_file}')
-    print(f'  Pattern used for ground truth files: {args.gt_file}')
-    print(f'  Results will be written to: {args.output_file}')
-    print(f'  The following performance measures will be used:')
+    print(f' Reading segmentation results from: {args.seg_dir}')
+    print(f' Pattern used for parsing file name: {args.seg_file}')
+    print(f' Pattern used for ground truth files: {args.gt_file}')
+    print(f' Is ground truth data uniquely labeled? {args.gt_unique}')
+    print(f' Is segmentation result data uniquely labeled? {args.seg_unique}')
+    print(f' Results will be written to: {args.output_file}')
+    print(f' The following performance measures will be used:')
 
     study = sm.Study()
     for measure_spec in args.measures:
-        print(f'  - {measure_spec}')
+        print(f' - {measure_spec}')
         measure = eval(measure_spec)
         study.add_measure(measure)
 
