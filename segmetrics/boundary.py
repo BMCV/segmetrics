@@ -19,6 +19,13 @@ def _compute_boundary_distance_map(mask):
     return ndimage.morphology.distance_transform_edt(np.logical_not(boundary))
 
 
+def _quantile_max(quantile, values):
+    if quantile == 1: return np.max(values)
+    else:
+        values = np.sort(values)
+        return values[int(quantile * (len(values) - 1))]
+
+
 class DistanceMeasure(Measure):
     """Defines a performance measure which is based on the spatial distances of binary volumes (images).
     
@@ -38,9 +45,13 @@ class Hausdorff(DistanceMeasure):
     
     The Hausdorff distsance is not upper-bounded. Lower values correspond to better segmentation performance.
     
-    See: P. Bamford, "Empirical comparison of cell segmentation algorithms using an annotated dataset," in Proc. Int. Conf. Image Proc., 1612 vol. 2, 2003, pp. II-1073–1076.
+    References:
+
+    - P. Bamford, "Empirical comparison of cell segmentation algorithms using an annotated dataset," in Proc. Int. Conf. Image Proc., 1612 vol. 2, 2003, pp. II-1073–1076.
+    - W. J. Rucklidge, "Efficiently locating objects using the Hausdorff distance." International Journal of computer vision 24.3 (1997): 251-270.
     
     :param mode: Specifies how the Hausdorff distance is to be computed.
+    :param quantile: Specifies the quantile of the Hausdorff distsance. The default ``quantile=1`` corresponds to the Hausdorff distance described by Bamford (2003). Any other positive value for ``quantile`` corresponds to the quantile method introduced by Rucklidge (1997).
     
     The following values are allowed for the ``mode`` parameter:
 
@@ -49,11 +60,13 @@ class Hausdorff(DistanceMeasure):
     - ``sym``: Maximum of the two (equivalent to ``symmetric``).
     """
 
-    def __init__(self, mode='sym'):
+    def __init__(self, mode='sym', quantile=1):
         super().__init__()
         assert mode in ('a2e', 'e2a', 'symmetric', 'sym')
+        assert 0 < quantile <= 1
         if mode == 'symmetric': mode = 'sym'
         self.mode = mode
+        self.quantile = quantile
 
     def set_expected(self, expected):
         self.expected_boundary = _compute_binary_boundary(expected > 0)
@@ -63,14 +76,20 @@ class Hausdorff(DistanceMeasure):
         actual_boundary = _compute_binary_boundary(actual > 0)
         if not self.expected_boundary.any() or not actual_boundary.any(): return []
         results = []
-        if self.mode in ('a2e', 'sym'): results.append(self.expected_boundary_distance_map[actual_boundary].max())
+        if self.mode in ('a2e', 'sym'): results.append(self._quantile_max(self.expected_boundary_distance_map[actual_boundary]))
         if self.mode in ('e2a', 'sym'):
             actual_boundary_distance_map = ndimage.morphology.distance_transform_edt(np.logical_not(actual_boundary))
-            results.append(actual_boundary_distance_map[self.expected_boundary].max())
+            results.append(self._quantile_max(actual_boundary_distance_map[self.expected_boundary]))
         return [max(results)]
 
     def default_name(self):
-        return f'HSD ({self.mode})'
+        if self.quantile == 1:
+            return f'HSD ({self.mode})'
+        else:
+            return f'HSD ({self.mode}, Q={self.quantile:g})'
+
+    def _quantile_max(self, values):
+        return _quantile_max(self.quantile, values)
 
 
 class NSD(DistanceMeasure):
