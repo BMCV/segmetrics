@@ -45,11 +45,6 @@ class Hausdorff(DistanceMeasure):
     
     The Hausdorff distsance is not upper-bounded. Lower values correspond to better segmentation performance.
     
-    References:
-
-    - P\. Bamford, "Empirical comparison of cell segmentation algorithms using an annotated dataset," in Proc. Int. Conf. Image Proc., 1612 vol. 2, 2003, pp. II-1073–1076.
-    - W\. J. Rucklidge, "Efficiently locating objects using the Hausdorff distance." International Journal of computer vision 24.3 (1997): 251-270.
-    
     :param mode: Specifies how the Hausdorff distance is to be computed.
     :param quantile: Specifies the quantile of the Hausdorff distsance. The default ``quantile=1`` corresponds to the Hausdorff distance described by Bamford (2003). Any other positive value for ``quantile`` corresponds to the quantile method introduced by Rucklidge (1997).
     
@@ -58,6 +53,11 @@ class Hausdorff(DistanceMeasure):
     - ``a2e``: Maximum distance of actual foreground to expected foreground.
     - ``e2a``: Maximum distance of expected foreground to actual foreground.
     - ``sym``: Maximum of the two (equivalent to ``symmetric``).
+    
+    References:
+
+    - P\. Bamford, "Empirical comparison of cell segmentation algorithms using an annotated dataset," in Proc. Int. Conf. Image Proc., 1612 vol. 2, 2003, pp. II-1073–1076.
+    - W\. J. Rucklidge, "Efficiently locating objects using the Hausdorff distance." International Journal of computer vision 24.3 (1997): 251-270.
     """
 
     def __init__(self, mode='sym', quantile=1):

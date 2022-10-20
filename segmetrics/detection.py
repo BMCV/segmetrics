@@ -27,8 +27,9 @@ def _compute_ref_by_seg_assignments(seg, ref, *args, **kwargs):
 class FalseSplit(Measure):
     """Counts falsely split objects.
 
-    See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented
-    dataset and comparison of algorithms", ISBI 2009
+    References:
+
+    - L\. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
     """
 
     def __init__(self, **kwargs):
@@ -46,8 +47,9 @@ class FalseSplit(Measure):
 class FalseMerge(Measure):
     """Counts falsely merged objects.
 
-    See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented
-    dataset and comparison of algorithms", ISBI 2009
+    References:
+
+    - L\. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
     """
 
     def __init__(self, **kwargs):
@@ -65,8 +67,9 @@ class FalseMerge(Measure):
 class FalsePositive(Measure):
     """Counts spurious objects.
 
-    See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented
-    dataset and comparison of algorithms", ISBI 2009
+    References:
+
+    - L\. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
     """
 
     def __init__(self, **kwargs):
@@ -87,8 +90,9 @@ class FalsePositive(Measure):
 class FalseNegative(Measure):
     """Counts missing objects.
 
-    See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented
-    dataset and comparison of algorithms", ISBI 2009
+    References:
+
+    - L\. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
     """
 
     def __init__(self, **kwargs):

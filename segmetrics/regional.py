@@ -74,7 +74,9 @@ class RandIndex(Measure):
     
     The Rand index attains values between :math:`0` and :math:`1`. Higher values correspond to better segmentation performance.
 
-    See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms", ISBI 2009
+    References:
+
+    - L\. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
     """
 
     FRACTIONAL = True
@@ -142,7 +144,9 @@ class JaccardIndex(RandIndex):
 
     The Jaccard index is not upper-bounded. Higher values correspond to better segmentation performance.
 
-    See: Coelho et al., "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms", ISBI 2009
+    References:
+
+    - L\. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
     """
 
     FRACTIONAL = False
@@ -161,6 +165,10 @@ class ISBIScore(Measure):
     The SEG measure is based on the Jaccard coefficient :math:`J = \left|R \cap S\right| / \left|R \cup S\right|` of the sets of pixels of matching objects :math:`R` and :math:`S`, where :math:`R` denotes the set of pixels belonging to a reference object and :math:`S` denotes the set of pixels belonging to its matching segmented object. A ground truth object :math:`R` and a segmented object :math:`S` are considered matching if and only if :math:`\left|R \cap S\right| > 0.5 \cdot \left|R\right|`. Note that for each reference object, there can be at most one segmented object which satisfies the detection test. See: http://public.celltrackingchallenge.net/documents/SEG.pdf
     
     :param min_ref_size: Ground truth objects smaller than ``min_ref_size`` pixels are skipped. It is reasonable to set this value to ``2`` so that objects of a single pixel in size are skipped, since such objects obviously correspond to misannotations which distort the performance evaluation. However, for compatibility to the official implementation, the value is set to ``1`` by default so all ground truth objects are included.
+
+    References:
+
+    - M\. Maska et al., "A benchmark for comparison of cell tracking algorithms," Bioinformatics, vol. 30, no. 11, pp. 1609–1617, 2014.
     """
 
     FRACTIONAL = True
