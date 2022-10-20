@@ -101,12 +101,12 @@ class Study:
     def set_expected(self, expected, unique=True):
         """Sets the expected ground truth segmentation result.
         
-        The background of the image must be labeled as ``0``. Negative object labels are forbidden. If ``unique`` is ``True``, it is assumed that all objects are labeled uniquely. Use ``unique=False`` if this is not guaranteed (e.g., if ``expected`` is a binary image which represents the union of the individual object masks).
+        The background of the image must be labeled as ``0``. Negative object labels are forbidden. If ``unique`` is ``True``, it is assumed that all objects are labeled uniquely. Use ``unique=False`` if this is not guaranteed and the individual objects should be determined by connected component analysis instead  (e.g., if ``expected`` is a binary image which represents the union of the individual object masks).
 
         The image ``expected`` must be a numpy array of integral data type. It is also allowed to be boolean if and only if ``unique=False`` is used.
 
         :param expected: An image containing object masks corresponding to the ground truth.
-        :param unique: Whether the individual object masks are uniquely labeled.
+        :param unique: Whether the individual object masks are uniquely labeled. Providing ``False`` assumes that connected components correspond to individual objects.
         """
         assert expected.min() == 0, 'mis-labeled ground truth'
         expected = expected.squeeze()
@@ -119,13 +119,13 @@ class Study:
     def process(self, sample_id, actual, unique=True, replace=True):
         """Evaluates a segmentation result based on the previously set expected result.
         
-        If ``unique`` is ``True``, it is assumed that all objects are labeled uniquely. Use ``unique=False`` if this is not guaranteed (e.g., if ``actual`` is a binary image which represents the union of the individual object masks).
+        If ``unique`` is ``True``, it is assumed that all objects are labeled uniquely. Use ``unique=False`` if this is not guaranteed and the individual objects should be determined by connected component analysis instead (e.g., if ``actual`` is a binary image which represents the union of the individual object masks).
 
         The image ``actual`` must be a numpy array of integral data type. It is also allowed to be boolean if and only if ``unique=False`` is used.
 
         :param sample_id: An arbitrary indentifier of the segmentation image (e.g., the file name).
         :param actual: An image containing object masks corresponding to the segmentation result.
-        :param unique: Whether the individual object masks are uniquely labeled.
+        :param unique: Whether the individual object masks are uniquely labeled. Providing ``False`` assumes that connected components correspond to individual objects.
         :param replace: Whether previous results computed for the same ``sample_id`` should be replaced (``True``) or forbidden (``False``).
         """
         actual = actual.squeeze()
