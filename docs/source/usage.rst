@@ -13,7 +13,7 @@ To use segmetrics, first install it using conda:
 Usage
 -----
 
-Segmentation performance evaluation is driven by the :py:class:`~segmetrics.study.Study` class. The general procedure is to instantiate a ``~segmetrics.study.Study`` object, add the required performance measures, and then to process the segmentation results. A simple example is:
+Segmentation performance evaluation is driven by the :py:class:`~segmetrics.study.Study` class. The general procedure is to instantiate a :py:class:`~segmetrics.study.Study` object, add the required performance measures, and then to process the segmentation results. A simple example is:
 
 .. code-block:: python
 
@@ -31,7 +31,7 @@ Segmentation performance evaluation is driven by the :py:class:`~segmetrics.stud
 
 In the example above, it is presumed that ``gt_list`` and ``seg_list`` are two iterables of ground truth segmentation and segmentation result images, respectively (they contain numpy arrays which represent segmentation masks).
 
-The method ``study.process`` computes the performance measures for the segmentation ``seg_img`` with respect to the ground truth segmentation ``gt_img``. The first argument is an arbitrary indentifier of the segmentation image (e.g., the file name). Supplying the same identifier multiple times overrides any previously computed results for that identifier. This is particularily handy in an interactive environment, such as Jupyter notebooks. The identifier is also used in the detailed output of the study (e.g., ``study.tocsv()``).
+The method :py:meth:`~segmetrics.study.Study.process` computes the performance measures for the segmentation ``seg_img`` with respect to the ground truth segmentation ``gt_img``. The first argument is an arbitrary indentifier of the segmentation image (e.g., the file name). Supplying the same identifier multiple times overrides any previously computed results for that identifier. This is particularily handy in an interactive environment, such as Jupyter notebooks. The identifier is also used in the detailed output of the study (e.g., ``study.tocsv()``).
 
 Implemented performance measures
 ********************************
