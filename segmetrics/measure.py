@@ -1,7 +1,7 @@
 class Measure:
     """Defines a performance measure.
 
-    :param accumulative: Indicates whether the results from this measure are aggregated by summing (``True``) or by taking the average (``False``).
+    :param accumulative: Indicates whether the results of this performance measure are aggregated by summation (``True``) or by averaging (``False``).
     """
 
     """Indicates whether the results from this measure should be presented as percentages."""
