@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 import sklearn.metrics
+import warnings
 
 from segmetrics.measure import Measure
 
@@ -83,9 +84,11 @@ class RandIndex(Measure):
         return [(a + d) / float(a + b + c + d)]
 
     def compute_parts(self, actual):
+        """Computes the values :math:`a`, :math:`b`, :math:`c`, :math:`d`.
+        """
         R, S = (self.expected > 0), (actual > 0)
         a, b, c, d = 0, 0, 0, 0
-        RS = np.empty((2, 2), int)
+        RS = np.empty((2, 2), np.uint64)
         RS[0, 0] = ((R == 0) * (S == 0)).sum()
         RS[0, 1] = ((R == 0) * (S == 1)).sum()
         RS[1, 0] = ((R == 1) * (S == 0)).sum()
@@ -113,7 +116,9 @@ class AdjustedRandIndex(Measure):
     FRACTIONAL = True
 
     def compute(self, actual):
-        return [sklearn.metrics.adjusted_rand_score(self.expected.flat, actual.flat)]
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', category=DeprecationWarning)
+            return [sklearn.metrics.adjusted_rand_score(self.expected.flat, actual.flat)]
 
     def default_name(self):
         return 'ARI'
