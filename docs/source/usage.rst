@@ -13,7 +13,7 @@ To use segmetrics, first install it using conda:
 Usage
 -----
 
-Segmentation performance evaluation is driven by the ``Study`` class. The general procedure is to instantiate a ``Study`` object, add the required performance measures, and then to process the segmentation results. A simple example is:
+Segmentation performance evaluation is driven by the :py:class:`~segmetrics.Study` class. The general procedure is to instantiate a ``Study`` object, add the required performance measures, and then to process the segmentation results. A simple example is:
 
 .. code-block:: python
 
