@@ -10,6 +10,7 @@ import segmetrics as sm
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
+    parser.add_argument('--version', action='version', version=f'{sm.__name__} {sm.VERSION}')
     parser.add_argument('seg_dir', help='directory containing the segmentation results')
     parser.add_argument('seg_file', help='regex pattern used to parse segmentation results')
     parser.add_argument('gt_file', help='pattern used to obtain the corresponding ground truth file (\\1 corresponds to the first capture group)')
