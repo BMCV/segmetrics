@@ -14,7 +14,8 @@ class Dice(Measure):
     .. math:: \mathrm{DC} = \frac{2 \cdot \left|R \cap S\right|}{\left|R\right| + \left|S\right|}
     
     and attains values between :math:`0` and :math:`1`. Higher values correspond to better segmentation performance. Dice corresponds to the pixel-based `F1 score`_ (harmonic mean of precision and recall).
-    .. _`F1 score`: https://en.wikipedia.org/wiki/F-score
+    
+    .. _F1 score: https://en.wikipedia.org/wiki/F-score
     """
 
     FRACTIONAL = True
@@ -58,7 +59,7 @@ class JaccardCoefficient(Measure):
 
 
 class RandIndex(Measure):
-    r"""Defines the Rand Index.
+    r"""Defines the Rand index.
     
     Let :math:`R` be the set of all image pixels corresponding to the ground truth segmentation, and :math:`S` the set of those corresponding to the segmentation result. Moreover, let :math:`a, b, c, d` be the quantities of the events
     
@@ -74,7 +75,8 @@ class RandIndex(Measure):
     .. math:: \mathrm{RI} = \frac{a + d}{a + b + c + d}.
     
     The Rand index attains values between :math:`0` and :math:`1`. Higher values correspond to better segmentation performance. The Rand index corresponds to the pixel-based `accuracy score`_.
-    .. _`accuracy score`: https://en.wikipedia.org/wiki/Accuracy_and_precision#In_binary_classification
+    
+    .. _accuracy score: https://en.wikipedia.org/wiki/Accuracy_and_precision#In_binary_classification
 
     References:
 
@@ -112,7 +114,7 @@ class RandIndex(Measure):
 
 
 class AdjustedRandIndex(Measure):
-    """Defines the Adjusted Rand Index.
+    """Defines the adjusted Rand index.
 
     See: http://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html
     """
