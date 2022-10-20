@@ -85,7 +85,7 @@ The object correspondences between the ground truth objects and the segmented ob
 Parallel computing
 ******************
 
-It is also easy to exploit the computational advantages of multi-core systems by evaluating multiple images in parallel via the ``parallel`` interface:
+It is also easy to exploit the computational advantages of multi-core systems by evaluating multiple images in parallel via the :py:mod:`~segmetrics.parallel` interface:
 
 .. code-block:: python
 
