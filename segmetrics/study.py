@@ -106,7 +106,7 @@ class Study:
         The image ``expected`` must be a numpy array of integral data type. It is also allowed to be boolean if and only if ``unique=False`` is used.
 
         :param expected: An image containing object masks corresponding to the ground truth.
-        :param unique: Whether the individual object masks are uniquely labeled. Providing ``False`` assumes that connected components correspond to individual objects.
+        :param unique: Whether the individual object masks are uniquely labeled. Providing ``False`` assumes that connected components correspond to individual objects (components of different labels are not connected).
         """
         assert expected.min() == 0, 'mis-labeled ground truth'
         expected = expected.squeeze()
@@ -125,7 +125,7 @@ class Study:
 
         :param sample_id: An arbitrary indentifier of the segmentation image (e.g., the file name).
         :param actual: An image containing object masks corresponding to the segmentation result.
-        :param unique: Whether the individual object masks are uniquely labeled. Providing ``False`` assumes that connected components correspond to individual objects.
+        :param unique: Whether the individual object masks are uniquely labeled. Providing ``False`` assumes that connected components correspond to individual objects (components of different labels are not connected).
         :param replace: Whether previous results computed for the same ``sample_id`` should be replaced (``True``) or forbidden (``False``).
         """
         actual = actual.squeeze()
