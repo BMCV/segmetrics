@@ -15,3 +15,8 @@ Contents
    :maxdepth: 2
    
    segmetrics
+
+.. toctree::
+   :maxdepth: 1
+   
+   changelog
