@@ -30,7 +30,7 @@ Adds ``segmetrics.cli``.
 
 Adds ``segmetrics.Measure.accumulative`` parameter and makes detection-based measures non-accumulative by default.
 
-Removes the `segmetrics.Measure.ACCUMULATIVE` field.
+Removes the ``segmetrics.Measure.ACCUMULATIVE`` field.
 
 1.2.0
 -----
