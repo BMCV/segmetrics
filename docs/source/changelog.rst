@@ -35,7 +35,7 @@ Removes the ``segmetrics.Measure.ACCUMULATIVE`` field.
 1.2.0
 -----
 
-Changes default names of performance measures in ``segmetrics.study.Study.add_measure``.
+Changes default names of performance measures in ``segmetrics.study.Study.add_measure()``.
 
 Adds ``segmetrics.measure.Measure.default_name()`` method.
 
