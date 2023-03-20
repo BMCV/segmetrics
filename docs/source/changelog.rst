@@ -43,3 +43,9 @@ Adds ``segmetrics.measure.Measure.default_name()`` method.
 -----
 
 Adds quantile-based implementation of ``segmetrics.boundary.Hausdorff``.
+
+1.2.2
+-----
+
+Positional and keyword arguments passed to ``segmetrics.boundary.DistanceMeasure.object_based`` are passed through to ``ObjectBasedDistanceMeasure``.
+
