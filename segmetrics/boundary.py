@@ -32,12 +32,14 @@ class DistanceMeasure(Measure):
     The computation of such measures only regards the union of the individual objects, not the individual objects themselves.
     """
 
-    def object_based(self):
+    def object_based(self, *args, **kwargs):
         """Returns measure for computation regarding individual objects (rather than their union).
-        
+       
+        Positional and keyword arguments are passed through to :class:`ObjectBasedDistanceMeasure`.
+
         :returns: This measure decorated using :class:`ObjectBasedDistanceMeasure`.
         """
-        return ObjectBasedDistanceMeasure(self)
+        return ObjectBasedDistanceMeasure(self, *args, **kwargs)
 
 
 class Hausdorff(DistanceMeasure):
