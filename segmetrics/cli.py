@@ -19,6 +19,7 @@ if __name__ == '__main__':
     parser.add_argument('--gt-unique', action='store_true', help='assumes that the ground truth data is uniquely labeled')
     parser.add_argument('--seg-unique', action='store_true', help='assumes that the segmentation result data is uniquely labeled')
     parser.add_argument('measures', nargs='+', type=str, help='list of performance measures')
+    parser.add_argument('--semicolon', action='store_true', help='uses semi-colon instead of comma to write the results')
     args = parser.parse_args()
 
     measure_spec_pattern = re.compile(r'([a-zA-Z]+)((:?_o)?)')
@@ -65,8 +66,9 @@ if __name__ == '__main__':
         study.set_expected(im_expected, unique=args.gt_unique)
         study.process(sample_id, im_actual, unique=args.seg_unique)
 
+    csv_delimiter = ';' if args.semicolon else ','
     with open(args.output_file, 'w') as fout:
-        study.write_csv(fout)
+        study.write_csv(fout, delimiter=csv_delimiter)
 
     print(f'')
     print(f'Results written to: {args.output_file}')

@@ -49,3 +49,8 @@ Adds quantile-based implementation of ``segmetrics.boundary.Hausdorff``.
 
 Positional and keyword arguments passed to ``segmetrics.boundary.DistanceMeasure.object_based`` are passed through to ``ObjectBasedDistanceMeasure``.
 
+1.2.3
+-----
+
+Adds ``--semicolon`` CLI option.
+
