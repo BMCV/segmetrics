@@ -57,5 +57,11 @@ Adds ``--semicolon`` CLI option.
 1.3
 ---
 
+Adds the ``aggregation`` keyword argument and member variable of the ``segmetrics.measure.Measure`` base class.
+
+Removes the ``accumulative`` keyword argument and member variable of the ``segmetrics.measure.Measure`` base class.
+
 Removes the ``FRACTIONAL`` class variable of the ``segmetrics.measure.Measure`` base class.
+
+The method ``add_measure``` of the ``segmetrics.study.Study`` class now returns the name of the measure.
 

@@ -33,7 +33,7 @@ class FalseSplit(Measure):
     """
 
     def __init__(self, **kwargs):
-        kwargs.setdefault('accumulative', False)
+        kwargs.setdefault('aggregation', 'mean')
         super().__init__(**kwargs)
 
     def compute(self, actual):
@@ -53,7 +53,7 @@ class FalseMerge(Measure):
     """
 
     def __init__(self, **kwargs):
-        kwargs.setdefault('accumulative', False)
+        kwargs.setdefault('aggregation', 'mean')
         super().__init__(**kwargs)
 
     def compute(self, actual):
@@ -73,7 +73,7 @@ class FalsePositive(Measure):
     """
 
     def __init__(self, **kwargs):
-        kwargs.setdefault('accumulative', False)
+        kwargs.setdefault('aggregation', 'mean')
         super().__init__(**kwargs)
         self.result = None
 
@@ -96,7 +96,7 @@ class FalseNegative(Measure):
     """
 
     def __init__(self, **kwargs):
-        kwargs.setdefault('accumulative', False)
+        kwargs.setdefault('aggregation', 'mean')
         super().__init__(**kwargs)
         self.result = None
 

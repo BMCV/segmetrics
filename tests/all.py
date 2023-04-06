@@ -36,6 +36,8 @@ def create_full_study():
     study.add_measure(sm.FalseMerge(), 'Merge')
     study.add_measure(sm.FalsePositive(), 'FP')
     study.add_measure(sm.FalseNegative(), 'FN')
+    study.add_measure(sm.FalseSplit(aggregation='obj-mean'), 'Split/obj')
+    study.add_measure(sm.FalseMerge(aggregation='obj-mean'), 'Merge/obj')
     return study
 
 
@@ -82,6 +84,30 @@ class MeasureTest(unittest.TestCase):
         self.assertEqual(sm.FalseNegative().default_name(), 'Missing')
 
 
+class ObjMeanTest(unittest.TestCase):
+
+    def do_test(self, measure):
+        objects = 0
+        study = sm.Study()
+        sampler = CrossSampler(images, images)
+        measure_name = study.add_measure(measure(aggregation='obj-mean'))
+        for sample_id, ref, seg in sampler.all():
+            study.set_expected(ref, unique=True)
+            objects += len(frozenset(ref.reshape(-1)) - frozenset([0]))
+            study.process(sample_id, seg, unique=True)
+        count = np.sum(study[measure_name])
+        df = study.todf()
+        expected = count / objects
+        actual = df[measure_name].values[-1]
+        self.assertEqual(actual, expected)
+
+    def test_FalseMerge(self):
+        self.do_test(sm.FalseMerge)
+
+    def test_FalseSplit(self):
+        self.do_test(sm.FalseSplit)
+
+
 class FullStudyTest(unittest.TestCase):
 
     def setUp(self):
@@ -122,7 +148,7 @@ class SEGTest(unittest.TestCase):
         self.study.add_measure(sm.ISBIScore(), 'SEG')
         self.sampler = CrossSampler(images, images)
 
-    def test_sequential(self):
+    def test_parallel(self):
         sm.parallel.process_all(self.study, lambda sid: self.sampler.img2(sid), lambda sid: self.sampler.img1(sid), self.sampler.sample_ids, num_forks=2, is_actual_unique=True, is_expected_unique=True)
         seg_expected = isbi_seg_official(self.sampler.img2_list, self.sampler.img1_list)
         seg_actual = np.mean(self.study['SEG'])

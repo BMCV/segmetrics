@@ -1,11 +1,11 @@
 class Measure:
     """Defines a performance measure.
 
-    :param accumulative: Indicates whether the results of this performance measure are aggregated by summation (``True``) or by averaging (``False``).
+    :param aggregation: Indicates whether the results of this performance measure are aggregated by summation (``sum``), by averaging (``mean``), or by computing the proportion with respect to the number of annotated objects (``obj-mean``).
     """
 
-    def __init__(self, accumulative=False):
-        self.accumulative = accumulative
+    def __init__(self, aggregation='mean'):
+        self.aggregation = aggregation
 
     def set_expected(self, expected):
         """Sets the expected result for evaluation.

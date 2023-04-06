@@ -45,9 +45,15 @@ def _label(im, background=0, neighbors=4):
         - _SKIMAGE_MEASURE_LABEL_BF_LABEL # this is 1 in older versions and 0 in newer
 
 
-def _aggregate(measure, values):
-    fnc = np.sum if measure.accumulative else np.mean
-    return fnc(values)
+def _aggregate(measure, values, objects):
+    if measure.aggregation == 'sum':
+        return np.sum(values)
+    if measure.aggregation == 'mean':
+        return np.mean(values)
+    if measure.aggregation == 'obj-mean':
+        return np.sum(values) / objects
+    else:
+        raise ValueError(f'Unknown aggregation: "{measure.aggregation}"')
 
 
 class Study:
@@ -58,6 +64,7 @@ class Study:
 
     def __init__(self):
         self.measures   = dict()
+        self.objects    = dict()
         self.sample_ids = list()
         self.results    = dict()
         self.results_cache = dict()
@@ -75,7 +82,9 @@ class Study:
                 self.add_measure(other.measures[measure_name], name=measure_name)
             for sample_id in (other.results[measure_name].keys() if sample_ids == 'all' else sample_ids):
                 assert replace or sample_id not in self.results[measure_name]
+                assert replace or sample_id not in self.objects
                 self.results[measure_name][sample_id] = list(other.results[measure_name][sample_id])
+                self.objects[sample_id] = other.objects[sample_id]
                 if sample_id not in self.sample_ids: self.sample_ids.append(sample_id)
         self.results_cache.clear()
 
@@ -84,11 +93,13 @@ class Study:
         
         :param measure: The performance measure to be added.
         :param name: An arbitrary name which uniquely identifies the performance measure within this study. Uses ``measure.default_name()`` if ``None`` is given.
+        :return: The name used for the measure (see above).
         """
-        if not isinstance(measure, Measure): raise ValueError(f'measure must be a Measure object ({type(measure)}, {measure})')
+        if not isinstance(measure, Measure): raise ValueError(f'Argument "measure" must be a Measure object ({type(measure)}, {measure})')
         if name is None: name = measure.default_name()
         self.measures[name] = measure
         self.results [name] = {None: []}
+        return name
 
     def reset(self):
         """Resets all results computed so far in this study.
@@ -97,6 +108,7 @@ class Study:
             self.results[measure_name] = {None: []}
         self.results_cache.clear()
         self.sample_ids.clear()
+        self.objects.clear()
 
     def set_expected(self, expected, unique=True):
         """Sets the expected ground truth segmentation result.
@@ -112,6 +124,7 @@ class Study:
         expected = expected.squeeze()
         assert expected.ndim == 2, 'ground truth has wrong dimensions'
         expected = _get_labeled(expected, unique, 'ground truth')
+        self.expected_objects = len(frozenset(expected.reshape(-1)) - frozenset([0]))
         for measure_name in self.measures:
             measure = self.measures[measure_name]
             measure.set_expected(expected)
@@ -140,6 +153,7 @@ class Study:
             intermediate_results[measure_name] = result
         self.results_cache.clear()
         self.sample_ids.append(sample_id)
+        self.objects[sample_id] = self.expected_objects
         return intermediate_results
 
     def __getitem__(self, measure):
@@ -161,7 +175,7 @@ class Study:
         fmt = '%%%ds: %%%s' % (label_length, fmt_unbound_float)
         for measure_name in sorted(self.results.keys()):
             measure = self.measures[measure_name]
-            val = _aggregate(measure, self[measure_name])
+            val = _aggregate(measure, self[measure_name], sum(self.objects.values()))
             write((fmt % (measure_name, val)) + line_suffix)
 
     def write_csv(self, fout, write_samples='auto', write_header=True, write_summary=True, **kwargs):
@@ -189,7 +203,7 @@ class Study:
                 for measure_name in self.measures.keys():
                     measure = self.measures[measure_name]
                     samples = self.results[measure_name]
-                    row += [_aggregate(measure, samples[sample_id])]
+                    row += [_aggregate(measure, samples[sample_id], self.objects[sample_id])]
                 rows.append(row)
 
         # define summary
@@ -197,7 +211,7 @@ class Study:
             rows.append([''])
             for measure_name in self.measures.keys():
                 measure = self.measures[measure_name]
-                value = _aggregate(measure, self[measure_name])
+                value = _aggregate(measure, self[measure_name], sum(self.objects.values()))
                 rows[-1].append(value)
 
         # write results

@@ -134,7 +134,7 @@ class ObjectBasedDistanceMeasure(Measure):
         super().__init__()
         self.distance     = distance
         self.skip_fn      = skip_fn
-        self.accumulative = distance.accumulative
+        self.aggregation  = distance.aggregation
         self.nodetections = -1
         
     def set_expected(self, *args, **kwargs):
