@@ -104,8 +104,6 @@ class NSD(DistanceMeasure):
     where :math:`R \triangle S = \left(R \setminus S\right) \cup \left(S \setminus R\right)` is the symmetric difference of :math:`R` and :math:`S`. :math:`\mathrm{NSD}` attains values between :math:`0` and :math:`1`. Lower values correspond to better segmentation performance.
     """
 
-    FRACTIONAL = True
-
     def set_expected(self, expected):
         self.expected = (expected > 0)
         self.expected_boundary = _compute_binary_boundary(self.expected)
@@ -136,7 +134,6 @@ class ObjectBasedDistanceMeasure(Measure):
         super().__init__()
         self.distance     = distance
         self.skip_fn      = skip_fn
-        self.FRACTIONAL   = distance.FRACTIONAL
         self.accumulative = distance.accumulative
         self.nodetections = -1
         

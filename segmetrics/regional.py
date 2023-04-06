@@ -18,8 +18,6 @@ class Dice(Measure):
     .. _F1 score: https://en.wikipedia.org/wiki/F-score
     """
 
-    FRACTIONAL = True
-
     def compute(self, actual):
         ref = self.expected > 0
         res = actual        > 0
@@ -41,8 +39,6 @@ class JaccardCoefficient(Measure):
     
     The Jaccard coefficient equals :math:`\mathrm{JC} = \mathrm{DC} / \left(2 - \mathrm{DC}\right)`, where $\mathrm{DC}$ is the Dice coefficient. Note that this equation only holds for individual $\mathrm{JC}$ and $\mathrm{DC}$ values, but not for sums or mean values thereof.
     """
-
-    FRACTIONAL = True
 
     def compute(self, actual):
         ref = self.expected > 0
@@ -83,8 +79,6 @@ class RandIndex(Measure):
     - L\. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
     """
 
-    FRACTIONAL = True
-
     def compute(self, actual):
         a, b, c, d = self.compute_parts(actual)
         return [(a + d) / float(a + b + c + d)]
@@ -119,8 +113,6 @@ class AdjustedRandIndex(Measure):
     See: http://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html
     """
 
-    FRACTIONAL = True
-
     def compute(self, actual):
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', category=DeprecationWarning)
@@ -153,8 +145,6 @@ class JaccardIndex(RandIndex):
     - L\. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
     """
 
-    FRACTIONAL = False
-
     def compute(self, actual):
         a, b, c, d = self.compute_parts(actual)
         return [(a + d) / float(b + c + d)]
@@ -174,8 +164,6 @@ class ISBIScore(Measure):
 
     - M\. Maska et al., "A benchmark for comparison of cell tracking algorithms," Bioinformatics, vol. 30, no. 11, pp. 1609–1617, 2014.
     """
-
-    FRACTIONAL = True
 
     def __init__(self, min_ref_size=1):
         super().__init__()

@@ -4,9 +4,6 @@ class Measure:
     :param accumulative: Indicates whether the results of this performance measure are aggregated by summation (``True``) or by averaging (``False``).
     """
 
-    """Indicates whether the results from this measure should be presented as percentages."""
-    FRACTIONAL = False
-
     def __init__(self, accumulative=False):
         self.accumulative = accumulative
 

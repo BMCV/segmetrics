@@ -54,3 +54,8 @@ Positional and keyword arguments passed to ``segmetrics.boundary.DistanceMeasure
 
 Adds ``--semicolon`` CLI option.
 
+1.3
+---
+
+Removes the ``FRACTIONAL`` class variable of the ``segmetrics.measure.Measure`` base class.
+

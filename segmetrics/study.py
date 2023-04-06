@@ -157,13 +157,11 @@ class Study:
         :param fmt_unbound_float: Formatting literal used for decimals not presented as percentages.
         :param line_suffix: Suffix of each line.
         """
-        label_length   = pad + max(len(str(measure_name)) for measure_name in self.results)
-        fmt_fractional = '%%%ds: %%5.2f %%%%' % label_length
-        fmt_unbound    = '%%%ds: %%%s' % (label_length, fmt_unbound_float)
+        label_length = pad + max(len(str(measure_name)) for measure_name in self.results)
+        fmt = '%%%ds: %%%s' % (label_length, fmt_unbound_float)
         for measure_name in sorted(self.results.keys()):
             measure = self.measures[measure_name]
-            fmt = fmt_fractional if measure.FRACTIONAL else fmt_unbound
-            val = _aggregate(measure, self[measure_name]) * (100 if measure.FRACTIONAL else 1)
+            val = _aggregate(measure, self[measure_name])
             write((fmt % (measure_name, val)) + line_suffix)
 
     def write_csv(self, fout, write_samples='auto', write_header=True, write_summary=True, **kwargs):
