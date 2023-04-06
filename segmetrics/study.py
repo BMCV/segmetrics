@@ -85,7 +85,7 @@ class Study:
         :param measure: The performance measure to be added.
         :param name: An arbitrary name which uniquely identifies the performance measure within this study. Uses ``measure.default_name()`` if ``None`` is given.
         """
-        if not isinstance(measure, Measure): raise ValueError('measure must be a Measure object')
+        if not isinstance(measure, Measure): raise ValueError(f'measure must be a Measure object ({type(measure)}, {measure})')
         if name is None: name = measure.default_name()
         self.measures[name] = measure
         self.results [name] = {None: []}
