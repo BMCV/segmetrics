@@ -37,7 +37,7 @@ class JaccardCoefficient(Measure):
     
     and attains values between :math:`0` and :math:`1`. Higher values correspond to better segmentation performance.
     
-    The Jaccard coefficient equals :math:`\mathrm{JC} = \mathrm{DC} / \left(2 - \mathrm{DC}\right)`, where $\mathrm{DC}$ is the Dice coefficient. Note that this equation only holds for individual $\mathrm{JC}$ and $\mathrm{DC}$ values, but not for sums or mean values thereof.
+    The Jaccard coefficient equals :math:`\mathrm{JC} = \mathrm{DC} / \left(2 - \mathrm{DC}\right)`, where :math:`\mathrm{DC}` is the Dice coefficient. Note that this equation only holds for individual :math:`\mathrm{JC}` and :math:`\mathrm{DC}` values, but not for sums or mean values thereof.
     """
 
     def compute(self, actual):
