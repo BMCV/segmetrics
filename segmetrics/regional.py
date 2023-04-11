@@ -165,8 +165,8 @@ class ISBIScore(Measure):
     - M\. Maska et al., "A benchmark for comparison of cell tracking algorithms," Bioinformatics, vol. 30, no. 11, pp. 1609–1617, 2014.
     """
 
-    def __init__(self, min_ref_size=1):
-        super().__init__()
+    def __init__(self, min_ref_size=1, **kwargs):
+        super().__init__(**kwargs)
         assert min_ref_size >= 1, 'min_ref_size must be 1 or larger'
         self.min_ref_size = min_ref_size
 

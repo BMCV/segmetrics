@@ -62,8 +62,8 @@ class Hausdorff(DistanceMeasure):
     - W\. J. Rucklidge, "Efficiently locating objects using the Hausdorff distance." International Journal of computer vision 24.3 (1997): 251-270.
     """
 
-    def __init__(self, mode='sym', quantile=1):
-        super().__init__()
+    def __init__(self, mode='sym', quantile=1, **kwargs):
+        super().__init__(**kwargs)
         assert mode in ('a2e', 'e2a', 'symmetric', 'sym')
         assert 0 < quantile <= 1
         if mode == 'symmetric': mode = 'sym'

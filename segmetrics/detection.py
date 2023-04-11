@@ -32,10 +32,6 @@ class FalseSplit(Measure):
     - L\. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
     """
 
-    def __init__(self, **kwargs):
-        kwargs.setdefault('aggregation', 'mean')
-        super().__init__(**kwargs)
-
     def compute(self, actual):
         seg_by_ref = _compute_seg_by_ref_assignments(actual, self.expected)
         return [sum(len(seg_by_ref[ref_label]) > 1 for ref_label in seg_by_ref.keys() if ref_label > 0)]
@@ -51,10 +47,6 @@ class FalseMerge(Measure):
 
     - L\. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
     """
-
-    def __init__(self, **kwargs):
-        kwargs.setdefault('aggregation', 'mean')
-        super().__init__(**kwargs)
 
     def compute(self, actual):
         ref_by_seg = _compute_ref_by_seg_assignments(actual, self.expected)
@@ -73,7 +65,6 @@ class FalsePositive(Measure):
     """
 
     def __init__(self, **kwargs):
-        kwargs.setdefault('aggregation', 'mean')
         super().__init__(**kwargs)
         self.result = None
 
@@ -96,7 +87,6 @@ class FalseNegative(Measure):
     """
 
     def __init__(self, **kwargs):
-        kwargs.setdefault('aggregation', 'mean')
         super().__init__(**kwargs)
         self.result = None
 
@@ -114,6 +104,9 @@ class COCOmAP(Measure):
     """Calculate mean Average Precision for multiple intersection over union thresholds
 
     This metric is used in the COCO or 2018 Data Science Bowl challenge.
+
+    .. deprecated:: 1.0
+       The implementation of this measure has not undergone any testing or development since version 1.0, since the contributor of this measure is not involved in segmetrics.py any longer.
     """
 
     def __init__(self, min_ref_size=1, iou_thresholds=[0.5 , 0.55, 0.6 , 0.65, 0.7 , 0.75, 0.8 , 0.85, 0.9 , 0.95]):
