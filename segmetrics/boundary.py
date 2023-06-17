@@ -190,4 +190,12 @@ class ObjectBasedDistanceMeasure(Measure):
         return results
 
     def default_name(self):
-        return f'Ob. {self.distance.default_name()}'
+        name = f'Ob. {self.distance.default_name()}'
+        if self.skip_fn:
+            skip_fn_hint = f'skip_fn={self.skip_fn}'
+            if name.endswith(')'):
+                name = name[:-1] + f', {skip_fn_hint})'
+            else:
+                name += f' ({skip_fn_hint})'
+        return name
+

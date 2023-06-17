@@ -192,4 +192,8 @@ class ISBIScore(Measure):
         return results
 
     def default_name(self):
-        return 'SEG'
+        name = 'SEG'
+        if self.min_ref_size >= 2:
+            name += f' (min_ref_size={self.min_ref_size})'
+        return name
+
