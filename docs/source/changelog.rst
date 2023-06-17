@@ -65,3 +65,10 @@ Removes the ``FRACTIONAL`` class variable of the ``segmetrics.measure.Measure`` 
 
 The method ``add_measure``` of the ``segmetrics.study.Study`` class now returns the name of the measure.
 
+1.4
+---
+
+Changes default name of ``segmetrics.regional.ISBIScore`` if ``min_ref_size`` is not the default.
+
+Changes default name of ``segmetrics.boundary.ObjectBasedDistanceMeasure`` if ``skip_fn`` is not the default.
+
