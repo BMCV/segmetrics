@@ -1,6 +1,13 @@
 User guide
 ==========
 
+Galaxy
+------
+
+This tool is also available as a `web-app for the Galaxy platform`_ where it can be used without installation.
+
+.. _web-app on the Galaxy platform: https://usegalaxy.eu/root?tool_id=toolshed.g2.bx.psu.edu/repos/imgteam/segmetrics/ip_segmetrics/1.4.0-1
+
 Installation
 ------------
 
