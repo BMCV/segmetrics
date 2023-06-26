@@ -15,7 +15,7 @@ segmetrics
 
 The goal of this package is to provide easy-to-use tools for evaluation of the performance of segmentation methods in biomedical image analysis and beyond, and to fasciliate the comparison of different methods by providing standardized implementations. This package currently only supports 2-D image data.
 
-This tool is also available as a `web-app on the Galaxy platform`_.
+This tool is also available as a `web-app for the Galaxy platform`_.
 
 .. _web-app on the Galaxy platform: https://usegalaxy.eu/root?tool_id=toolshed.g2.bx.psu.edu/repos/imgteam/segmetrics/ip_segmetrics/1.4.0-1
 
