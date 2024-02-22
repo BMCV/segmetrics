@@ -4,6 +4,7 @@
     <h6>Image segmentation and object detection performance measures</h6>
     <h1>
       <a href="https://github.com/BMCV/segmetrics">segmetrics</a><br>
+      <a href="https://github.com/BMCV/segmetrics/actions/workflows/testsuite.yml"><img src="https://github.com/BMCV/segmetrics/actions/workflows/testsuite.yml/badge.svg" /></a>
       <a href="https://anaconda.org/bioconda/segmetrics"><img src="https://img.shields.io/badge/Install%20with-conda-%2387c305" /></a>
       <a href="https://anaconda.org/bioconda/segmetrics"><img src="https://img.shields.io/conda/v/bioconda/segmetrics.svg?label=Version" /></a>
       <a href="https://anaconda.org/bioconda/segmetrics"><img src="https://img.shields.io/conda/dn/bioconda/segmetrics.svg?label=Downloads" /></a>
