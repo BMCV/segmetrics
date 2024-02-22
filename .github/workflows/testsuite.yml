@@ -7,7 +7,9 @@ on:
 
   pull_request:
 
-    branches: ['develop']
+    branches:
+      - develop
+      - master
 
     paths:
       - .github/workflows/testsuite.yml
@@ -19,7 +21,8 @@ on:
 
   push:
 
-    branches: ['master']
+    branches:
+      - master
 
 
 jobs:
