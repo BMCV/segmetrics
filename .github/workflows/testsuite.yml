@@ -11,7 +11,7 @@ on:
 
     paths:
       - .github/workflows/testsuite.yml
-      - segmetrics
+      - segmetrics/*.py
       - setup.py
       - tests/*.py
       - tests/*.csv

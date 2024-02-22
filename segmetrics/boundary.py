@@ -16,7 +16,7 @@ def _compute_binary_boundary(mask, width=1):
 
 def _compute_boundary_distance_map(mask):
     boundary = _compute_binary_boundary(mask)
-    return ndimage.morphology.distance_transform_edt(np.logical_not(boundary))
+    return ndimage.distance_transform_edt(np.logical_not(boundary))
 
 
 def _quantile_max(quantile, values):
@@ -72,7 +72,7 @@ class Hausdorff(DistanceMeasure):
 
     def set_expected(self, expected):
         self.expected_boundary = _compute_binary_boundary(expected > 0)
-        self.expected_boundary_distance_map = ndimage.morphology.distance_transform_edt(np.logical_not(self.expected_boundary))
+        self.expected_boundary_distance_map = ndimage.distance_transform_edt(np.logical_not(self.expected_boundary))
 
     def compute(self, actual):
         actual_boundary = _compute_binary_boundary(actual > 0)
@@ -80,7 +80,7 @@ class Hausdorff(DistanceMeasure):
         results = []
         if self.mode in ('a2e', 'sym'): results.append(self._quantile_max(self.expected_boundary_distance_map[actual_boundary]))
         if self.mode in ('e2a', 'sym'):
-            actual_boundary_distance_map = ndimage.morphology.distance_transform_edt(np.logical_not(actual_boundary))
+            actual_boundary_distance_map = ndimage.distance_transform_edt(np.logical_not(actual_boundary))
             results.append(self._quantile_max(actual_boundary_distance_map[self.expected_boundary]))
         return [max(results)]
 
@@ -107,7 +107,7 @@ class NSD(DistanceMeasure):
     def set_expected(self, expected):
         self.expected = (expected > 0)
         self.expected_boundary = _compute_binary_boundary(self.expected)
-        self.expected_boundary_distance_map = ndimage.morphology.distance_transform_edt(np.logical_not(self.expected_boundary))
+        self.expected_boundary_distance_map = ndimage.distance_transform_edt(np.logical_not(self.expected_boundary))
 
     def compute(self, actual):
         actual = (actual > 0)
