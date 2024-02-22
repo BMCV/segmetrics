@@ -79,6 +79,8 @@ jobs:
 
   report_coverage:
 
+    name: Report test coverage
+
     runs-on: ubuntu-latest
 
     needs: ['run_testsuite']
