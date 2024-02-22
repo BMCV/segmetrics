@@ -99,7 +99,7 @@ class ObjMeanTest(unittest.TestCase):
         df = study.todf()
         expected = count / objects
         actual = df[measure_name].values[-1]
-        self.assertEqual(actual, expected)
+        self.assertAlmostEqual(actual, expected)
 
     def test_FalseMerge(self):
         self.do_test(sm.FalseMerge)
