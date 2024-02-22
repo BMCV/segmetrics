@@ -21,7 +21,7 @@ This tool is also available as a `web-app for the Galaxy platform`_.
 
 The documentation is available here: https://segmetrics.readthedocs.io
 
-Use ``python -m tests.all`` to run the test suite.
+Use ``python -m unittest`` to run the test suite.
 
 Contributions:
 """"""""""""""
