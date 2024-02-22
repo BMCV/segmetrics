@@ -25,6 +25,12 @@ on:
       - master
 
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+
 jobs:
 
   run_testsuite:
@@ -32,9 +38,6 @@ jobs:
     name: Test suite
 
     runs-on: ubuntu-latest
-
-    permissions:
-      issues: write
 
     strategy:
       matrix:
