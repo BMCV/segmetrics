@@ -23,6 +23,11 @@ The documentation is available here: https://segmetrics.readthedocs.io
 
 Use ``python -m tests.all`` to run the test suite.
 
+Contributions:
+""""""""""""""
+
+Contributions should be made against the ``develop`` branch, so that the documentation build on readthedocs.io is triggered, the documentation is built and reviewed (see `here <https://segmetrics.readthedocs.io/en/develop/>`_), before ``develop`` is merged into ``master``. This ensures that the ``master`` branch always has an up-to-date documentation.
+
 ----
 
 .. raw:: html
