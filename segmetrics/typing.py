@@ -1,13 +1,18 @@
-from typing import Union
+from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
 
-LabelImage = npt.NDArray[np.integer]
+if TYPE_CHECKING:
 
-BinaryImage = npt.NDArray[np.bool_]
+    LabelImage = npt.NDArray[np.integer]
 
-Image = Union[
-    LabelImage,
-    BinaryImage,
-]
+    BinaryImage = npt.NDArray[np.bool_]
+
+    Image = LabelImage | BinaryImage
+
+else:
+
+    LabelImage = None
+    BinaryImage = None
+    Image = None
