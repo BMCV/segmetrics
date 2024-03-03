@@ -45,7 +45,7 @@ class Measure:
             An image containing uniquely labeled object masks corresponding to
             the segmentation results.
         """
-        return NotImplementedError()
+        return NotImplemented
 
     def default_name(self):
         """
