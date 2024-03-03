@@ -1,7 +1,6 @@
 # flake8: noqa
 
 import numpy as np
-
 from deprecated import deprecated
 
 from segmetrics.measure import Measure
