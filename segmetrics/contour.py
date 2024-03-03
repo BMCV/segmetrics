@@ -27,9 +27,11 @@ class ContourMeasure(ImageMeasureMixin, Measure):
     binary volumes (images).
     """
 
-    def __init__(self, correspondance_function='min'):
+    def __init__(self, *args, correspondance_function='min', **kwargs):
         super().__init__(
+            *args,
             correspondance_function=correspondance_function,
+            **kwargs,
         )
 
 

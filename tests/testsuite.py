@@ -1,15 +1,21 @@
-import unittest
-import segmetrics as sm
-import numpy as np
-import pathlib
-import pandas as pd
-import time
+# flake8: noqa
+
 import os
+import pathlib
 import tempfile
-import skimage.io
+import time
+import unittest
 import warnings
 
-from tests.data import images, CrossSampler
+import numpy as np
+import pandas as pd
+import skimage.io
+
+import segmetrics as sm
+from tests.data import (
+    CrossSampler,
+    images,
+)
 from tests.isbi_seg import isbi_seg_official
 
 
@@ -24,6 +30,7 @@ def create_full_study():
     study.add_measure(sm.ISBIScore().symmetric(), 'Sym. SEG')
     study.add_measure(sm.JaccardCoefficient(), 'JC')
     study.add_measure(sm.JaccardIndex(), 'JI')
+    study.add_measure(sm.JaccardIndex(aggregation='geometric-mean'), 'JI (geom)')
     study.add_measure(sm.RandIndex(), 'Rand')
     study.add_measure(sm.AdjustedRandIndex(), 'ARI')
     study.add_measure(sm.Hausdorff(), 'HSD')
@@ -37,8 +44,8 @@ def create_full_study():
     study.add_measure(sm.FalseMerge(), 'Merge')
     study.add_measure(sm.FalsePositive(), 'FP')
     study.add_measure(sm.FalseNegative(), 'FN')
-    study.add_measure(sm.FalseSplit(aggregation='obj-mean'), 'Split/obj')
-    study.add_measure(sm.FalseMerge(aggregation='obj-mean'), 'Merge/obj')
+    study.add_measure(sm.FalseSplit(aggregation='object-mean'), 'Split/obj')
+    study.add_measure(sm.FalseMerge(aggregation='object-mean'), 'Merge/obj')
     return study
 
 
@@ -91,7 +98,7 @@ class ObjMeanTest(unittest.TestCase):
         objects = 0
         study = sm.Study()
         sampler = CrossSampler(images, images)
-        measure_name = study.add_measure(measure(aggregation='obj-mean'))
+        measure_name = study.add_measure(measure(aggregation='object-mean'))
         for sample_id, ref, seg in sampler.all():
             study.set_expected(ref, unique=True)
             objects += len(frozenset(ref.reshape(-1)) - frozenset([0]))

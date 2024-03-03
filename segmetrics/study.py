@@ -5,6 +5,7 @@ import math
 import sys
 
 import numpy as np
+import scipy.stats.mstats
 import skimage.measure
 
 from segmetrics.measure import Measure
@@ -62,7 +63,9 @@ def _aggregate(measure, values, objects):
         return np.sum(values)
     if measure.aggregation == 'mean':
         return np.mean(values)
-    if measure.aggregation == 'obj-mean':
+    if measure.aggregation == 'geometric-mean':
+        return scipy.stats.mstats.gmean(values)
+    if measure.aggregation == 'object-mean':
         return np.sum(values) / objects
     else:
         raise ValueError(f'Unknown aggregation: "{measure.aggregation}"')

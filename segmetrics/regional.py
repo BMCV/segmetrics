@@ -16,9 +16,11 @@ class RegionalImageMeasure(ImageMeasureMixin, Measure):
     of binary volumes (images).
     """
 
-    def __init__(self, correspondance_function='max'):
+    def __init__(self, *args, correspondance_function='max', **kwargs):
         super().__init__(
+            *args,
             correspondance_function=correspondance_function,
+            **kwargs,
         )
 
 

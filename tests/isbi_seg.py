@@ -1,10 +1,9 @@
 import os
-import tempfile
-import shutil
-import subprocess
-import sys
 import re
+import subprocess
+import tempfile
 import warnings
+
 import py7zr
 from skimage import io
 
@@ -28,7 +27,7 @@ def isbi_seg_official(result_list, groundtruth_list, verbose=False):
         with py7zr.SevenZipFile('isbi_evaluation_software.7z', mode='r', password='ppy42wGfcrHG9W4Z') as z:
             z.extractall()
         subprocess.call(['chmod', '+w', '-R', '.'], **subprocess_kwargs)
-        
+
         os.chdir('Linux')
         subprocess.call(['chmod', '+x', 'SEGMeasure'], **subprocess_kwargs)
         result = str(subprocess.check_output(['./SEGMeasure', '../data', '01']))
@@ -39,4 +38,3 @@ def isbi_seg_official(result_list, groundtruth_list, verbose=False):
             return official_result
         else:
             raise ValueError('Unexpected result:', result)
-            
