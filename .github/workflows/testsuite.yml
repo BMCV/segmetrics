@@ -59,7 +59,7 @@ jobs:
 
   run_testsuite:
 
-    name: Test suite
+    name: Tests
     runs-on: ubuntu-latest
 
     strategy:
