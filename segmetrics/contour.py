@@ -3,7 +3,6 @@ from scipy import ndimage
 from skimage import morphology as morph
 
 from segmetrics.measure import (
-    AsymmetricMeasureMixin,
     ImageMeasureMixin,
     Measure,
 )
@@ -12,11 +11,6 @@ from segmetrics.measure import (
 def _compute_binary_contour(mask, width=1):
     dilation = morph.binary_dilation(mask, morph.disk(width))
     return np.logical_and(dilation, np.logical_not(mask))
-
-
-def _compute_contour_distance_map(mask):
-    contour = _compute_binary_contour(mask)
-    return ndimage.distance_transform_edt(np.logical_not(contour))
 
 
 def _quantile_max(quantile, values):
@@ -39,27 +33,19 @@ class ContourMeasure(ImageMeasureMixin, Measure):
         )
 
 
-class Hausdorff(AsymmetricMeasureMixin, ContourMeasure):
+class Hausdorff(ContourMeasure):
     r"""
     Defines the Hausdorff distsance between two binary images.
 
-    The Hausdorff distsance is not upper-bounded. Lower values correspond to
-    better segmentation performance.
-
-    :param mode:
-        Specifies how the Hausdorff distance is to be computed.
+    The Hausdorff distsance is the maximum Euclidean distance of the ground
+    truth contour to the segmented contour. The Hausdorff distsance is not
+    upper-bounded. Lower values correspond to better segmentation performance.
 
     :param quantile:
         Specifies the quantile of the Hausdorff distsance. The default
         ``quantile=1`` corresponds to the Hausdorff distance described by
         Bamford (2003). Any other positive value for ``quantile`` corresponds
         to the quantile method introduced by Rucklidge (1997).
-
-    The following values are allowed for the ``mode`` parameter:
-
-    - ``a2e``: Maximum distance of actual foreground to expected foreground.
-    - ``e2a``: Maximum distance of expected foreground to actual foreground.
-    - ``sym``: Maximum of the two (equivalent to ``symmetric``).
 
     References:
 
@@ -70,15 +56,9 @@ class Hausdorff(AsymmetricMeasureMixin, ContourMeasure):
       distance." International Journal of computer vision 24.3 (1997): 251-270.
     """
 
-    def __init__(self, mode='sym', quantile=1, **kwargs):
+    def __init__(self, quantile=1, **kwargs):
         super().__init__(**kwargs)
-        assert mode in ('a2e', 'e2a', 'symmetric', 'sym')
         assert 0 < quantile <= 1
-
-        if mode == 'symmetric':
-            mode = 'sym'
-
-        self.mode = mode
         self.quantile = quantile
 
     def set_expected(self, expected):
@@ -92,28 +72,17 @@ class Hausdorff(AsymmetricMeasureMixin, ContourMeasure):
         if not self.expected_contour.any() or not actual_contour.any():
             return []
 
-        results = []
-
-        if self.mode in ('a2e', 'sym'):
-            results.append(self._quantile_max(
+        return [
+            self._quantile_max(
                 self.expected_contour_distance_map[actual_contour]
-            ))
-
-        if self.mode in ('e2a', 'sym'):
-            actual_contour_distance_map = ndimage.distance_transform_edt(
-                np.logical_not(actual_contour)
             )
-            results.append(self._quantile_max(
-                actual_contour_distance_map[self.expected_contour]
-            ))
-
-        return [max(results)]
+        ]
 
     def default_name(self):
         if self.quantile == 1:
-            return f'HSD ({self.mode})'
+            return 'HSD'
         else:
-            return f'HSD ({self.mode}, Q={self.quantile:g})'
+            return f'HSD (Q={self.quantile:g})'
 
     def _quantile_max(self, values):
         return _quantile_max(self.quantile, values)

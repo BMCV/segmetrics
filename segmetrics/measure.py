@@ -1,4 +1,3 @@
-import numpy as np
 from scipy import ndimage
 
 from segmetrics._aux import bbox
@@ -54,10 +53,11 @@ class ImageMeasureMixin:
     objects, not the individual objects themselves.
 
     :param correspondance_function:
-        Determines how the object correspondances are determined when using
-        the :meth:`object_based` method. Must be either ``min`` (use the
-        object with the minimal score) or ``max`` (use the object with the
-        maximal score).
+        Determines how the object correspondances between the segmented and
+        the ground truth objects are determined when using the
+        :meth:`object_based` method. The correspondances are established by
+        choosing the segmented object for each ground truth object, for which
+        the obtained scores are either minimal (``min``) or maximal (``max``).
     """
 
     def __init__(self, *args, correspondance_function, **kwargs):
@@ -93,22 +93,10 @@ class ImageMeasureMixin:
 class AsymmetricMeasureMixin:
 
     def reversed(self, *args, **kwargs):
-        return ReversedMeasureAdapter(*args, **kwargs)
+        return ReverseMeasureAdapter(self, *args, **kwargs)
 
-    def symmetric(self, reduction_function, *args, **kwargs):
-        if isinstance(reduction_function, str):
-            reduction_function = {
-                'min': min,
-                'max': max,
-                'mean': np.mean,
-            }[reduction_function]
-        return SymmetricMeasureAdapter(
-            self,
-            self.reversed(),
-            reduction_function,
-            *args,
-            **kwargs,
-        )
+    def symmetric(self, *args, **kwargs):
+        return SymmetricMeasureAdapter(self, self.reversed(), *args, **kwargs)
 
 
 class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
@@ -117,8 +105,8 @@ class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
 
     Computes the underlying image-level measure on a per-object level. Object
     correspondances between the segmented and the ground truth objects are
-    established on a many-to-many basis, so that the resulting scores are
-    either minimal or maximal.
+    established by choosing the segmented object for each ground truth object,
+    for which the obtained scores are either minimal or maximal.
 
     :param measure:
         The underlying image-level measure.
@@ -210,15 +198,19 @@ class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
         return f'Ob. {self.measure.default_name()}'
 
 
-class ReversedMeasureAdapter(Measure):
+class ReverseMeasureAdapter(Measure):
 
     def __init__(self, measure, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.measure = measure
+        self.measure     = measure
+        self.aggregation = measure.aggregation
 
     def compute(self, actual):
         self.measure.set_expected(actual)
-        return self.compute(self.expected)
+        return self.measure.compute(self.expected)
+
+    def default_name(self):
+        return f'Rev. {self.measure.default_name()}'
 
 
 class SymmetricMeasureAdapter(Measure):
@@ -227,14 +219,14 @@ class SymmetricMeasureAdapter(Measure):
         self,
         measure1,
         measure2,
-        reduction_function,
         *args,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        self.measure1 = measure1
-        self.measure2 = measure2
-        self.reduction_function = reduction_function
+        assert measure1.aggregation == measure2.aggregation
+        self.measure1    = measure1
+        self.measure2    = measure2
+        self.aggregation = measure1.aggregation
 
     def set_expected(self, expected):
         self.measure1.set_expected(expected)
@@ -242,6 +234,9 @@ class SymmetricMeasureAdapter(Measure):
         super().set_expected(expected)
 
     def compute(self, actual):
-        score1 = self.measure1.compute(actual)
-        score2 = self.measure2.compute(actual)
-        return self.reduction_function([score1, score2])
+        results1 = self.measure1.compute(actual)
+        results2 = self.measure2.compute(actual)
+        return results1 + results2
+
+    def default_name(self):
+        return f'Sym. {self.measure1.default_name()}'
