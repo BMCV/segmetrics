@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "segmetrics"
+doi: "10.5281/zenodo.10111958"
+version: 1.4
+date-released: 2023-07-23
+url: "https://github.com/BMCV/segmetrics"
+authors:
+- family-names: "Kostrykin"
+  given-names: "Leonid"
+  orcid: "https://orcid.org/0000-0003-1323-3762"
+- family-names: "Wollmann"
+  given-names: "Thomas"
+  orcid: "https://orcid.org/0000-0002-4741-3844"
