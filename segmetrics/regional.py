@@ -1,20 +1,27 @@
-import sys
+import warnings
+
 import numpy as np
 import sklearn.metrics
-import warnings
 
 from segmetrics.measure import Measure
 
 
 class Dice(Measure):
-    r"""Defines the Dice coefficient.
-    
-    Let :math:`R` be the set of all image pixels corresponding to the ground truth segmentation, and :math:`S` the set of those corresponding to the segmentation result. Then, the Dice coefficient is defined as
-    
-    .. math:: \mathrm{DC} = \frac{2 \cdot \left|R \cap S\right|}{\left|R\right| + \left|S\right|}
-    
-    and attains values between :math:`0` and :math:`1`. Higher values correspond to better segmentation performance. Dice corresponds to the pixel-based `F1 score`_ (harmonic mean of precision and recall).
-    
+    r"""
+    Defines the Dice coefficient.
+
+    Let :math:`R` be the set of all image pixels corresponding to the ground
+    truth segmentation, and :math:`S` the set of those corresponding to the
+    segmentation result. Then, the Dice coefficient is defined as
+
+    .. math:: \mathrm{DC} =\frac
+        {2 \cdot \left|R \cap S\right|}
+        {\left|R\right| + \left|S\right|}
+
+    and attains values between :math:`0` and :math:`1`. Higher values
+    correspond to better segmentation performance. Dice corresponds to the
+    pixel-based `F1 score`_ (harmonic mean of precision and recall).
+
     .. _F1 score: https://en.wikipedia.org/wiki/F-score
     """
 
@@ -29,15 +36,25 @@ class Dice(Measure):
 
 
 class JaccardCoefficient(Measure):
-    r"""Defines the Jaccard coefficient.
-    
-    Let :math:`R` be the set of all image pixels corresponding to the ground truth segmentation, and :math:`S` the set of those corresponding to the segmentation result. Then, the Jaccard coefficient is defined as the *intersection over the union*,
-    
-    .. math:: \mathrm{JC} = \frac{\left|R \cap S\right|}{\left|R \cup S\right|},
-    
-    and attains values between :math:`0` and :math:`1`. Higher values correspond to better segmentation performance.
-    
-    The Jaccard coefficient equals :math:`\mathrm{JC} = \mathrm{DC} / \left(2 - \mathrm{DC}\right)`, where :math:`\mathrm{DC}` is the Dice coefficient. Note that this equation only holds for individual :math:`\mathrm{JC}` and :math:`\mathrm{DC}` values, but not for sums or mean values thereof.
+    r"""
+    Defines the Jaccard coefficient.
+
+    Let :math:`R` be the set of all image pixels corresponding to the ground
+    truth segmentation, and :math:`S` the set of those corresponding to the
+    segmentation result. Then, the Jaccard coefficient is defined as the
+    *intersection over the union*,
+
+    .. math:: \mathrm{JC} = \frac
+        {\left|R \cap S\right|}
+        {\left|R \cup S\right|},
+
+    and attains values between :math:`0` and :math:`1`. Higher values
+    correspond to better segmentation performance.
+
+    The Jaccard coefficient equals :math:`\mathrm{JC} = \mathrm{DC} / \left(2 -
+    \mathrm{DC}\right)`, where :math:`\mathrm{DC}` is the Dice coefficient.
+    Note that this equation only holds for individual :math:`\mathrm{JC}` and
+    :math:`\mathrm{DC}` values, but not for sums or mean values thereof.
     """
 
     def compute(self, actual):
@@ -55,10 +72,14 @@ class JaccardCoefficient(Measure):
 
 
 class RandIndex(Measure):
-    r"""Defines the Rand index.
-    
-    Let :math:`R` be the set of all image pixels corresponding to the ground truth segmentation, and :math:`S` the set of those corresponding to the segmentation result. Moreover, let :math:`a, b, c, d` be the quantities of the events
-    
+    r"""
+    Defines the Rand index.
+
+    Let :math:`R` be the set of all image pixels corresponding to the ground
+    truth segmentation, and :math:`S` the set of those corresponding to the
+    segmentation result. Moreover, let :math:`a, b, c, d` be the quantities of
+    the events
+
     .. math::
 
         &\text{(a) } R_i = R_j \text{ and } S_i = S_j \quad
@@ -66,17 +87,23 @@ class RandIndex(Measure):
         &\text{(c) } R_i = R_j \text{ and } S_i \neq S_j \quad
         &\text{(d) } R_i \neq R_j \text{ and } S_i \neq S_j
 
-    for :math:`i` and :math:`j` ranging over all pair of pixels in :math:`R` and :math:`S`. Then, the Rand index is defined as
-    
+    for :math:`i` and :math:`j` ranging over all pair of pixels in :math:`R`
+    and :math:`S`. Then, the Rand index is defined as
+
     .. math:: \mathrm{RI} = \frac{a + d}{a + b + c + d}.
-    
-    The Rand index attains values between :math:`0` and :math:`1`. Higher values correspond to better segmentation performance. The Rand index corresponds to the pixel-based `accuracy score`_.
-    
-    .. _accuracy score: https://en.wikipedia.org/wiki/Accuracy_and_precision#In_binary_classification
+
+    The Rand index attains values between :math:`0` and :math:`1`. Larger
+    values correspond to better segmentation performance. The Rand index
+    corresponds to the pixel-based `accuracy score`_.
+
+    .. _accuracy score:
+        https://en.wikipedia.org/wiki/Accuracy_and_precision#In_binary_classification
 
     References:
 
-    - L\. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
+    - L\. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in
+      microscope cell images: A hand-segmented dataset and comparison of
+      algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
     """
 
     def compute(self, actual):
@@ -84,7 +111,8 @@ class RandIndex(Measure):
         return [(a + d) / float(a + b + c + d)]
 
     def compute_parts(self, actual):
-        """Computes the values :math:`a`, :math:`b`, :math:`c`, :math:`d`.
+        """
+        Computes the values :math:`a`, :math:`b`, :math:`c`, :math:`d`.
         """
         R, S = (self.expected > 0), (actual > 0)
         a, b, c, d = 0, 0, 0, 0
@@ -108,25 +136,36 @@ class RandIndex(Measure):
 
 
 class AdjustedRandIndex(Measure):
-    """Defines the adjusted Rand index.
+    """
+    Defines the adjusted Rand index.
 
-    See: http://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html
+    See:
+    http://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html
     """
 
     def compute(self, actual):
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', category=DeprecationWarning)
-            return [sklearn.metrics.adjusted_rand_score(self.expected.flat, actual.flat)]
+            return [
+                sklearn.metrics.adjusted_rand_score(
+                    self.expected.flat,
+                    actual.flat
+                )
+            ]
 
     def default_name(self):
         return 'ARI'
 
 
 class JaccardIndex(RandIndex):
-    r"""Defines the Jaccard index, not to be confused with the Jaccard coefficient.
-    
-    Let :math:`R` be the set of all image pixels corresponding to the ground truth segmentation, and :math:`S` the set of those corresponding to the segmentation result. Moreover, let :math:`a, b, c, d` be the quantities of the events
-    
+    r"""
+    Defines the Jaccard index, not to be confused with the Jaccard coefficient.
+
+    Let :math:`R` be the set of all image pixels corresponding to the ground
+    truth segmentation, and :math:`S` the set of those corresponding to the
+    segmentation result. Moreover, let :math:`a, b, c, d` be the quantities of
+    the events
+
     .. math::
 
         &\text{(a) } R_i = R_j \text{ and } S_i = S_j \quad
@@ -134,15 +173,19 @@ class JaccardIndex(RandIndex):
         &\text{(c) } R_i = R_j \text{ and } S_i \neq S_j \quad
         &\text{(d) } R_i \neq R_j \text{ and } S_i \neq S_j
 
-    for :math:`i` and :math:`j` ranging over all pair of pixels in :math:`R` and :math:`S`. Then, the Jaccard index is defined as
-    
+    for :math:`i` and :math:`j` ranging over all pair of pixels in :math:`R`
+    and :math:`S`. Then, the Jaccard index is defined as
+
     .. math:: \mathrm{JI} = \frac{a + d}{b + c + d}.
 
-    The Jaccard index is not upper-bounded. Higher values correspond to better segmentation performance.
+    The Jaccard index is not upper-bounded. Higher values correspond to better
+    segmentation performance.
 
     References:
 
-    - L\. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in microscope cell images: A hand-segmented dataset and comparison of algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
+    - L\. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in
+      microscope cell images: A hand-segmented dataset and comparison of
+      algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
     """
 
     def compute(self, actual):
@@ -154,15 +197,33 @@ class JaccardIndex(RandIndex):
 
 
 class ISBIScore(Measure):
-    r"""Defines the SEG performance measure (used in the ISBI Cell Tracking Challenge).
+    r"""
+    Defines the SEG performance measure (used in the ISBI Cell Tracking
+    Challenge).
 
-    The SEG measure is based on the Jaccard coefficient :math:`J = \left|R \cap S\right| / \left|R \cup S\right|` of the sets of pixels of matching objects :math:`R` and :math:`S`, where :math:`R` denotes the set of pixels belonging to a reference object and :math:`S` denotes the set of pixels belonging to its matching segmented object. A ground truth object :math:`R` and a segmented object :math:`S` are considered matching if and only if :math:`\left|R \cap S\right| > 0.5 \cdot \left|R\right|`. Note that for each reference object, there can be at most one segmented object which satisfies the detection test. See: http://public.celltrackingchallenge.net/documents/SEG.pdf
-    
-    :param min_ref_size: Ground truth objects smaller than ``min_ref_size`` pixels are skipped. It is reasonable to set this value to ``2`` so that objects of a single pixel in size are skipped, since such objects obviously correspond to misannotations which distort the performance evaluation. However, for compatibility to the official implementation, the value is set to ``1`` by default so all ground truth objects are included.
+    The SEG measure is based on the Jaccard coefficient :math:`J = \left|R
+    \cap S\right| / \left|R \cup S\right|` of the sets of pixels of matching
+    objects :math:`R` and :math:`S`, where :math:`R` denotes the set of pixels
+    belonging to a reference object and :math:`S` denotes the set of pixels
+    belonging to its matching segmented object. A ground truth object
+    :math:`R` and a segmented object :math:`S` are considered matching if and
+    only if :math:`\left|R \cap S\right| > 0.5 \cdot \left|R\right|`. Note
+    that for each reference object, there can be at most one segmented object
+    which satisfies the detection test. See:
+    http://public.celltrackingchallenge.net/documents/SEG.pdf
+
+    :param min_ref_size:
+        Ground truth objects smaller than ``min_ref_size`` pixels are skipped.
+        It is reasonable to set this value to ``2`` so that objects of a
+        single pixel in size are skipped, since such objects obviously
+        correspond to misannotations which distort the performance evaluation.
+        However, for compatibility to the official implementation, the value
+        is set to ``1`` by default so all ground truth objects are included.
 
     References:
 
-    - M\. Maska et al., "A benchmark for comparison of cell tracking algorithms," Bioinformatics, vol. 30, no. 11, pp. 1609–1617, 2014.
+    - M\. Maska et al., "A benchmark for comparison of cell tracking
+      algorithms," Bioinformatics, vol. 30, no. 11, pp. 1609–1617, 2014.
     """
 
     def __init__(self, min_ref_size=1, **kwargs):
@@ -173,14 +234,24 @@ class ISBIScore(Measure):
     def compute(self, actual):
         results = []
         for ref_label in range(1, self.expected.max() + 1):
-            ref_cc = (self.expected == ref_label)  # the reference connected component
+
+            # The reference connected component
+            ref_cc = (self.expected == ref_label)
+
             ref_cc_size = ref_cc.sum()
             ref_cc_half_size = 0.5 * ref_cc_size
-            if ref_cc_size < self.min_ref_size: continue
-            actual_cc = None  # the segmented object we compare the reference to
+
+            if ref_cc_size < self.min_ref_size:
+                continue
+
+            # The segmented object we compare the reference to
+            actual_cc = None
+
             for actual_candidate_label in set(actual[ref_cc]) - {0}:
                 actual_candidate_cc = (actual == actual_candidate_label)
-                overlap = float(np.logical_and(actual_candidate_cc, ref_cc).sum())
+                overlap = float(
+                    np.logical_and(actual_candidate_cc, ref_cc).sum()
+                )
                 if overlap > ref_cc_half_size:
                     actual_cc = actual_candidate_cc
                     break
@@ -196,4 +267,3 @@ class ISBIScore(Measure):
         if self.min_ref_size >= 2:
             name += f' (min_ref_size={self.min_ref_size})'
         return name
-

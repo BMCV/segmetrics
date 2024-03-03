@@ -72,3 +72,7 @@ Changes default name of ``segmetrics.regional.ISBIScore`` if ``min_ref_size`` is
 
 Changes default name of ``segmetrics.boundary.ObjectBasedDistanceMeasure`` if ``skip_fn`` is not the default.
 
+1.5
+---
+
+Rename ``segmetrics.boundary`` to ``segmetrics.contour``.

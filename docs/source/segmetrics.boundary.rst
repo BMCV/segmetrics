@@ -1,7 +1,7 @@
-segmetrics.boundary
-===================
+segmetrics.contour
+==================
 
-.. automodule:: segmetrics.boundary
+.. automodule:: segmetrics.contour
     :members:
     :undoc-members:
     :show-inheritance:
