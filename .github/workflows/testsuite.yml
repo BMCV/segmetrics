@@ -74,8 +74,14 @@ jobs:
 
       - name: Run mypy
         shell: bash
+        continue-on-error: true
         run: |
           mypy --config-file .mypy.ini --install-types segmetrics <<< "y"
+
+      - name: Run mypy
+        shell: bash
+        run: |
+          mypy --config-file .mypy.ini
 
   run_testsuite:
 
