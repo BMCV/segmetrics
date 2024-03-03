@@ -1,6 +1,4 @@
-from typing import (
-    List,
-)
+from typing import List
 
 from scipy import ndimage
 
