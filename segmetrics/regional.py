@@ -196,4 +196,4 @@ class ISBIScore(Measure):
         if self.min_ref_size >= 2:
             name += f' (min_ref_size={self.min_ref_size})'
         return name
-
+        

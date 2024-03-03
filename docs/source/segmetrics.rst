@@ -5,6 +5,6 @@ segmetrics API
     segmetrics.study
     segmetrics.measure
     segmetrics.regional
-    segmetrics.boundary
+    segmetrics.contour
     segmetrics.detection
     segmetrics.parallel

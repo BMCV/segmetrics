@@ -72,4 +72,3 @@ if __name__ == '__main__':
 
     print(f'')
     print(f'Results written to: {args.output_file}')
-

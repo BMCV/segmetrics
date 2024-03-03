@@ -238,4 +238,3 @@ class Study:
         buf.seek(0)
         df = pd.read_csv(buf, sep=',', keep_default_na=False)
         return df
-

@@ -22,4 +22,3 @@ def bbox(*masks, margin=0):
     _cmin, _cmax = max((_cmin, 0)), min((_cmax, mask.shape[1] - 1))
     sel = np.s_[_rmin : _rmax + 1, _cmin : _cmax + 1]
     return sel, (_rmin, _rmax), (_cmin, _cmax)
-

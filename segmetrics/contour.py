@@ -9,14 +9,14 @@ from segmetrics.measure import Measure
 from segmetrics._aux import bbox
 
 
-def _compute_binary_boundary(mask, width=1):
+def _compute_binary_contour(mask, width=1):
     dilation = morph.binary_dilation(mask, morph.disk(width))
     return np.logical_and(dilation, np.logical_not(mask))
 
 
-def _compute_boundary_distance_map(mask):
-    boundary = _compute_binary_boundary(mask)
-    return ndimage.distance_transform_edt(np.logical_not(boundary))
+def _compute_contour_distance_map(mask):
+    contour = _compute_binary_contour(mask)
+    return ndimage.distance_transform_edt(np.logical_not(contour))
 
 
 def _quantile_max(quantile, values):
@@ -71,17 +71,17 @@ class Hausdorff(DistanceMeasure):
         self.quantile = quantile
 
     def set_expected(self, expected):
-        self.expected_boundary = _compute_binary_boundary(expected > 0)
-        self.expected_boundary_distance_map = ndimage.distance_transform_edt(np.logical_not(self.expected_boundary))
+        self.expected_contour = _compute_binary_contour(expected > 0)
+        self.expected_contour_distance_map = ndimage.distance_transform_edt(np.logical_not(self.expected_contour))
 
     def compute(self, actual):
-        actual_boundary = _compute_binary_boundary(actual > 0)
-        if not self.expected_boundary.any() or not actual_boundary.any(): return []
+        actual_contour = _compute_binary_contour(actual > 0)
+        if not self.expected_contour.any() or not actual_contour.any(): return []
         results = []
-        if self.mode in ('a2e', 'sym'): results.append(self._quantile_max(self.expected_boundary_distance_map[actual_boundary]))
+        if self.mode in ('a2e', 'sym'): results.append(self._quantile_max(self.expected_contour_distance_map[actual_contour]))
         if self.mode in ('e2a', 'sym'):
-            actual_boundary_distance_map = ndimage.distance_transform_edt(np.logical_not(actual_boundary))
-            results.append(self._quantile_max(actual_boundary_distance_map[self.expected_boundary]))
+            actual_contour_distance_map = ndimage.distance_transform_edt(np.logical_not(actual_contour))
+            results.append(self._quantile_max(actual_contour_distance_map[self.expected_contour]))
         return [max(results)]
 
     def default_name(self):
@@ -106,16 +106,16 @@ class NSD(DistanceMeasure):
 
     def set_expected(self, expected):
         self.expected = (expected > 0)
-        self.expected_boundary = _compute_binary_boundary(self.expected)
-        self.expected_boundary_distance_map = ndimage.distance_transform_edt(np.logical_not(self.expected_boundary))
+        self.expected_contour = _compute_binary_contour(self.expected)
+        self.expected_contour_distance_map = ndimage.distance_transform_edt(np.logical_not(self.expected_contour))
 
     def compute(self, actual):
         actual = (actual > 0)
-        actual_boundary = _compute_binary_boundary(actual)
+        actual_contour = _compute_binary_contour(actual)
         union           = np.logical_or(self.expected, actual)
         intersection    = np.logical_and(self.expected, actual)
-        denominator     = self.expected_boundary_distance_map[union].sum()
-        nominator       = self.expected_boundary_distance_map[np.logical_and(union, np.logical_not(intersection))].sum()
+        denominator     = self.expected_contour_distance_map[union].sum()
+        nominator       = self.expected_contour_distance_map[np.logical_and(union, np.logical_not(intersection))].sum()
         return [nominator / (0. + denominator)]
 
 
@@ -198,4 +198,3 @@ class ObjectBasedDistanceMeasure(Measure):
             else:
                 name += f' ({skip_fn_hint})'
         return name
-

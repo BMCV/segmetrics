@@ -126,4 +126,3 @@ class _fork: # namespace
             raise
         finally:
             _fork._forked = False
-
