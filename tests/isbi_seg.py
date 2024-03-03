@@ -5,6 +5,7 @@ import subprocess
 import sys
 import re
 import warnings
+import py7zr
 from skimage import io
 
 
@@ -24,7 +25,8 @@ def isbi_seg_official(result_list, groundtruth_list, verbose=False):
                 io.imsave('data/01_GT/SEG/man_seg%03d.tif' % i, groundtruth[None, :, :].astype('uint16'), plugin='tifffile')
 
         subprocess.call(['wget', 'http://evoid.de/isbi_evaluation_software.7z'], **subprocess_kwargs)
-        subprocess.call(['7z', 'x', '-pppy42wGfcrHG9W4Z', 'isbi_evaluation_software.7z'], **subprocess_kwargs)
+        with py7zr.SevenZipFile('isbi_evaluation_software.7z', mode='r', password='ppy42wGfcrHG9W4Z') as z:
+            z.extractall()
         subprocess.call(['chmod', '+w', '-R', '.'], **subprocess_kwargs)
         
         os.chdir('Linux')
