@@ -1,13 +1,13 @@
 import segmetrics.parallel
 from segmetrics.contour import (
     NSD,
-    Hausdorff
+    Hausdorff,
 )
 from segmetrics.detection import (
     FalseMerge,
     FalseNegative,
     FalsePositive,
-    FalseSplit
+    FalseSplit,
 )
 from segmetrics.regional import (
     AdjustedRandIndex,
@@ -15,7 +15,7 @@ from segmetrics.regional import (
     ISBIScore,
     JaccardCoefficient,
     JaccardIndex,
-    RandIndex
+    RandIndex,
 )
 from segmetrics.study import Study
 
