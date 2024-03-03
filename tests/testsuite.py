@@ -1,3 +1,5 @@
+# flake8: noqa
+
 import unittest
 import segmetrics as sm
 import numpy as np
@@ -24,6 +26,7 @@ def create_full_study():
     study.add_measure(sm.ISBIScore().symmetric(), 'Sym. SEG')
     study.add_measure(sm.JaccardCoefficient(), 'JC')
     study.add_measure(sm.JaccardIndex(), 'JI')
+    study.add_measure(sm.JaccardIndex(aggregation='geometric-mean'), 'JI (geom)')
     study.add_measure(sm.RandIndex(), 'Rand')
     study.add_measure(sm.AdjustedRandIndex(), 'ARI')
     study.add_measure(sm.Hausdorff(), 'HSD')

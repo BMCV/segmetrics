@@ -9,15 +9,17 @@ class Measure:
 
     :param aggregation:
         Controls whether the results of this performance measure are
-        aggregated by summation (``sum``), by averaging (``mean``), or by
-        computing the proportion with respect to the number of annotated
-        objects (``object-mean``).
+        aggregated by summation (``sum``), by averaging (``mean``), by using
+        the geometric mean (``geometric-mean``), or by computing the
+        proportion with respect to the number of annotated objects
+        (``object-mean``).
     """
 
     def __init__(self, aggregation='mean'):
         assert aggregation in (
             'sum',
             'mean',
+            'geometric-mean',
             'object-mean',
         )
         self.aggregation = aggregation
