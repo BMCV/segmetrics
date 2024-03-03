@@ -1,9 +1,11 @@
-import skimage.measure
-import numpy as np
-import math
-import itertools
-import sys
 import csv
+import io
+import itertools
+import math
+import sys
+
+import numpy as np
+import skimage.measure
 
 from segmetrics.measure import Measure
 
@@ -369,7 +371,6 @@ class Study:
         Returns the results of this study as a pandas dataframe.
         """
         import pandas as pd
-        import io
         buf = io.StringIO()
         self.write_csv(buf, delimiter=',')
         buf.seek(0)
