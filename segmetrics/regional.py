@@ -4,12 +4,13 @@ import numpy as np
 import sklearn.metrics
 
 from segmetrics.measure import (
-    ImageMeasure,
+    AsymmetricMeasureMixin,
+    ImageMeasureMixin,
     Measure,
 )
 
 
-class RegionalImageMeasure(ImageMeasure):
+class RegionalImageMeasure(ImageMeasureMixin, Measure):
     """
     Defines an image-level performance measure which is based on the regions
     of binary volumes (images).
@@ -211,7 +212,7 @@ class JaccardIndex(RandIndex):
         return 'Jaccard index'
 
 
-class ISBIScore(Measure):
+class ISBIScore(AsymmetricMeasureMixin, Measure):
     r"""
     Defines the SEG performance measure (used in the ISBI Cell Tracking
     Challenge).

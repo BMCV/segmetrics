@@ -1,3 +1,4 @@
+import numpy as np
 from scipy import ndimage
 
 from segmetrics._aux import bbox
@@ -45,7 +46,7 @@ class Measure:
         return type(self).__name__
 
 
-class ImageMeasure(Measure):
+class ImageMeasureMixin:
     """
     Defines an image-level performance measure.
 
@@ -89,7 +90,28 @@ class ImageMeasure(Measure):
         )
 
 
-class ObjectMeasureAdapter(Measure):
+class AsymmetricMeasureMixin:
+
+    def reversed(self, *args, **kwargs):
+        return ReversedMeasureAdapter(*args, **kwargs)
+
+    def symmetric(self, reduction_function, *args, **kwargs):
+        if isinstance(reduction_function, str):
+            reduction_function = {
+                'min': min,
+                'max': max,
+                'mean': np.mean,
+            }[reduction_function]
+        return SymmetricMeasureAdapter(
+            self,
+            self.reversed(),
+            reduction_function,
+            *args,
+            **kwargs,
+        )
+
+
+class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
     """
     Adapter to use image-level measures on a per-object level.
 
@@ -186,3 +208,40 @@ class ObjectMeasureAdapter(Measure):
 
     def default_name(self):
         return f'Ob. {self.measure.default_name()}'
+
+
+class ReversedMeasureAdapter(Measure):
+
+    def __init__(self, measure, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.measure = measure
+
+    def compute(self, actual):
+        self.measure.set_expected(actual)
+        return self.compute(self.expected)
+
+
+class SymmetricMeasureAdapter(Measure):
+
+    def __init__(
+        self,
+        measure1,
+        measure2,
+        reduction_function,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self.measure1 = measure1
+        self.measure2 = measure2
+        self.reduction_function = reduction_function
+
+    def set_expected(self, expected):
+        self.measure1.set_expected(expected)
+        self.measure2.set_expected(expected)
+        super().set_expected(expected)
+
+    def compute(self, actual):
+        score1 = self.measure1.compute(actual)
+        score2 = self.measure2.compute(actual)
+        return self.reduction_function([score1, score2])

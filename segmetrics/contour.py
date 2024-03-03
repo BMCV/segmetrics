@@ -2,7 +2,11 @@ import numpy as np
 from scipy import ndimage
 from skimage import morphology as morph
 
-from segmetrics.measure import ImageMeasure
+from segmetrics.measure import (
+    AsymmetricMeasureMixin,
+    ImageMeasureMixin,
+    Measure,
+)
 
 
 def _compute_binary_contour(mask, width=1):
@@ -23,7 +27,7 @@ def _quantile_max(quantile, values):
         return values[int(quantile * (len(values) - 1))]
 
 
-class ContourMeasure(ImageMeasure):
+class ContourMeasure(ImageMeasureMixin, Measure):
     """
     Defines a performance measure which is based on the spatial distances of
     binary volumes (images).
@@ -35,7 +39,7 @@ class ContourMeasure(ImageMeasure):
         )
 
 
-class Hausdorff(ContourMeasure):
+class Hausdorff(AsymmetricMeasureMixin, ContourMeasure):
     r"""
     Defines the Hausdorff distsance between two binary images.
 
