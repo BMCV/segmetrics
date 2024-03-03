@@ -30,7 +30,9 @@ class ContourMeasure(ImageMeasure):
     """
 
     def __init__(self, correspondance_function='min'):
-        super().__init__(correspondance_function)
+        super().__init__(
+            correspondance_function=correspondance_function,
+        )
 
 
 class Hausdorff(ContourMeasure):

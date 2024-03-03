@@ -59,7 +59,8 @@ class ImageMeasure(Measure):
         maximal score).
     """
 
-    def __init__(self, correspondance_function):
+    def __init__(self, *args, correspondance_function, **kwargs):
+        super().__init__(*args, **kwargs)
         assert correspondance_function in (
             'min',
             'max',
@@ -184,4 +185,4 @@ class ObjectMeasureAdapter(Measure):
         return results
 
     def default_name(self):
-        return f'Ob. {self.distance.default_name()}'
+        return f'Ob. {self.measure.default_name()}'

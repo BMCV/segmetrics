@@ -16,7 +16,9 @@ class RegionalImageMeasure(ImageMeasure):
     """
 
     def __init__(self, correspondance_function='max'):
-        super().__init__(correspondance_function)
+        super().__init__(
+            correspondance_function=correspondance_function,
+        )
 
 
 class Dice(RegionalImageMeasure):
@@ -170,7 +172,7 @@ class AdjustedRandIndex(RegionalImageMeasure):
         return 'ARI'
 
 
-class JaccardIndex(RegionalImageMeasure):
+class JaccardIndex(RandIndex):
     r"""
     Defines the Jaccard index, not to be confused with the Jaccard coefficient.
 
