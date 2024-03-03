@@ -47,11 +47,15 @@ jobs:
 
       - name: Run flake8
         shell: bash
-        run: flake8 segmetrics
+        run: |
+          flake8 segmetrics
+          flake8 tests
 
       - name: Run isort
         shell: bash
-        run: isort segmetrics --check-only
+        run: |
+          isort segmetrics --check-only
+          isort tests --check-only
 
   run_testsuite:
 

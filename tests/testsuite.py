@@ -1,17 +1,21 @@
 # flake8: noqa
 
-import unittest
-import segmetrics as sm
-import numpy as np
-import pathlib
-import pandas as pd
-import time
 import os
+import pathlib
 import tempfile
-import skimage.io
+import time
+import unittest
 import warnings
 
-from tests.data import images, CrossSampler
+import numpy as np
+import pandas as pd
+import skimage.io
+
+import segmetrics as sm
+from tests.data import (
+    CrossSampler,
+    images,
+)
 from tests.isbi_seg import isbi_seg_official
 
 
