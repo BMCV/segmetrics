@@ -1,7 +1,8 @@
 import numpy as np
+import numpy.typing as npt
 
-LabelImage = np.typing.NDArray[np.integer]
+LabelImage = npt.NDArray[np.integer]
 
-BinaryImage = np.typing.NDArray[np.bool_]
+BinaryImage = npt.NDArray[np.bool_]
 
 Image = LabelImage | BinaryImage
