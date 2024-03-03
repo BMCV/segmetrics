@@ -2,8 +2,7 @@ import numpy as np
 from scipy import ndimage
 from skimage import morphology as morph
 
-from segmetrics._aux import bbox
-from segmetrics.measure import Measure
+from segmetrics.measure import ImageMeasure
 
 
 def _compute_binary_contour(mask, width=1):
@@ -24,30 +23,17 @@ def _quantile_max(quantile, values):
         return values[int(quantile * (len(values) - 1))]
 
 
-class DistanceMeasure(Measure):
+class ContourMeasure(ImageMeasure):
     """
     Defines a performance measure which is based on the spatial distances of
     binary volumes (images).
-
-    The computation of such measures only regards the union of the individual
-    objects, not the individual objects themselves.
     """
 
-    def object_based(self, *args, **kwargs):
-        """
-        Returns measure for computation regarding individual objects (as
-        opposed to considering their union).
-
-        Positional and keyword arguments are passed through to
-        :class:`ObjectBasedDistanceMeasure`.
-
-        :returns:
-            This measure decorated using :class:`ObjectBasedDistanceMeasure`.
-        """
-        return ObjectBasedDistanceMeasure(self, *args, **kwargs)
+    def __init__(self, correspondance_function='min'):
+        super().__init__(correspondance_function)
 
 
-class Hausdorff(DistanceMeasure):
+class Hausdorff(ContourMeasure):
     r"""
     Defines the Hausdorff distsance between two binary images.
 
@@ -127,7 +113,7 @@ class Hausdorff(DistanceMeasure):
         return _quantile_max(self.quantile, values)
 
 
-class NSD(DistanceMeasure):
+class NSD(ContourMeasure):
     r"""
     Defines the normalized sum of distsances between two binary images.
 
@@ -167,111 +153,3 @@ class NSD(DistanceMeasure):
             np.logical_and(union, np.logical_not(intersection))
         ].sum()
         return [nominator / (0. + denominator)]
-
-
-class ObjectBasedDistanceMeasure(Measure):
-    """
-    Decorator to apply image-level distance measures on a per-object level.
-
-    Computes the decorated distance measure on a per-object level. Object
-    correspondances between the segmented and the ground truth objects are
-    established on a many-to-many basis, so that the resulting distances are
-    minimal.
-
-    :param distance:
-        The image-level distance measure, which is to be decorated.
-
-    :param skip_fn:
-        Specifies whether false-negative detections shall be skipped.
-    """
-
-    _obj_mapping = (None, None)  # cache
-
-    def __init__(self, distance, skip_fn=False):
-        super().__init__()
-        self.distance     = distance
-        self.skip_fn      = skip_fn
-        self.aggregation  = distance.aggregation
-        self.nodetections = -1
-
-    def set_expected(self, *args, **kwargs):
-        super().set_expected(*args, **kwargs)
-        ObjectBasedDistanceMeasure._obj_mapping = (None, dict())
-
-    def compute(self, actual):
-        results = []
-        seg_labels = frozenset(actual.reshape(-1)) - {0}
-
-        # Reset the cached object mapping:
-        if ObjectBasedDistanceMeasure._obj_mapping[0] is not actual:
-            ObjectBasedDistanceMeasure._obj_mapping = (actual, dict())
-
-        for ref_label in set(self.expected.flatten()) - {0}:
-            ref_cc = (self.expected == ref_label)
-
-            # If there were no detections, no distances can be determined:
-            if len(seg_labels) == 0:
-                if self.nodetections >= 0:
-                    results.append(self.nodetections)
-                continue
-
-            if self.skip_fn:
-                potentially_closest_seg_labels = frozenset(
-                    actual[ref_cc].reshape(-1)
-                ) - {0}
-            else:
-
-                # Query the cached object mapping:
-                if ref_label in self._obj_mapping[1]:  # cache hit
-
-                    potentially_closest_seg_labels = \
-                        ObjectBasedDistanceMeasure._obj_mapping[1][ref_label]
-
-                else:  # cache miss
-
-                    # First, determine the set of potentially "closest"
-                    # segmented objects:
-                    ref_distancemap = ndimage.distance_transform_edt(~ref_cc)
-                    closest_potential_seg_label = min(
-                        seg_labels,
-                        key=lambda seg_label: ref_distancemap[
-                                actual == seg_label
-                            ].min(),
-                    )
-                    max_potential_seg_label_distance = ref_distancemap[
-                        actual == closest_potential_seg_label
-                    ].max()
-                    potentially_closest_seg_labels = [
-                        seg_label for seg_label in seg_labels
-                        if ref_distancemap[
-                            actual == seg_label
-                        ].min() <= max_potential_seg_label_distance
-                    ]
-                    ObjectBasedDistanceMeasure._obj_mapping[1][
-                        ref_label
-                    ] = potentially_closest_seg_labels
-
-            # If not a single object was detected, the distance is undefined:
-            if len(potentially_closest_seg_labels) == 0:
-                continue
-
-            distances = []
-            for seg_label in potentially_closest_seg_labels:
-                seg_cc = (actual == seg_label)
-                _bbox  = bbox(ref_cc, seg_cc, margin=1)[0]
-                self.distance.set_expected(ref_cc[_bbox].astype('uint8'))
-                distance = self.distance.compute(seg_cc[_bbox].astype('uint8'))
-                assert len(distance) == 1
-                distances.append(distance[0])
-            results.append(min(distances))
-        return results
-
-    def default_name(self):
-        name = f'Ob. {self.distance.default_name()}'
-        if self.skip_fn:
-            skip_fn_hint = f'skip_fn={self.skip_fn}'
-            if name.endswith(')'):
-                name = name[:-1] + f', {skip_fn_hint})'
-            else:
-                name += f' ({skip_fn_hint})'
-        return name

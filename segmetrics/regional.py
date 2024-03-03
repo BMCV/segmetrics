@@ -3,10 +3,23 @@ import warnings
 import numpy as np
 import sklearn.metrics
 
-from segmetrics.measure import Measure
+from segmetrics.measure import (
+    ImageMeasure,
+    Measure,
+)
 
 
-class Dice(Measure):
+class RegionalImageMeasure(ImageMeasure):
+    """
+    Defines an image-level performance measure which is based on the regions
+    of binary volumes (images).
+    """
+
+    def __init__(self, correspondance_function='max'):
+        super().__init__(correspondance_function)
+
+
+class Dice(RegionalImageMeasure):
     r"""
     Defines the Dice coefficient.
 
@@ -35,7 +48,7 @@ class Dice(Measure):
             return [1.]  # result of zero/zero division
 
 
-class JaccardCoefficient(Measure):
+class JaccardCoefficient(RegionalImageMeasure):
     r"""
     Defines the Jaccard coefficient.
 
@@ -71,7 +84,7 @@ class JaccardCoefficient(Measure):
         return 'Jaccard coef.'
 
 
-class RandIndex(Measure):
+class RandIndex(RegionalImageMeasure):
     r"""
     Defines the Rand index.
 
@@ -135,7 +148,7 @@ class RandIndex(Measure):
         return 'Rand'
 
 
-class AdjustedRandIndex(Measure):
+class AdjustedRandIndex(RegionalImageMeasure):
     """
     Defines the adjusted Rand index.
 
@@ -157,7 +170,7 @@ class AdjustedRandIndex(Measure):
         return 'ARI'
 
 
-class JaccardIndex(RandIndex):
+class JaccardIndex(RegionalImageMeasure):
     r"""
     Defines the Jaccard index, not to be confused with the Jaccard coefficient.
 
