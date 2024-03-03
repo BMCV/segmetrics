@@ -1,25 +1,66 @@
 import argparse
-import re
 import glob
 import pathlib
+import re
+
 import skimage.io
 
 import segmetrics as sm
 
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--version', action='version', version=f'{sm.__name__} {sm.VERSION}')
-    parser.add_argument('seg_dir', help='directory containing the segmentation results')
-    parser.add_argument('seg_file', help='regex pattern used to parse segmentation results')
-    parser.add_argument('gt_file', help='pattern used to obtain the corresponding ground truth file (\\1 corresponds to the first capture group)')
-    parser.add_argument('output_file', help='filepath where the results are to be written (CSV)')
-    parser.add_argument('--recursive', '-r', action='store_true', help='reads the segmentation results directory recursively')
-    parser.add_argument('--gt-unique', action='store_true', help='assumes that the ground truth data is uniquely labeled')
-    parser.add_argument('--seg-unique', action='store_true', help='assumes that the segmentation result data is uniquely labeled')
-    parser.add_argument('measures', nargs='+', type=str, help='list of performance measures')
-    parser.add_argument('--semicolon', action='store_true', help='uses semi-colon instead of comma to write the results')
+    parser.add_argument(
+        '--version',
+        action='version',
+        version=f'{sm.__name__} {sm.VERSION}',
+    )
+    parser.add_argument(
+        'seg_dir',
+        help='directory containing the segmentation results',
+    )
+    parser.add_argument(
+        'seg_file',
+        help='regex pattern used to parse segmentation results',
+    )
+    parser.add_argument(
+        'gt_file',
+        help=(
+            'pattern used to obtain the corresponding ground truth file'
+            ' (\\1 corresponds to the first capture group)'
+        ),
+    )
+    parser.add_argument(
+        'output_file',
+        help='filepath where the results are to be written (CSV)',
+    )
+    parser.add_argument(
+        '--recursive',
+        '-r',
+        action='store_true',
+        help='reads the segmentation results directory recursively',
+    )
+    parser.add_argument(
+        '--gt-unique',
+        action='store_true',
+        help='assumes that the ground truth data is uniquely labeled',
+    )
+    parser.add_argument(
+        '--seg-unique',
+        action='store_true',
+        help='assumes that the segmentation result data is uniquely labeled',
+    )
+    parser.add_argument(
+        'measures',
+        nargs='+',
+        type=str,
+        help='list of performance measures',
+    )
+    parser.add_argument(
+        '--semicolon',
+        action='store_true',
+        help='uses semi-colon instead of comma to write the results',
+    )
     args = parser.parse_args()
 
     measure_spec_pattern = re.compile(r'([a-zA-Z]+)((:?_o)?)')
@@ -49,12 +90,20 @@ if __name__ == '__main__':
     print(f'**********')
     print(f'')
 
-    for filepath in glob.glob(args.seg_dir + '**' if args.seg_dir.endswith('/') else args.seg_dir + '/**', recursive=args.recursive):
+    glob_pattern = (
+        args.seg_dir + '**' if args.seg_dir.endswith('/')
+        else args.seg_dir + '/**'
+    )
+    for filepath in glob.glob(glob_pattern, recursive=args.recursive):
         match = seg_file_pattern.match(filepath)
-        if match is None: continue
+        if match is None:
+            continue
         gt_file = args.gt_file
         for group_idx in range(len(match.groups()) + 1):
-            gt_file = gt_file.replace(rf'\{group_idx:d}', match.group(group_idx))
+            gt_file = gt_file.replace(
+                rf'\{group_idx:d}',
+                match.group(group_idx),
+            )
 
         print(f'Evaluating {filepath} using ground truth: {gt_file}')
 
