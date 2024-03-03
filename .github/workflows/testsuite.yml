@@ -81,11 +81,11 @@ jobs:
       - name: Run mypy
         shell: bash
         run: |
-          mypy --config-file .mypy.ini
+          mypy --config-file .mypy.ini segmetrics
 
   run_testsuite:
 
-    name: Test suite
+    name: Tests
     runs-on: ubuntu-latest
 
     strategy:
