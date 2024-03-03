@@ -1,3 +1,7 @@
+from typing import (
+    List,
+)
+
 from scipy import ndimage
 
 from segmetrics._aux import bbox
@@ -34,7 +38,7 @@ class Measure:
         """
         self.expected = expected
 
-    def compute(self, actual):
+    def compute(self, actual) -> List[float]:
         """
         Computes the performance measure for the given segmentation results
         based on the previously set expected result.

@@ -3,12 +3,21 @@ import io
 import itertools
 import math
 import sys
+from typing import (
+    Any,
+    Dict,
+    List,
+)
 
 import numpy as np
 import scipy.stats.mstats
 import skimage.measure
 
 from segmetrics.measure import Measure
+from segmetrics.typing import (
+    Image,
+    LabelImage,
+)
 
 
 def _is_boolean(narray):
@@ -19,7 +28,7 @@ def _is_integral(narray):
     return issubclass(narray.dtype.type, np.integer)
 
 
-def _get_labeled(narray, unique, img_hint):
+def _get_labeled(narray: Image, unique: bool, img_hint: str) -> LabelImage:
     assert (
         _is_integral(narray) or _is_boolean(narray)
     ), f'illegal {img_hint} dtype'
@@ -43,7 +52,7 @@ def _get_skimage_measure_label_bg_label():
 _SKIMAGE_MEASURE_LABEL_OFFSET = _get_skimage_measure_label_bg_label()
 
 
-def _label(im, background=0, neighbors=4):
+def _label(im: Image, background: int = 0, neighbors: int = 4) -> LabelImage:
     """
     Labels the given image `im`.
 
@@ -146,7 +155,7 @@ class Study:
         self.results [name] = {None: list()}
         return name
 
-    def reset(self):
+    def reset(self) -> None:
         """Resets all results computed so far in this study.
         """
         for measure_name in self.measures:
@@ -155,7 +164,11 @@ class Study:
         self.sample_ids.clear()
         self.objects.clear()
 
-    def set_expected(self, expected, unique=True):
+    def set_expected(
+        self,
+        expected: Image,
+        unique: bool = True,
+    ) -> None:
         """
         Sets the expected ground truth segmentation result.
 
@@ -190,7 +203,13 @@ class Study:
             measure = self.measures[measure_name]
             measure.set_expected(expected)
 
-    def process(self, sample_id, actual, unique=True, replace=True):
+    def process(
+        self,
+        sample_id: Any,
+        actual: Image,
+        unique: bool = True,
+        replace: bool = True,
+    ) -> Dict[str, List[float]]:
         """
         Evaluates a segmentation result based on the previously set expected
         result.
@@ -226,12 +245,14 @@ class Study:
         assert actual.ndim == 2, 'image has wrong dimensions'
         actual = _get_labeled(actual, unique, 'image')
         assert replace or sample_id not in self.sample_ids
-        intermediate_results = {}
+
+        intermediate_results: Dict[str, List[float]] = dict()
         for measure_name in self.measures:
-            measure = self.measures[measure_name]
-            result = measure.compute(actual)
+            measure: Measure = self.measures[measure_name]
+            result: List[float] = measure.compute(actual)
             self.results[measure_name][sample_id] = result
             intermediate_results[measure_name] = result
+
         self.results_cache.clear()
         self.sample_ids.append(sample_id)
         self.objects[sample_id] = self.expected_objects
