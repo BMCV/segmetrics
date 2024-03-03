@@ -5,8 +5,8 @@ import math
 import sys
 
 import numpy as np
-import skimage.measure
 import scipy.stats.mstats
+import skimage.measure
 
 from segmetrics.measure import Measure
 
