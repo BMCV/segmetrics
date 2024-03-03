@@ -80,7 +80,7 @@ jobs:
       - name: Run mypy
         shell: bash
         run: |
-          mypy segmetrics
+          mypy --config-file .mypy.ini --ignore-missing-imports segmetrics
 
   run_testsuite:
 
