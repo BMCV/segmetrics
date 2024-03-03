@@ -136,57 +136,52 @@ class ObjectMeasureAdapter(Measure):
                     results.append(self.nodetections)
                 continue
 
-            # Query the cached object mapping:
+            # Query the cached object correspondance candidates:
             if ref_label in self._obj_mapping[1]:  # cache hit
 
-                potentially_closest_seg_labels = \
+                correspondance_candidates = \
                     ObjectMeasureAdapter._obj_mapping[1][ref_label]
 
             else:  # cache miss
 
-                # First, narrow the set of potentially corresponding objects
-                # by determining the labels of objects with non-empty overlap:
+                # We restrict the search for potentially corresponding objects
+                # to a meaningful region. To do so, we first determine the
+                # distance within which potentially corresponding objects will
+                # be considered. This is the distance to the furthest point of
+                # the closest object:
                 ref_distancemap = ndimage.distance_transform_edt(~ref_cc)
-                closest_potential_seg_label = min(
+                closest_seg_label = min(
                     seg_labels,
                     key=lambda seg_label: ref_distancemap[
                             actual == seg_label
                         ].min(),
                 )
-                max_potential_seg_label_distance = ref_distancemap[
-                    actual == closest_potential_seg_label
+                max_correspondance_candidates_distance = ref_distancemap[
+                    actual == closest_seg_label
                 ].max()
-                potentially_closest_seg_labels = [
+
+                # Second, narrow the set of potentially corresponding objects
+                # by finding the labels of objects within the maximum distance:
+                correspondance_candidates = [
                     seg_label for seg_label in seg_labels
                     if ref_distancemap[
                         actual == seg_label
-                    ].min() <= max_potential_seg_label_distance
+                    ].min() <= max_correspondance_candidates_distance
                 ]
                 ObjectMeasureAdapter._obj_mapping[1][
                     ref_label
-                ] = potentially_closest_seg_labels
+                ] = correspondance_candidates
 
-            # If not a single object was detected, the distance is undefined:
-            if len(potentially_closest_seg_labels) == 0:
-                continue
-
-            distances = []
-            for seg_label in potentially_closest_seg_labels:
+            scores = list()
+            for seg_label in correspondance_candidates:
                 seg_cc = (actual == seg_label)
                 _bbox  = bbox(ref_cc, seg_cc, margin=1)[0]
-                self.distance.set_expected(ref_cc[_bbox].astype('uint8'))
-                distance = self.distance.compute(seg_cc[_bbox].astype('uint8'))
-                assert len(distance) == 1
-                distances.append(distance[0])
-            results.append(self.correspondance_function(distances))
+                self.measure.set_expected(ref_cc[_bbox].astype('uint8'))
+                score = self.measure.compute(seg_cc[_bbox].astype('uint8'))
+                assert len(score) == 1
+                scores.append(score[0])
+            results.append(self.correspondance_function(scores))
         return results
 
     def default_name(self):
-        name = f'Ob. {self.distance.default_name()}'
-        if self.skip_fn:
-            skip_fn_hint = f'skip_fn={self.skip_fn}'
-            if name.endswith(')'):
-                name = name[:-1] + f', {skip_fn_hint})'
-            else:
-                name += f' ({skip_fn_hint})'
-        return name
+        return f'Ob. {self.distance.default_name()}'
