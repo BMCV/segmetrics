@@ -37,8 +37,8 @@ def create_full_study():
     study.add_measure(sm.FalseMerge(), 'Merge')
     study.add_measure(sm.FalsePositive(), 'FP')
     study.add_measure(sm.FalseNegative(), 'FN')
-    study.add_measure(sm.FalseSplit(aggregation='obj-mean'), 'Split/obj')
-    study.add_measure(sm.FalseMerge(aggregation='obj-mean'), 'Merge/obj')
+    study.add_measure(sm.FalseSplit(aggregation='object-mean'), 'Split/obj')
+    study.add_measure(sm.FalseMerge(aggregation='object-mean'), 'Merge/obj')
     return study
 
 
@@ -91,7 +91,7 @@ class ObjMeanTest(unittest.TestCase):
         objects = 0
         study = sm.Study()
         sampler = CrossSampler(images, images)
-        measure_name = study.add_measure(measure(aggregation='obj-mean'))
+        measure_name = study.add_measure(measure(aggregation='object-mean'))
         for sample_id, ref, seg in sampler.all():
             study.set_expected(ref, unique=True)
             objects += len(frozenset(ref.reshape(-1)) - frozenset([0]))

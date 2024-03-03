@@ -62,7 +62,7 @@ def _aggregate(measure, values, objects):
         return np.sum(values)
     if measure.aggregation == 'mean':
         return np.mean(values)
-    if measure.aggregation == 'obj-mean':
+    if measure.aggregation == 'object-mean':
         return np.sum(values) / objects
     else:
         raise ValueError(f'Unknown aggregation: "{measure.aggregation}"')
