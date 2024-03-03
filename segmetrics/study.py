@@ -155,7 +155,7 @@ class Study:
     def set_expected(self, expected, unique=True):
         """
         Sets the expected ground truth segmentation result.
-        
+
         The background of the image must be labeled as ``0``. Negative object
         labels are forbidden. If ``unique`` is ``True``, it is assumed that
         all objects are labeled uniquely. Use ``unique=False`` if this is not
@@ -191,7 +191,7 @@ class Study:
         """
         Evaluates a segmentation result based on the previously set expected
         result.
-        
+
         If ``unique`` is ``True``, it is assumed that all objects are labeled
         uniquely. Use ``unique=False`` if this is not guaranteed and the
         individual objects should be determined by connected component
