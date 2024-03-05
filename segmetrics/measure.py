@@ -1,4 +1,7 @@
-from typing import List
+from typing import (
+    List,
+    Callable,
+)
 
 from scipy import ndimage
 
@@ -78,7 +81,7 @@ class ImageMeasureMixin:
         )
         self.correspondance_function: str = correspondance_function
 
-    def object_based(self, *args, **kwargs) -> Measure:
+    def object_based(self, **kwargs) -> Measure:
         """
         Returns measure for comparison regarding the individual objects (as
         opposed to only considering their union).
@@ -90,23 +93,22 @@ class ImageMeasureMixin:
             This measure decorated by :class:`ObjectMeasureAdapter`.
         """
         return ObjectMeasureAdapter(
-            self,
+            measure=self,
             correspondance_function={
                 'min': min,
                 'max': max,
             }[self.correspondance_function],
-            *args,
             **kwargs
         )
 
 
 class AsymmetricMeasureMixin:
 
-    def reversed(self, *args, **kwargs):
-        return ReverseMeasureAdapter(self, *args, **kwargs)
+    def reversed(self, **kwargs) -> Measure:
+        return ReverseMeasureAdapter(self, **kwargs)
 
-    def symmetric(self, *args, **kwargs):
-        return SymmetricMeasureAdapter(self, self.reversed(), *args, **kwargs)
+    def symmetric(self, **kwargs) -> Measure:
+        return SymmetricMeasureAdapter(self, self.reversed(), **kwargs)
 
 
 class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
@@ -126,26 +128,21 @@ class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
         to a single score value.
     """
 
-    _obj_mapping = (None, None)  # cache
-
-    def __init__(self, measure, correspondance_function, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        measure: Measure,
+        correspondance_function: Callable[[List[float]], float],
+        **kwargs
+    ):
+        super().__init__(**kwargs)
         self.measure      = measure
         self.aggregation  = measure.aggregation
         self.nodetections = -1  # value to be used if detections are empty
         self.correspondance_function = correspondance_function
 
-    def set_expected(self, *args, **kwargs):
-        super().set_expected(*args, **kwargs)
-        ObjectMeasureAdapter._obj_mapping = (None, dict())
-
-    def compute(self, actual):
+    def compute(self, actual: LabelImage) -> List[float]:
         results = []
         seg_labels = frozenset(actual.reshape(-1)) - {0}
-
-        # Reset the cached object mapping:
-        if ObjectMeasureAdapter._obj_mapping[0] is not actual:
-            ObjectMeasureAdapter._obj_mapping = (actual, dict())
 
         for ref_label in set(self.expected.flatten()) - {0}:
             ref_cc = (self.expected == ref_label)
@@ -157,41 +154,30 @@ class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
                     results.append(self.nodetections)
                 continue
 
-            # Query the cached object correspondance candidates:
-            if ref_label in self._obj_mapping[1]:  # cache hit
-
-                correspondance_candidates = \
-                    ObjectMeasureAdapter._obj_mapping[1][ref_label]
-
-            else:  # cache miss
-
-                # We restrict the search for potentially corresponding objects
-                # to a meaningful region. To do so, we first determine the
-                # distance within which potentially corresponding objects will
-                # be considered. This is the distance to the furthest point of
-                # the closest object:
-                ref_distancemap = ndimage.distance_transform_edt(~ref_cc)
-                closest_seg_label = min(
-                    seg_labels,
-                    key=lambda seg_label: ref_distancemap[
-                            actual == seg_label
-                        ].min(),
-                )
-                max_correspondance_candidates_distance = ref_distancemap[
-                    actual == closest_seg_label
-                ].max()
-
-                # Second, narrow the set of potentially corresponding objects
-                # by finding the labels of objects within the maximum distance:
-                correspondance_candidates = [
-                    seg_label for seg_label in seg_labels
-                    if ref_distancemap[
+            # We restrict the search for potentially corresponding objects
+            # to a meaningful region. To do so, we first determine the
+            # distance within which potentially corresponding objects will
+            # be considered. This is the distance to the furthest point of
+            # the closest object:
+            ref_distancemap = ndimage.distance_transform_edt(~ref_cc)
+            closest_seg_label = min(
+                seg_labels,
+                key=lambda seg_label: ref_distancemap[
                         actual == seg_label
-                    ].min() <= max_correspondance_candidates_distance
-                ]
-                ObjectMeasureAdapter._obj_mapping[1][
-                    ref_label
-                ] = correspondance_candidates
+                    ].min(),
+            )
+            max_correspondance_candidates_distance = ref_distancemap[
+                actual == closest_seg_label
+            ].max()
+
+            # Second, narrow the set of potentially corresponding objects
+            # by finding the labels of objects within the maximum distance:
+            correspondance_candidates = [
+                seg_label for seg_label in seg_labels
+                if ref_distancemap[
+                    actual == seg_label
+                ].min() <= max_correspondance_candidates_distance
+            ]
 
             scores = list()
             for seg_label in correspondance_candidates:
@@ -210,8 +196,8 @@ class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
 
 class ReverseMeasureAdapter(Measure):
 
-    def __init__(self, measure, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, measure, **kwargs):
+        super().__init__(**kwargs)
         self.measure     = measure
         self.aggregation = measure.aggregation
 
@@ -229,10 +215,9 @@ class SymmetricMeasureAdapter(Measure):
         self,
         measure1,
         measure2,
-        *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         assert measure1.aggregation == measure2.aggregation
         self.measure1    = measure1
         self.measure2    = measure2
