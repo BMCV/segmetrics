@@ -3,6 +3,7 @@ from typing import List
 from scipy import ndimage
 
 from segmetrics._aux import bbox
+from segmetrics.typing import LabelImage
 
 
 class Measure:
@@ -17,16 +18,16 @@ class Measure:
         (``object-mean``).
     """
 
-    def __init__(self, aggregation='mean'):
+    def __init__(self, aggregation: str = 'mean'):
         assert aggregation in (
             'sum',
             'mean',
             'geometric-mean',
             'object-mean',
         )
-        self.aggregation = aggregation
+        self.aggregation: str = aggregation
 
-    def set_expected(self, expected):
+    def set_expected(self, expected: LabelImage) -> None:
         """
         Sets the expected result for evaluation.
 
@@ -36,7 +37,7 @@ class Measure:
         """
         self.expected = expected
 
-    def compute(self, actual) -> List[float]:
+    def compute(self, actual: LabelImage) -> List[float]:
         """
         Computes the performance measure for the given segmentation results
         based on the previously set expected result.
@@ -47,7 +48,7 @@ class Measure:
         """
         return NotImplemented
 
-    def default_name(self):
+    def default_name(self) -> str:
         """
         Returns the default name of this measure.
         """
@@ -69,15 +70,15 @@ class ImageMeasureMixin:
         the obtained scores are either minimal (``min``) or maximal (``max``).
     """
 
-    def __init__(self, *args, correspondance_function, **kwargs):
+    def __init__(self, *args, correspondance_function: str, **kwargs):
         super().__init__(*args, **kwargs)
         assert correspondance_function in (
             'min',
             'max',
         )
-        self.correspondance_function = correspondance_function
+        self.correspondance_function: str = correspondance_function
 
-    def object_based(self, *args, **kwargs):
+    def object_based(self, *args, **kwargs) -> Measure:
         """
         Returns measure for comparison regarding the individual objects (as
         opposed to only considering their union).
@@ -90,11 +91,11 @@ class ImageMeasureMixin:
         """
         return ObjectMeasureAdapter(
             self,
-            *args,
             correspondance_function={
                 'min': min,
                 'max': max,
             }[self.correspondance_function],
+            *args,
             **kwargs
         )
 
@@ -127,8 +128,8 @@ class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
 
     _obj_mapping = (None, None)  # cache
 
-    def __init__(self, measure, correspondance_function):
-        super().__init__()
+    def __init__(self, measure, correspondance_function, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.measure      = measure
         self.aggregation  = measure.aggregation
         self.nodetections = -1  # value to be used if detections are empty
