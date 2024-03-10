@@ -72,7 +72,11 @@ class Measure(MeasureProtocol):
             'geometric-mean',
             'object-mean',
         )
-        self.aggregation: str = aggregation
+        self._aggregation: str = aggregation
+
+    @property
+    def aggregation(self) -> str:
+        return self._aggregation
 
     def set_expected(self, expected: LabelImage) -> None:
         self.expected = expected
@@ -160,9 +164,8 @@ class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
         correspondance_function: Callable[[List[float]], float],
         **kwargs
     ):
-        super().__init__(**kwargs)
+        super().__init__(aggregation=measure.aggregation, **kwargs)
         self.measure      = measure
-        self.aggregation  = measure.aggregation
         self.nodetections = -1  # value to be used if detections are empty
         self.correspondance_function = correspondance_function
 
@@ -223,9 +226,8 @@ class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
 class ReverseMeasureAdapter(Measure):
 
     def __init__(self, measure: MeasureProtocol, **kwargs):
-        super().__init__(**kwargs)
-        self.measure     = measure
-        self.aggregation = measure.aggregation
+        super().__init__(aggregation=measure.aggregation, **kwargs)
+        self.measure = measure
 
     def compute(self, actual: LabelImage) -> List[float]:
         self.measure.set_expected(actual)
@@ -243,11 +245,10 @@ class SymmetricMeasureAdapter(Measure):
         measure2: MeasureProtocol,
         **kwargs,
     ):
-        super().__init__(**kwargs)
+        super().__init__(aggregation=measure1.aggregation, **kwargs)
         assert measure1.aggregation == measure2.aggregation
-        self.measure1    = measure1
-        self.measure2    = measure2
-        self.aggregation = measure1.aggregation
+        self.measure1 = measure1
+        self.measure2 = measure2
 
     def set_expected(self, expected: LabelImage) -> None:
         self.measure1.set_expected(expected)
