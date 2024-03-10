@@ -1,9 +1,75 @@
+from typing import (
+    Callable,
+    List,
+    Literal,
+    Protocol,
+    get_args,
+    runtime_checkable,
+)
+
 from scipy import ndimage
 
 from segmetrics._aux import bbox
+from segmetrics.typing import LabelImage
+
+AggregationType = Literal[
+    'sum',
+    'mean',
+    'geometric-mean',
+    'object-mean',
+]
+
+CorrespondanceFunction = Literal[
+    'min',
+    'max',
+]
 
 
-class Measure:
+@runtime_checkable
+class MeasureProtocol(Protocol):
+    """
+    Type protocol of performance measures.
+    """
+
+    @property
+    def aggregation(self) -> AggregationType:
+        """
+        Indicates whether the results of this performance measure are
+        aggregated by summation (``sum``), by averaging (``mean``), by using
+        the geometric mean (``geometric-mean``), or by computing the proportion
+        with respect to the number of annotated objects (``object-mean``).
+        """
+        ...
+
+    def set_expected(self, expected: LabelImage) -> None:
+        """
+        Sets the expected result for evaluation.
+
+        :param expected:
+            An image containing uniquely labeled object masks corresponding to
+            the ground truth.
+        """
+        ...
+
+    def compute(self, actual: LabelImage) -> List[float]:
+        """
+        Computes the performance measure for the given segmentation results
+        based on the previously set expected result.
+
+        :param actual:
+            An image containing uniquely labeled object masks corresponding to
+            the segmentation results.
+        """
+        ...
+
+    def default_name(self) -> str:
+        """
+        Returns the default name of this measure.
+        """
+        ...
+
+
+class Measure(MeasureProtocol):
     """
     Defines a performance measure.
 
@@ -15,44 +81,25 @@ class Measure:
         (``object-mean``).
     """
 
-    def __init__(self, aggregation='mean'):
-        assert aggregation in (
-            'sum',
-            'mean',
-            'geometric-mean',
-            'object-mean',
-        )
-        self.aggregation = aggregation
+    def __init__(self, aggregation: AggregationType = 'mean') -> None:
+        assert aggregation in get_args(AggregationType)
+        self._aggregation: AggregationType = aggregation
 
-    def set_expected(self, expected):
-        """
-        Sets the expected result for evaluation.
+    @property
+    def aggregation(self) -> AggregationType:
+        return self._aggregation
 
-        :param expected:
-            An image containing uniquely labeled object masks corresponding to
-            the ground truth.
-        """
+    def set_expected(self, expected: LabelImage) -> None:
         self.expected = expected
 
-    def compute(self, actual):
-        """
-        Computes the performance measure for the given segmentation results
-        based on the previously set expected result.
-
-        :param actual:
-            An image containing uniquely labeled object masks corresponding to
-            the segmentation results.
-        """
+    def compute(self, actual: LabelImage) -> List[float]:
         return NotImplemented
 
-    def default_name(self):
-        """
-        Returns the default name of this measure.
-        """
+    def default_name(self) -> str:
         return type(self).__name__
 
 
-class ImageMeasureMixin:
+class ImageMeasureMixin(MeasureProtocol):
     """
     Defines an image-level performance measure.
 
@@ -67,15 +114,18 @@ class ImageMeasureMixin:
         the obtained scores are either minimal (``min``) or maximal (``max``).
     """
 
-    def __init__(self, *args, correspondance_function, **kwargs):
+    def __init__(
+        self,
+        *args,
+        correspondance_function: CorrespondanceFunction,
+        **kwargs,
+    ) -> None:
         super().__init__(*args, **kwargs)
-        assert correspondance_function in (
-            'min',
-            'max',
-        )
+        assert correspondance_function in get_args(CorrespondanceFunction)
+        self.correspondance_function: CorrespondanceFunction
         self.correspondance_function = correspondance_function
 
-    def object_based(self, *args, **kwargs):
+    def object_based(self, **kwargs) -> Measure:
         """
         Returns measure for comparison regarding the individual objects (as
         opposed to only considering their union).
@@ -87,8 +137,7 @@ class ImageMeasureMixin:
             This measure decorated by :class:`ObjectMeasureAdapter`.
         """
         return ObjectMeasureAdapter(
-            self,
-            *args,
+            measure=self,
             correspondance_function={
                 'min': min,
                 'max': max,
@@ -97,13 +146,13 @@ class ImageMeasureMixin:
         )
 
 
-class AsymmetricMeasureMixin:
+class AsymmetricMeasureMixin(MeasureProtocol):
 
-    def reversed(self, *args, **kwargs):
-        return ReverseMeasureAdapter(self, *args, **kwargs)
+    def reversed(self, **kwargs) -> Measure:
+        return ReverseMeasureAdapter(self, **kwargs)
 
-    def symmetric(self, *args, **kwargs):
-        return SymmetricMeasureAdapter(self, self.reversed(), *args, **kwargs)
+    def symmetric(self, **kwargs) -> Measure:
+        return SymmetricMeasureAdapter(self, self.reversed(), **kwargs)
 
 
 class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
@@ -123,26 +172,20 @@ class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
         to a single score value.
     """
 
-    _obj_mapping = (None, None)  # cache
-
-    def __init__(self, measure, correspondance_function):
-        super().__init__()
+    def __init__(
+        self,
+        measure: MeasureProtocol,
+        correspondance_function: Callable[[List[float]], float],
+        **kwargs
+    ) -> None:
+        super().__init__(aggregation=measure.aggregation, **kwargs)
         self.measure      = measure
-        self.aggregation  = measure.aggregation
         self.nodetections = -1  # value to be used if detections are empty
         self.correspondance_function = correspondance_function
 
-    def set_expected(self, *args, **kwargs):
-        super().set_expected(*args, **kwargs)
-        ObjectMeasureAdapter._obj_mapping = (None, dict())
-
-    def compute(self, actual):
-        results = []
+    def compute(self, actual: LabelImage) -> List[float]:
+        results: List[float] = list()
         seg_labels = frozenset(actual.reshape(-1)) - {0}
-
-        # Reset the cached object mapping:
-        if ObjectMeasureAdapter._obj_mapping[0] is not actual:
-            ObjectMeasureAdapter._obj_mapping = (actual, dict())
 
         for ref_label in set(self.expected.flatten()) - {0}:
             ref_cc = (self.expected == ref_label)
@@ -154,43 +197,32 @@ class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
                     results.append(self.nodetections)
                 continue
 
-            # Query the cached object correspondance candidates:
-            if ref_label in self._obj_mapping[1]:  # cache hit
-
-                correspondance_candidates = \
-                    ObjectMeasureAdapter._obj_mapping[1][ref_label]
-
-            else:  # cache miss
-
-                # We restrict the search for potentially corresponding objects
-                # to a meaningful region. To do so, we first determine the
-                # distance within which potentially corresponding objects will
-                # be considered. This is the distance to the furthest point of
-                # the closest object:
-                ref_distancemap = ndimage.distance_transform_edt(~ref_cc)
-                closest_seg_label = min(
-                    seg_labels,
-                    key=lambda seg_label: ref_distancemap[
-                            actual == seg_label
-                        ].min(),
-                )
-                max_correspondance_candidates_distance = ref_distancemap[
-                    actual == closest_seg_label
-                ].max()
-
-                # Second, narrow the set of potentially corresponding objects
-                # by finding the labels of objects within the maximum distance:
-                correspondance_candidates = [
-                    seg_label for seg_label in seg_labels
-                    if ref_distancemap[
+            # We restrict the search for potentially corresponding objects
+            # to a meaningful region. To do so, we first determine the
+            # distance within which potentially corresponding objects will
+            # be considered. This is the distance to the furthest point of
+            # the closest object:
+            ref_distancemap = ndimage.distance_transform_edt(~ref_cc)
+            closest_seg_label = min(
+                seg_labels,
+                key=lambda seg_label: ref_distancemap[
                         actual == seg_label
-                    ].min() <= max_correspondance_candidates_distance
-                ]
-                ObjectMeasureAdapter._obj_mapping[1][
-                    ref_label
-                ] = correspondance_candidates
+                    ].min(),
+            )
+            max_correspondance_candidates_distance = ref_distancemap[
+                actual == closest_seg_label
+            ].max()
 
-            scores = list()
+            # Second, narrow the set of potentially corresponding objects
+            # by finding the labels of objects within the maximum distance:
+            correspondance_candidates = [
+                seg_label for seg_label in seg_labels
+                if ref_distancemap[
+                    actual == seg_label
+                ].min() <= max_correspondance_candidates_distance
+            ]
+
+            scores: List[float] = list()
             for seg_label in correspondance_candidates:
                 seg_cc = (actual == seg_label)
                 _bbox  = bbox(ref_cc, seg_cc, margin=1)[0]
@@ -207,16 +239,15 @@ class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
 
 class ReverseMeasureAdapter(Measure):
 
-    def __init__(self, measure, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.measure     = measure
-        self.aggregation = measure.aggregation
+    def __init__(self, measure: MeasureProtocol, **kwargs) -> None:
+        super().__init__(aggregation=measure.aggregation, **kwargs)
+        self.measure = measure
 
-    def compute(self, actual):
+    def compute(self, actual: LabelImage) -> List[float]:
         self.measure.set_expected(actual)
         return self.measure.compute(self.expected)
 
-    def default_name(self):
+    def default_name(self) -> str:
         return f'Rev. {self.measure.default_name()}'
 
 
@@ -224,26 +255,24 @@ class SymmetricMeasureAdapter(Measure):
 
     def __init__(
         self,
-        measure1,
-        measure2,
-        *args,
+        measure1: MeasureProtocol,
+        measure2: MeasureProtocol,
         **kwargs,
-    ):
-        super().__init__(*args, **kwargs)
+    ) -> None:
+        super().__init__(aggregation=measure1.aggregation, **kwargs)
         assert measure1.aggregation == measure2.aggregation
-        self.measure1    = measure1
-        self.measure2    = measure2
-        self.aggregation = measure1.aggregation
+        self.measure1 = measure1
+        self.measure2 = measure2
 
-    def set_expected(self, expected):
+    def set_expected(self, expected: LabelImage) -> None:
         self.measure1.set_expected(expected)
         self.measure2.set_expected(expected)
         super().set_expected(expected)
 
-    def compute(self, actual):
+    def compute(self, actual: LabelImage) -> List[float]:
         results1 = self.measure1.compute(actual)
         results2 = self.measure2.compute(actual)
         return results1 + results2
 
-    def default_name(self):
+    def default_name(self) -> str:
         return f'Sym. {self.measure1.default_name()}'

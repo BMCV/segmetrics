@@ -1,4 +1,4 @@
-numpy>=1.18
+numpy>=1.20
 scipy
 scikit-image>=0.18
 scikit-learn
