@@ -1,7 +1,9 @@
 from typing import (
     Callable,
     List,
+    Literal,
     Protocol,
+    get_args,
     runtime_checkable,
 )
 
@@ -9,6 +11,18 @@ from scipy import ndimage
 
 from segmetrics._aux import bbox
 from segmetrics.typing import LabelImage
+
+AggregationType = Literal[
+    'sum',
+    'mean',
+    'geometric-mean',
+    'object-mean',
+]
+
+CorrespondanceFunction = Literal[
+    'min',
+    'max',
+]
 
 
 @runtime_checkable
@@ -18,7 +32,7 @@ class MeasureProtocol(Protocol):
     """
 
     @property
-    def aggregation(self) -> str:
+    def aggregation(self) -> AggregationType:
         """
         Indicates whether the results of this performance measure are
         aggregated by summation (``sum``), by averaging (``mean``), by using
@@ -67,17 +81,12 @@ class Measure(MeasureProtocol):
         (``object-mean``).
     """
 
-    def __init__(self, aggregation: str = 'mean'):
-        assert aggregation in (
-            'sum',
-            'mean',
-            'geometric-mean',
-            'object-mean',
-        )
-        self._aggregation: str = aggregation
+    def __init__(self, aggregation: AggregationType = 'mean'):
+        assert aggregation in get_args(AggregationType)
+        self._aggregation: AggregationType = aggregation
 
     @property
-    def aggregation(self) -> str:
+    def aggregation(self) -> AggregationType:
         return self._aggregation
 
     def set_expected(self, expected: LabelImage) -> None:
@@ -105,13 +114,16 @@ class ImageMeasureMixin(MeasureProtocol):
         the obtained scores are either minimal (``min``) or maximal (``max``).
     """
 
-    def __init__(self, *args, correspondance_function: str, **kwargs):
+    def __init__(
+        self,
+        *args,
+        correspondance_function: CorrespondanceFunction,
+        **kwargs,
+    ) -> None:
         super().__init__(*args, **kwargs)
-        assert correspondance_function in (
-            'min',
-            'max',
-        )
-        self.correspondance_function: str = correspondance_function
+        assert correspondance_function in get_args(CorrespondanceFunction)
+        self.correspondance_function: CorrespondanceFunction
+        self.correspondance_function = correspondance_function
 
     def object_based(self, **kwargs) -> Measure:
         """
