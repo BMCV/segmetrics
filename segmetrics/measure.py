@@ -1,7 +1,8 @@
 from typing import (
-    List,
     Callable,
+    List,
     Protocol,
+    runtime_checkable,
 )
 
 from scipy import ndimage
@@ -10,6 +11,7 @@ from segmetrics._aux import bbox
 from segmetrics.typing import LabelImage
 
 
+@runtime_checkable
 class MeasureProtocol(Protocol):
     """
     Type protocol of performance measures.

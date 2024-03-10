@@ -19,7 +19,7 @@ import numpy as np
 import scipy.stats.mstats
 import skimage.measure
 
-from segmetrics.measure import Measure
+from segmetrics.measure import MeasureProtocol
 from segmetrics.typing import (
     Image,
     LabelImage,
@@ -71,7 +71,7 @@ def _label(im: Image, background: int = 0, neighbors: int = 4) -> LabelImage:
 
 
 def _aggregate(
-    measure: Measure,
+    measure: MeasureProtocol,
     values: List[float],
     num_objects: int,
 ) -> float:
@@ -99,7 +99,7 @@ class Study:
     """
 
     def __init__(self) -> None:
-        self.measures: Dict[str, Measure] = dict()
+        self.measures: Dict[str, MeasureProtocol] = dict()
         self.csv_sample_id_column_name: str = 'Sample'
 
         self._num_objects: Dict[Any, int] = dict()
@@ -146,7 +146,7 @@ class Study:
                     self._sample_ids.append(sample_id)
         self._results_cache.clear()
 
-    def add_measure(self, measure: Measure, name: Optional[str] = None):
+    def add_measure(self, measure: MeasureProtocol, name: Optional[str] = None):
         """
         Adds a performance measure to this study.
 
@@ -161,9 +161,9 @@ class Study:
         :return:
             The name used for the measure (see above).
         """
-        if not isinstance(measure, Measure):
+        if not isinstance(measure, MeasureProtocol):
             raise ValueError(
-                'Argument "measure" must be a Measure object'
+                'Argument "measure" must implement MeasureProtocol'
                 f' ({type(measure)}, {measure})'
             )
         if name is None:
@@ -265,7 +265,7 @@ class Study:
 
         intermediate_results: Dict[str, List[float]] = dict()
         for measure_name in self.measures:
-            measure: Measure = self.measures[measure_name]
+            measure: MeasureProtocol = self.measures[measure_name]
             result: List[float] = measure.compute(actual)
             self._results[measure_name][sample_id] = result
             intermediate_results[measure_name] = result
