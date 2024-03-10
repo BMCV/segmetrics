@@ -1,4 +1,8 @@
 import warnings
+from typing import (
+    List,
+    Tuple,
+)
 
 import numpy as np
 import sklearn.metrics
@@ -7,6 +11,10 @@ from segmetrics.measure import (
     AsymmetricMeasureMixin,
     ImageMeasureMixin,
     Measure,
+)
+from segmetrics.typing import (
+    BinaryImage,
+    LabelImage,
 )
 
 
@@ -43,7 +51,7 @@ class Dice(RegionalImageMeasure):
     .. _F1 score: https://en.wikipedia.org/wiki/F-score
     """
 
-    def compute(self, actual):
+    def compute(self, actual: LabelImage) -> List[float]:
         ref = self.expected > 0
         res = actual        > 0
         denominator = ref.sum() + res.sum()
@@ -75,7 +83,7 @@ class JaccardCoefficient(RegionalImageMeasure):
     :math:`\mathrm{DC}` values, but not for sums or mean values thereof.
     """
 
-    def compute(self, actual):
+    def compute(self, actual: LabelImage) -> List[float]:
         ref = self.expected > 0
         res = actual        > 0
         nominator = np.logical_and(ref, res).sum().astype(np.float32)
@@ -85,7 +93,7 @@ class JaccardCoefficient(RegionalImageMeasure):
         else:
             return [1.]  # result of zero/zero division
 
-    def default_name(self):
+    def default_name(self) -> str:
         return 'Jaccard coef.'
 
 
@@ -124,32 +132,37 @@ class RandIndex(RegionalImageMeasure):
       algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
     """
 
-    def compute(self, actual):
+    def compute(self, actual: LabelImage) -> List[float]:
         a, b, c, d = self.compute_parts(actual)
         return [(a + d) / float(a + b + c + d)]
 
-    def compute_parts(self, actual):
+    def compute_parts(
+        self,
+        actual: LabelImage,
+    ) -> Tuple[float, float, float, float]:
         """
         Computes the values :math:`a`, :math:`b`, :math:`c`, :math:`d`.
         """
+        R: BinaryImage
+        S: BinaryImage
         R, S = (self.expected > 0), (actual > 0)
-        a, b, c, d = 0, 0, 0, 0
+        a, b, c, d = 0., 0., 0., 0.
         RS = np.empty((2, 2), np.uint64)
         RS[0, 0] = ((R == 0) * (S == 0)).sum()
         RS[0, 1] = ((R == 0) * (S == 1)).sum()
         RS[1, 0] = ((R == 1) * (S == 0)).sum()
         RS[1, 1] = ((R == 1) * (S == 1)).sum()
         for rs in np.ndindex(RS.shape):
-            n  = RS[rs]
-            Ri = rs[0]
-            Si = rs[1]
-            a += n * (((Ri == R) * (Si == S)).sum() - 1)
-            b += n *  ((Ri != R) * (Si == S)).sum()
-            c += n *  ((Ri == R) * (Si != S)).sum()
-            d += n *  ((Ri != R) * (Si != S)).sum()
+            n : int = RS[rs]
+            Ri: int = rs[0]
+            Si: int = rs[1]
+            a += n * (np.sum((Ri == R) * (Si == S)) - 1)
+            b += n *  np.sum((Ri != R) * (Si == S))
+            c += n *  np.sum((Ri == R) * (Si != S))
+            d += n *  np.sum((Ri != R) * (Si != S))
         return a, b, c, d
 
-    def default_name(self):
+    def default_name(self) -> str:
         return 'Rand'
 
 
@@ -161,7 +174,7 @@ class AdjustedRandIndex(RegionalImageMeasure):
     http://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html
     """
 
-    def compute(self, actual):
+    def compute(self, actual: LabelImage) -> List[float]:
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', category=DeprecationWarning)
             return [
@@ -171,7 +184,7 @@ class AdjustedRandIndex(RegionalImageMeasure):
                 )
             ]
 
-    def default_name(self):
+    def default_name(self) -> str:
         return 'ARI'
 
 
@@ -206,11 +219,11 @@ class JaccardIndex(RandIndex):
       algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
     """
 
-    def compute(self, actual):
+    def compute(self, actual: LabelImage) -> List[float]:
         a, b, c, d = self.compute_parts(actual)
         return [(a + d) / float(b + c + d)]
 
-    def default_name(self):
+    def default_name(self) -> str:
         return 'Jaccard index'
 
 
@@ -244,13 +257,13 @@ class ISBIScore(AsymmetricMeasureMixin, Measure):
       algorithms," Bioinformatics, vol. 30, no. 11, pp. 1609–1617, 2014.
     """
 
-    def __init__(self, min_ref_size=1, **kwargs):
+    def __init__(self, min_ref_size: int = 1, **kwargs):
         super().__init__(**kwargs)
         assert min_ref_size >= 1, 'min_ref_size must be 1 or larger'
         self.min_ref_size = min_ref_size
 
-    def compute(self, actual):
-        results = []
+    def compute(self, actual: LabelImage) -> List[float]:
+        results: List[float] = list()
         for ref_label in range(1, self.expected.max() + 1):
 
             # The reference connected component
@@ -280,7 +293,7 @@ class ISBIScore(AsymmetricMeasureMixin, Measure):
             results.append(jaccard)
         return results
 
-    def default_name(self):
+    def default_name(self) -> str:
         name = 'SEG'
         if self.min_ref_size >= 2:
             name += f' (min_ref_size={self.min_ref_size})'

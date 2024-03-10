@@ -1,6 +1,6 @@
 [flake8]
 
-extend-ignore = E221,E211,E222,E202,F541,E201
+extend-ignore = E221,E211,E222,E202,F541,E201,E203
 
 per-file-ignores =
     segmetrics/__init__.py:F401
