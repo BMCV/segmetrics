@@ -1,5 +1,7 @@
-from collections.abc import Sequence
-from typing import List
+from typing import (
+    List,
+    Sequence,
+)
 
 import numpy as np
 from scipy import ndimage
