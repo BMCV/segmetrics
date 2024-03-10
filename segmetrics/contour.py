@@ -1,23 +1,31 @@
+from collections.abc import Sequence
+from typing import List
+
 import numpy as np
 from scipy import ndimage
 from skimage import morphology as morph
 
 from segmetrics.measure import (
+    CorrespondanceFunction,
     ImageMeasureMixin,
     Measure,
 )
+from segmetrics.typing import (
+    BinaryImage,
+    LabelImage,
+)
 
 
-def _compute_binary_contour(mask, width=1):
+def _compute_binary_contour(mask: BinaryImage, width: int = 1) -> BinaryImage:
     dilation = morph.binary_dilation(mask, morph.disk(width))
     return np.logical_and(dilation, np.logical_not(mask))
 
 
-def _quantile_max(quantile, values):
+def _quantile_max(quantile: float, values: Sequence[float]) -> float:
     if quantile == 1:
         return np.max(values)
     else:
-        values = np.sort(values)
+        values = list(sorted(values))
         return values[int(quantile * (len(values) - 1))]
 
 
@@ -27,7 +35,12 @@ class ContourMeasure(ImageMeasureMixin, Measure):
     binary volumes (images).
     """
 
-    def __init__(self, *args, correspondance_function='min', **kwargs):
+    def __init__(
+        self,
+        *args,
+        correspondance_function: CorrespondanceFunction = 'min',
+        **kwargs,
+    ) -> None:
         super().__init__(
             *args,
             correspondance_function=correspondance_function,
@@ -58,18 +71,18 @@ class Hausdorff(ContourMeasure):
       distance." International Journal of computer vision 24.3 (1997): 251-270.
     """
 
-    def __init__(self, quantile=1, **kwargs):
+    def __init__(self, quantile: float = 1, **kwargs):
         super().__init__(**kwargs)
         assert 0 < quantile <= 1
         self.quantile = quantile
 
-    def set_expected(self, expected):
+    def set_expected(self, expected: LabelImage) -> None:
         self.expected_contour = _compute_binary_contour(expected > 0)
         self.expected_contour_distance_map = ndimage.distance_transform_edt(
             np.logical_not(self.expected_contour)
         )
 
-    def compute(self, actual):
+    def compute(self, actual: LabelImage) -> List[float]:
         actual_contour = _compute_binary_contour(actual > 0)
         if not self.expected_contour.any() or not actual_contour.any():
             return []
@@ -80,13 +93,13 @@ class Hausdorff(ContourMeasure):
             )
         ]
 
-    def default_name(self):
+    def default_name(self) -> str:
         if self.quantile == 1:
             return 'HSD'
         else:
             return f'HSD (Q={self.quantile:g})'
 
-    def _quantile_max(self, values):
+    def _quantile_max(self, values: Sequence[float]) -> float:
         return _quantile_max(self.quantile, values)
 
 
@@ -114,17 +127,17 @@ class NSD(ContourMeasure):
     :math:`1`. Lower values correspond to better segmentation performance.
     """
 
-    def set_expected(self, expected):
-        self.expected = (expected > 0)
-        self.expected_contour = _compute_binary_contour(self.expected)
+    def set_expected(self, expected: LabelImage) -> None:
+        self.expected_binary: BinaryImage = (expected > 0)
+        self.expected_contour = _compute_binary_contour(self.expected_binary)
         self.expected_contour_distance_map = ndimage.distance_transform_edt(
             np.logical_not(self.expected_contour)
         )
 
-    def compute(self, actual):
-        actual = (actual > 0)
-        union         = np.logical_or(self.expected, actual)
-        intersection  = np.logical_and(self.expected, actual)
+    def compute(self, actual: LabelImage) -> List[float]:
+        actual_binary: BinaryImage = (actual > 0)
+        union         = np.logical_or(self.expected_binary, actual_binary)
+        intersection  = np.logical_and(self.expected_binary, actual_binary)
         denominator   = self.expected_contour_distance_map[union].sum()
         nominator     = self.expected_contour_distance_map[
             np.logical_and(union, np.logical_not(intersection))
