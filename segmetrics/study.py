@@ -112,7 +112,7 @@ class Study:
         other: Study,
         sample_ids: Sequence[Any] | str = 'all',
         replace: bool = True
-    ):
+    ) -> None:
         """
         Merges measures and results from ``other`` study.
 
@@ -146,7 +146,11 @@ class Study:
                     self._sample_ids.append(sample_id)
         self._results_cache.clear()
 
-    def add_measure(self, measure: MeasureProtocol, name: Optional[str] = None):
+    def add_measure(
+        self,
+        measure: MeasureProtocol,
+        name: Optional[str] = None,
+    ) -> str:
         """
         Adds a performance measure to this study.
 
