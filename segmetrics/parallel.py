@@ -1,18 +1,27 @@
 import multiprocessing
 import signal
+from typing import (
+    Any,
+    Callable,
+    Optional,
+    Sequence,
+)
 
 import dill
 
+from segmetrics.study import Study
+from segmetrics.typing import Image
+
 
 def process(
-    study,
-    get_actual_func,
-    get_expected_func,
-    sample_ids,
-    num_forks=None,
-    is_actual_unique=True,
-    is_expected_unique=True,
-    callback=None,
+    study: Study,
+    get_actual_func: Callable[[Any], Image],
+    get_expected_func: Callable[[Any], Image],
+    sample_ids: Sequence[Any],
+    num_forks: Optional[int] = None,
+    is_actual_unique: bool = True,
+    is_expected_unique: bool = True,
+    callback: Optional[Callable[[int, int], None]] = None,
 ):
     if num_forks is None:
         num_forks = multiprocessing.cpu_count()
@@ -45,12 +54,12 @@ def process_all(*args, **kwargs):
 
 
 def _process_sample(
-    study,
-    get_actual_func,
-    get_expected_func,
-    sample_id,
-    is_actual_unique,
-    is_expected_unique,
+    study: Study,
+    get_actual_func: Callable[[Any], Image],
+    get_expected_func: Callable[[Any], Image],
+    sample_id: Any,
+    is_actual_unique: bool,
+    is_expected_unique: bool,
 ):
     actual   = dill.loads(get_actual_func  )(sample_id)
     expected = dill.loads(get_expected_func)(sample_id)
@@ -60,15 +69,15 @@ def _process_sample(
 
 
 class _Sequence:
-    def __init__(self, val):
+    def __init__(self, val: Sequence[Any]) -> None:
         self.val = val
 
 
-def _unroll(seq):
+def _unroll(seq: Sequence[Any]) -> _Sequence:
     return _Sequence(seq)
 
 
-def _get_args_chain(args):
+def _get_args_chain(args: Sequence[Any]):
     n = max(len(arg.val) for arg in list(args) if isinstance(arg, _Sequence))
     return n, (
         arg.val if isinstance(arg, _Sequence) else [arg] * n for arg in args

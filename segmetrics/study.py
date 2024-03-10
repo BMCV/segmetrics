@@ -11,6 +11,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     Optional,
     TextIO,
 )
@@ -110,7 +111,7 @@ class Study:
     def merge(
         self,
         other: Study,
-        sample_ids: Sequence[Any] | str = 'all',
+        sample_ids: Sequence[Any] | Literal['all'],
         replace: bool = True
     ) -> None:
         """
