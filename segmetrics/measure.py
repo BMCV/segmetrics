@@ -81,7 +81,7 @@ class Measure(MeasureProtocol):
         (``object-mean``).
     """
 
-    def __init__(self, aggregation: AggregationType = 'mean'):
+    def __init__(self, aggregation: AggregationType = 'mean') -> None:
         assert aggregation in get_args(AggregationType)
         self._aggregation: AggregationType = aggregation
 
@@ -177,7 +177,7 @@ class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
         measure: MeasureProtocol,
         correspondance_function: Callable[[List[float]], float],
         **kwargs
-    ):
+    ) -> None:
         super().__init__(aggregation=measure.aggregation, **kwargs)
         self.measure      = measure
         self.nodetections = -1  # value to be used if detections are empty
@@ -239,7 +239,7 @@ class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
 
 class ReverseMeasureAdapter(Measure):
 
-    def __init__(self, measure: MeasureProtocol, **kwargs):
+    def __init__(self, measure: MeasureProtocol, **kwargs) -> None:
         super().__init__(aggregation=measure.aggregation, **kwargs)
         self.measure = measure
 
@@ -258,7 +258,7 @@ class SymmetricMeasureAdapter(Measure):
         measure1: MeasureProtocol,
         measure2: MeasureProtocol,
         **kwargs,
-    ):
+    ) -> None:
         super().__init__(aggregation=measure1.aggregation, **kwargs)
         assert measure1.aggregation == measure2.aggregation
         self.measure1 = measure1

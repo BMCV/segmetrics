@@ -9,6 +9,7 @@ import sklearn.metrics
 
 from segmetrics.measure import (
     AsymmetricMeasureMixin,
+    CorrespondanceFunction,
     ImageMeasureMixin,
     Measure,
 )
@@ -24,7 +25,12 @@ class RegionalImageMeasure(ImageMeasureMixin, Measure):
     of binary volumes (images).
     """
 
-    def __init__(self, *args, correspondance_function='max', **kwargs):
+    def __init__(
+        self,
+        *args,
+        correspondance_function: CorrespondanceFunction = 'max',
+        **kwargs
+    ) -> None:
         super().__init__(
             *args,
             correspondance_function=correspondance_function,
@@ -257,7 +263,7 @@ class ISBIScore(AsymmetricMeasureMixin, Measure):
       algorithms," Bioinformatics, vol. 30, no. 11, pp. 1609–1617, 2014.
     """
 
-    def __init__(self, min_ref_size: int = 1, **kwargs):
+    def __init__(self, min_ref_size: int = 1, **kwargs) -> None:
         super().__init__(**kwargs)
         assert min_ref_size >= 1, 'min_ref_size must be 1 or larger'
         self.min_ref_size = min_ref_size
