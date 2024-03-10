@@ -1,6 +1,7 @@
 from typing import (
     List,
     Callable,
+    Protocol,
 )
 
 from scipy import ndimage
@@ -9,7 +10,50 @@ from segmetrics._aux import bbox
 from segmetrics.typing import LabelImage
 
 
-class Measure:
+class MeasureProtocol(Protocol):
+    """
+    Type protocol of performance measures.
+    """
+
+    @property
+    def aggregation(self) -> str:
+        """
+        Indicates whether the results of this performance measure are
+        aggregated by summation (``sum``), by averaging (``mean``), by using
+        the geometric mean (``geometric-mean``), or by computing the proportion
+        with respect to the number of annotated objects (``object-mean``).
+        """
+        ...
+
+    def set_expected(self, expected: LabelImage) -> None:
+        """
+        Sets the expected result for evaluation.
+
+        :param expected:
+            An image containing uniquely labeled object masks corresponding to
+            the ground truth.
+        """
+        ...
+
+    def compute(self, actual: LabelImage) -> List[float]:
+        """
+        Computes the performance measure for the given segmentation results
+        based on the previously set expected result.
+
+        :param actual:
+            An image containing uniquely labeled object masks corresponding to
+            the segmentation results.
+        """
+        ...
+
+    def default_name(self) -> str:
+        """
+        Returns the default name of this measure.
+        """
+        ...
+
+
+class Measure(MeasureProtocol):
     """
     Defines a performance measure.
 
@@ -31,34 +75,16 @@ class Measure:
         self.aggregation: str = aggregation
 
     def set_expected(self, expected: LabelImage) -> None:
-        """
-        Sets the expected result for evaluation.
-
-        :param expected:
-            An image containing uniquely labeled object masks corresponding to
-            the ground truth.
-        """
         self.expected = expected
 
     def compute(self, actual: LabelImage) -> List[float]:
-        """
-        Computes the performance measure for the given segmentation results
-        based on the previously set expected result.
-
-        :param actual:
-            An image containing uniquely labeled object masks corresponding to
-            the segmentation results.
-        """
         return NotImplemented
 
     def default_name(self) -> str:
-        """
-        Returns the default name of this measure.
-        """
         return type(self).__name__
 
 
-class ImageMeasureMixin:
+class ImageMeasureMixin(MeasureProtocol):
     """
     Defines an image-level performance measure.
 
@@ -102,7 +128,7 @@ class ImageMeasureMixin:
         )
 
 
-class AsymmetricMeasureMixin:
+class AsymmetricMeasureMixin(MeasureProtocol):
 
     def reversed(self, **kwargs) -> Measure:
         return ReverseMeasureAdapter(self, **kwargs)
@@ -130,7 +156,7 @@ class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
 
     def __init__(
         self,
-        measure: Measure,
+        measure: MeasureProtocol,
         correspondance_function: Callable[[List[float]], float],
         **kwargs
     ):
@@ -141,7 +167,7 @@ class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
         self.correspondance_function = correspondance_function
 
     def compute(self, actual: LabelImage) -> List[float]:
-        results = []
+        results: List[float] = list()
         seg_labels = frozenset(actual.reshape(-1)) - {0}
 
         for ref_label in set(self.expected.flatten()) - {0}:
@@ -179,7 +205,7 @@ class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
                 ].min() <= max_correspondance_candidates_distance
             ]
 
-            scores = list()
+            scores: List[float] = list()
             for seg_label in correspondance_candidates:
                 seg_cc = (actual == seg_label)
                 _bbox  = bbox(ref_cc, seg_cc, margin=1)[0]
@@ -196,16 +222,16 @@ class ObjectMeasureAdapter(AsymmetricMeasureMixin, Measure):
 
 class ReverseMeasureAdapter(Measure):
 
-    def __init__(self, measure, **kwargs):
+    def __init__(self, measure: MeasureProtocol, **kwargs):
         super().__init__(**kwargs)
         self.measure     = measure
         self.aggregation = measure.aggregation
 
-    def compute(self, actual):
+    def compute(self, actual: LabelImage) -> List[float]:
         self.measure.set_expected(actual)
         return self.measure.compute(self.expected)
 
-    def default_name(self):
+    def default_name(self) -> str:
         return f'Rev. {self.measure.default_name()}'
 
 
@@ -213,8 +239,8 @@ class SymmetricMeasureAdapter(Measure):
 
     def __init__(
         self,
-        measure1,
-        measure2,
+        measure1: MeasureProtocol,
+        measure2: MeasureProtocol,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -223,15 +249,15 @@ class SymmetricMeasureAdapter(Measure):
         self.measure2    = measure2
         self.aggregation = measure1.aggregation
 
-    def set_expected(self, expected):
+    def set_expected(self, expected: LabelImage) -> None:
         self.measure1.set_expected(expected)
         self.measure2.set_expected(expected)
         super().set_expected(expected)
 
-    def compute(self, actual):
+    def compute(self, actual: LabelImage) -> List[float]:
         results1 = self.measure1.compute(actual)
         results2 = self.measure2.compute(actual)
         return results1 + results2
 
-    def default_name(self):
+    def default_name(self) -> str:
         return f'Sym. {self.measure1.default_name()}'
