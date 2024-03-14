@@ -85,7 +85,7 @@ Replace the ``ObjectBasedDistanceMeasure`` class by the more general ``segmetric
 
 Add ``.object_based()`` method for all image-level measures (including region-based measures).
 
-Remove the argument and attribute mode of the Hausdorff distance.
+Remove the argument and attribute ``mode`` from the Hausdorff distance.
 
 Add ``.reversed()`` and ``.symmetric()`` methods for all asymmetric measures (e.g., object-based).
 
