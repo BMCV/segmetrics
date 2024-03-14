@@ -127,11 +127,10 @@ class ImageMeasureMixin(MeasureProtocol):
 
     def object_based(self, **kwargs) -> Measure:
         """
-        Returns measure for comparison regarding the individual objects (as
-        opposed to only considering their union).
+        Returns measure for comparing the individual objects (as opposed to
+        only considering the union thereof).
 
-        Positional and keyword arguments are passed through to
-        :class:`ObjectMeasureAdapter`.
+        Keyword arguments are passed through to :class:`ObjectMeasureAdapter`.
 
         :returns:
             This measure decorated by :class:`ObjectMeasureAdapter`.
@@ -147,11 +146,42 @@ class ImageMeasureMixin(MeasureProtocol):
 
 
 class AsymmetricMeasureMixin(MeasureProtocol):
+    """
+    Defines an asymmetric performance measure.
+
+    Symmetric performance measures are guaranteed to yield the same results
+    when the actual and the expected segmentation masks are swapped.
+    Asymmetric performance measures can yield different results when the
+    results are swapped.
+    """
 
     def reversed(self, **kwargs) -> Measure:
+        """
+        Returns a measure for comparing the underlying asymmetric performance
+        measure measure in the opposite direction (i.e. swapping the actual
+        and the expected segmentation masks).
+
+        Keyword arguments are passed through to :class:`ReverseMeasureAdapter`.
+
+        :returns:
+            This measure decorated by :class:`ReverseMeasureAdapter`.
+        """
         return ReverseMeasureAdapter(self, **kwargs)
 
     def symmetric(self, **kwargs) -> Measure:
+        """
+        Returns a bidirectional variant of the underlying asymmetric
+        performance measure. The underlying performance measure is used for
+        computation of performance values in both direction (i.e. with the
+        original segmentation masks, and, in addition, with actual and
+        expected segmentation masks swapped).
+
+        Keyword arguments are passed through to
+        :class:`SymmetricMeasureAdapter`.
+
+        :returns:
+            This measure decorated by :class:`SymmetricMeasureAdapter`.
+        """
         return SymmetricMeasureAdapter(self, self.reversed(), **kwargs)
 
 

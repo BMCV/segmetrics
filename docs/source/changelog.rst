@@ -84,6 +84,7 @@ Minimum supported Python version is now 3.8 due to type linting.
 Replace the ``ObjectBasedDistanceMeasure`` class by the more general ``segmetrics.measure.ObjectMeasureAdapter`` class.
 
 Add ``.object_based()`` method for all image-level measures (including region-based measures).
+The method does not accept positional arguments any more, only keyword arguments.
 
 Remove the argument and attribute ``mode`` from the Hausdorff distance.
 
