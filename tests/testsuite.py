@@ -1,43 +1,51 @@
-import unittest
-import segmetrics as sm
-import numpy as np
-import pathlib
-import pandas as pd
-import time
+# flake8: noqa
+
 import os
+import pathlib
 import tempfile
-import skimage.io
+import time
+import unittest
 import warnings
 
-from tests.data import images, CrossSampler
+import numpy as np
+import pandas as pd
+import skimage.io
+
+import segmetrics as sm
+from tests.data import (
+    CrossSampler,
+    images,
+)
 from tests.isbi_seg import isbi_seg_official
 
 
 def create_full_study():
     study = sm.Study()
     study.add_measure(sm.Dice(), 'Dice')
+    study.add_measure(sm.Dice().object_based(), 'Ob. Dice')
+    study.add_measure(sm.Dice().object_based().reversed(), 'Rev. Ob. Dice')
+    study.add_measure(sm.Dice().object_based().symmetric(), 'Sym. Ob. Dice')
     study.add_measure(sm.ISBIScore(), 'SEG')
+    study.add_measure(sm.ISBIScore().reversed(), 'Rev. SEG')
+    study.add_measure(sm.ISBIScore().symmetric(), 'Sym. SEG')
     study.add_measure(sm.JaccardCoefficient(), 'JC')
     study.add_measure(sm.JaccardIndex(), 'JI')
+    study.add_measure(sm.JaccardIndex(aggregation='geometric-mean'), 'JI (geom)')
     study.add_measure(sm.RandIndex(), 'Rand')
     study.add_measure(sm.AdjustedRandIndex(), 'ARI')
-    study.add_measure(sm.Hausdorff('sym'), 'HSD (sym)')
-    study.add_measure(sm.Hausdorff('e2a'), 'HSD (e2a)')
-    study.add_measure(sm.Hausdorff('a2e'), 'HSD (a2e)')
-    study.add_measure(sm.Hausdorff('sym', quantile=0.99), 'QHSD (sym)')
-    study.add_measure(sm.Hausdorff('e2a', quantile=0.99), 'QHSD (e2a)')
-    study.add_measure(sm.Hausdorff('a2e', quantile=0.99), 'QHSD (a2e)')
+    study.add_measure(sm.Hausdorff(), 'HSD')
+    study.add_measure(sm.Hausdorff(quantile=0.99), 'QHSD')
     study.add_measure(sm.NSD(), 'NSD')
-    study.add_measure(sm.Hausdorff('sym').object_based(), 'Ob. HSD (sym)')
-    study.add_measure(sm.Hausdorff('e2a').object_based(), 'Ob. HSD (e2a)')
-    study.add_measure(sm.Hausdorff('a2e').object_based(), 'Ob. HSD (a2e)')
+    study.add_measure(sm.Hausdorff().object_based(), 'Ob. HSD')
+    study.add_measure(sm.Hausdorff().object_based().reversed(), 'Rev. Ob. HSD')
+    study.add_measure(sm.Hausdorff().object_based().symmetric(), 'Sym. Ob. HSD')
     study.add_measure(sm.NSD().object_based(), 'Ob. NSD')
     study.add_measure(sm.FalseSplit(), 'Split')
     study.add_measure(sm.FalseMerge(), 'Merge')
     study.add_measure(sm.FalsePositive(), 'FP')
     study.add_measure(sm.FalseNegative(), 'FN')
-    study.add_measure(sm.FalseSplit(aggregation='obj-mean'), 'Split/obj')
-    study.add_measure(sm.FalseMerge(aggregation='obj-mean'), 'Merge/obj')
+    study.add_measure(sm.FalseSplit(aggregation='object-mean'), 'Split/obj')
+    study.add_measure(sm.FalseMerge(aggregation='object-mean'), 'Merge/obj')
     return study
 
 
@@ -61,22 +69,22 @@ def compare_dataframe(test, study_df, expected_csv_filepath, tag=None):
 class MeasureTest(unittest.TestCase):
 
     def test_default_name(self):
-        self.assertEqual(sm.Dice().default_name(), 'Dice')
+        self.assertEqual(sm.Dice().object_based().default_name(), 'Ob. Dice')
+        self.assertEqual(sm.Dice().object_based().reversed().default_name(), 'Rev. Ob. Dice')
+        self.assertEqual(sm.Dice().object_based().symmetric().default_name(), 'Sym. Ob. Dice')
         self.assertEqual(sm.ISBIScore().default_name(), 'SEG')
+        self.assertEqual(sm.ISBIScore().reversed().default_name(), 'Rev. SEG')
+        self.assertEqual(sm.ISBIScore().symmetric().default_name(), 'Sym. SEG')
         self.assertEqual(sm.JaccardCoefficient().default_name(), 'Jaccard coef.')
         self.assertEqual(sm.JaccardIndex().default_name(), 'Jaccard index')
         self.assertEqual(sm.RandIndex().default_name(), 'Rand')
         self.assertEqual(sm.AdjustedRandIndex().default_name(), 'ARI')
-        self.assertEqual(sm.Hausdorff('sym').default_name(), 'HSD (sym)')
-        self.assertEqual(sm.Hausdorff('e2a').default_name(), 'HSD (e2a)')
-        self.assertEqual(sm.Hausdorff('a2e').default_name(), 'HSD (a2e)')
-        self.assertEqual(sm.Hausdorff('sym', quantile=0.99).default_name(), 'HSD (sym, Q=0.99)')
-        self.assertEqual(sm.Hausdorff('e2a', quantile=0.99).default_name(), 'HSD (e2a, Q=0.99)')
-        self.assertEqual(sm.Hausdorff('a2e', quantile=0.99).default_name(), 'HSD (a2e, Q=0.99)')
+        self.assertEqual(sm.Hausdorff().default_name(), 'HSD')
+        self.assertEqual(sm.Hausdorff(quantile=0.99).default_name(), 'HSD (Q=0.99)')
         self.assertEqual(sm.NSD().default_name(), 'NSD')
-        self.assertEqual(sm.Hausdorff('sym').object_based().default_name(), 'Ob. HSD (sym)')
-        self.assertEqual(sm.Hausdorff('e2a').object_based().default_name(), 'Ob. HSD (e2a)')
-        self.assertEqual(sm.Hausdorff('a2e').object_based().default_name(), 'Ob. HSD (a2e)')
+        self.assertEqual(sm.Hausdorff().object_based().default_name(), 'Ob. HSD')
+        self.assertEqual(sm.Hausdorff().object_based().reversed().default_name(), 'Rev. Ob. HSD')
+        self.assertEqual(sm.Hausdorff().object_based().symmetric().default_name(), 'Sym. Ob. HSD')
         self.assertEqual(sm.NSD().object_based().default_name(), 'Ob. NSD')
         self.assertEqual(sm.FalseSplit().default_name(), 'Split')
         self.assertEqual(sm.FalseMerge().default_name(), 'Merge')
@@ -90,7 +98,7 @@ class ObjMeanTest(unittest.TestCase):
         objects = 0
         study = sm.Study()
         sampler = CrossSampler(images, images)
-        measure_name = study.add_measure(measure(aggregation='obj-mean'))
+        measure_name = study.add_measure(measure(aggregation='object-mean'))
         for sample_id, ref, seg in sampler.all():
             study.set_expected(ref, unique=True)
             objects += len(frozenset(ref.reshape(-1)) - frozenset([0]))
