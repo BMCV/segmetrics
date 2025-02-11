@@ -10,6 +10,4 @@ permissions:
 
 jobs:
   post_pr_comment:
-    uses: BMCV/github-workflows/.github/workflows/coverage-post-pr-comment.yml@main
-    secrets:
-      github-auth: ${{ secrets.GITHUB_TOKEN }}
+    uses: BMCV/github-workflows/.github/workflows/post-pr-comment.yml@main
