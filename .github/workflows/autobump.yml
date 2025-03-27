@@ -1,0 +1,11 @@
+name: Autobump
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 0 1 * *'  # At 00:30 on day-of-month 1
+
+jobs:
+  run_tests:
+    name: Autobump
+    uses: BMCV/github-workflows/.github/workflows/autobump-default.yml@main
