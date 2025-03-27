@@ -3,7 +3,7 @@
 # -- Project information
 
 project = 'segmetrics.py'
-copyright = '2017-2022 Leonid Kostrykin, Biomedical Computer Vision Group, Heidelberg University'
+copyright = '2017-2025 Leonid Kostrykin, Biomedical Computer Vision Group, Heidelberg University'
 author = 'Leonid Kostrykin'
 
 # -- General configuration
