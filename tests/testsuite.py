@@ -98,11 +98,10 @@ class MeasureTest(unittest.TestCase):
 
 class AJITest(unittest.TestCase):
 
-    def test_aggregated_jaccard_index(self):
-        """Test AggregatedJaccardIndex with various scenarios."""
+    def test_perfect_match(self):
+        """Test AggregatedJaccardIndex with perfect match."""
         import numpy as np
         
-        # Test case 1: Perfect match
         expected = np.array([[1, 1, 0], [1, 1, 0], [0, 0, 2]], dtype=np.uint8)
         actual = np.array([[1, 1, 0], [1, 1, 0], [0, 0, 2]], dtype=np.uint8)
         
@@ -110,8 +109,11 @@ class AJITest(unittest.TestCase):
         aji.set_expected(expected)
         result = aji.compute(actual)
         self.assertAlmostEqual(result[0], 1.0, places=6)
+
+    def test_partial_overlap(self):
+        """Test AggregatedJaccardIndex with partial overlap."""
+        import numpy as np
         
-        # Test case 2: Partial overlap
         expected = np.array([[1, 1, 0], [1, 1, 0], [0, 0, 2]], dtype=np.uint8)
         actual = np.array([[1, 1, 0], [1, 0, 0], [0, 0, 2]], dtype=np.uint8)
         
@@ -121,8 +123,11 @@ class AJITest(unittest.TestCase):
         # Object 1: intersection=3, union=4; Object 2: intersection=1, union=1
         # AJI = (3+1)/(4+1) = 4/5 = 0.8
         self.assertAlmostEqual(result[0], 4.0/5.0, places=6)
+
+    def test_no_overlap(self):
+        """Test AggregatedJaccardIndex with no overlap."""
+        import numpy as np
         
-        # Test case 3: No overlap
         expected = np.array([[1, 1, 0], [1, 1, 0], [0, 0, 0]], dtype=np.uint8)
         actual = np.array([[0, 0, 2], [0, 0, 2], [0, 0, 2]], dtype=np.uint8)
         
@@ -132,8 +137,11 @@ class AJITest(unittest.TestCase):
         # No intersection, but both GT object (size 4) and pred object (size 3) contribute to denominator
         # AJI = 0 / (4 + 3) = 0
         self.assertAlmostEqual(result[0], 0.0, places=6)
+
+    def test_empty_images(self):
+        """Test AggregatedJaccardIndex with empty images."""
+        import numpy as np
         
-        # Test case 4: Empty images
         expected = np.zeros((3, 3), dtype=np.uint8)
         actual = np.zeros((3, 3), dtype=np.uint8)
         
@@ -141,8 +149,11 @@ class AJITest(unittest.TestCase):
         aji.set_expected(expected)
         result = aji.compute(actual)
         self.assertAlmostEqual(result[0], 1.0, places=6)  # Perfect match for empty images
+
+    def test_ground_truth_empty_prediction_non_empty(self):
+        """Test AggregatedJaccardIndex with ground truth empty and prediction non-empty."""
+        import numpy as np
         
-        # Test case 5: Ground truth empty, prediction non-empty
         expected = np.zeros((3, 3), dtype=np.uint8)
         actual = np.array([[1, 1, 0], [1, 1, 0], [0, 0, 0]], dtype=np.uint8)
         
@@ -150,8 +161,11 @@ class AJITest(unittest.TestCase):
         aji.set_expected(expected)
         result = aji.compute(actual)
         self.assertAlmostEqual(result[0], 0.0, places=6)
+
+    def test_prediction_empty_ground_truth_non_empty(self):
+        """Test AggregatedJaccardIndex with prediction empty and ground truth non-empty."""
+        import numpy as np
         
-        # Test case 6: Prediction empty, ground truth non-empty
         expected = np.array([[1, 1, 0], [1, 1, 0], [0, 0, 0]], dtype=np.uint8)
         actual = np.zeros((3, 3), dtype=np.uint8)
         
@@ -159,8 +173,11 @@ class AJITest(unittest.TestCase):
         aji.set_expected(expected)
         result = aji.compute(actual)
         self.assertAlmostEqual(result[0], 0.0, places=6)
+
+    def test_iou_threshold(self):
+        """Test AggregatedJaccardIndex with different IoU thresholds."""
+        import numpy as np
         
-        # Test case 7: IoU threshold test
         expected = np.array([[1, 1, 0], [1, 1, 0], [0, 0, 2]], dtype=np.uint8)
         actual = np.array([[1, 0, 0], [0, 0, 0], [0, 0, 2]], dtype=np.uint8)  # Low overlap for object 1
         
