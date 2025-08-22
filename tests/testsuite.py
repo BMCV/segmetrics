@@ -95,6 +95,9 @@ class MeasureTest(unittest.TestCase):
         self.assertEqual(sm.FalsePositive().default_name(), 'Spurious')
         self.assertEqual(sm.FalseNegative().default_name(), 'Missing')
 
+
+class AJITest(unittest.TestCase):
+
     def test_aggregated_jaccard_index(self):
         """Test AggregatedJaccardIndex with various scenarios."""
         import numpy as np
