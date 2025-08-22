@@ -304,3 +304,133 @@ class ISBIScore(AsymmetricMeasureMixin, Measure):
         if self.min_ref_size >= 2:
             name += f' (min_ref_size={self.min_ref_size})'
         return name
+
+
+class AggregatedJaccardIndex(AsymmetricMeasureMixin, Measure):
+    r"""
+    Defines the Aggregated Jaccard Index (AJI) as described in Kumar et al. (2017).
+
+    The AJI is computed by finding optimal object matches between ground truth and
+    predicted objects, then computing the aggregated intersection and union across
+    all matched pairs and unmatched objects.
+
+    The AJI is defined as:
+
+    .. math:: \mathrm{AJI} = \frac{\sum_k \left|G_k \cap P_{\sigma(k)}\right|}{\sum_k \left|G_k \cup P_{\sigma(k)}\right| + \sum_{j \notin \sigma} \left|P_j\right|}
+
+    where :math:`G_k` are ground truth objects, :math:`P_j` are predicted objects,
+    :math:`\sigma(k)` represents the optimal matching function that maps each ground truth
+    object to at most one predicted object based on maximum IoU, and the second sum
+    includes all unmatched predicted objects.
+
+    :param min_ref_size:
+        Ground truth objects smaller than ``min_ref_size`` pixels are skipped.
+        Default is 1 so all ground truth objects are included.
+
+    :param iou_threshold:
+        Minimum IoU threshold for considering objects as matched.
+        Default is 0.5 following standard practice.
+
+    References:
+
+    - N\. Kumar et al., "A dataset and a technique for generalized nuclear
+      segmentation for computational pathology," IEEE Trans. Med. Imaging,
+      vol. 36, no. 7, pp. 1550–1560, 2017.
+    """
+
+    def __init__(self, min_ref_size: int = 1, iou_threshold: float = 0.5, **kwargs) -> None:
+        super().__init__(**kwargs)
+        assert min_ref_size >= 1, 'min_ref_size must be 1 or larger'
+        assert 0.0 <= iou_threshold <= 1.0, 'iou_threshold must be between 0.0 and 1.0'
+        self.min_ref_size = min_ref_size
+        self.iou_threshold = iou_threshold
+
+    def compute(self, actual: LabelImage) -> List[float]:
+        # Handle edge case where there are no ground truth or predicted objects
+        max_ref_label = self.expected.max() if self.expected.size > 0 else 0
+        max_actual_label = actual.max() if actual.size > 0 else 0
+        
+        if max_ref_label == 0 and max_actual_label == 0:
+            return [1.0]  # Perfect match when both are empty
+        if max_ref_label == 0:
+            return [0.0]  # No ground truth objects, but have predictions
+        if max_actual_label == 0:
+            return [0.0]  # No predicted objects, but have ground truth
+
+        # Find all ground truth and predicted object labels
+        ref_labels = list(range(1, max_ref_label + 1))
+        actual_labels = list(range(1, max_actual_label + 1))
+        
+        # Compute optimal matching using Hungarian algorithm based approach
+        # For efficiency, we'll use a greedy approach that matches each GT object 
+        # to the predicted object with highest IoU above threshold
+        matched_actual_labels = set()
+        total_intersection = 0.0
+        total_union = 0.0
+        
+        # Process each ground truth object
+        for ref_label in ref_labels:
+            ref_cc = (self.expected == ref_label)
+            ref_cc_size = ref_cc.sum()
+            
+            # Skip small objects if specified
+            if ref_cc_size < self.min_ref_size:
+                continue
+                
+            # Find best matching predicted object
+            best_iou = 0.0
+            best_actual_label = None
+            best_intersection = 0.0
+            best_union = 0.0
+            
+            # Check all candidate predicted objects that overlap with this GT object
+            candidate_labels = set(actual[ref_cc]) - {0}
+            
+            for actual_label in candidate_labels:
+                if actual_label in matched_actual_labels:
+                    continue  # Already matched to another GT object
+                    
+                actual_cc = (actual == actual_label)
+                intersection = float(np.logical_and(ref_cc, actual_cc).sum())
+                union = float(np.logical_or(ref_cc, actual_cc).sum())
+                
+                if union > 0:
+                    iou = intersection / union
+                    if iou > best_iou and iou >= self.iou_threshold:
+                        best_iou = iou
+                        best_actual_label = actual_label
+                        best_intersection = intersection
+                        best_union = union
+            
+            # Add to totals
+            if best_actual_label is not None:
+                # Matched pair
+                matched_actual_labels.add(best_actual_label)
+                total_intersection += best_intersection
+                total_union += best_union
+            else:
+                # Unmatched GT object - contributes only to denominator
+                total_union += ref_cc_size
+        
+        # Add unmatched predicted objects to denominator
+        for actual_label in actual_labels:
+            if actual_label not in matched_actual_labels:
+                actual_cc = (actual == actual_label)
+                actual_size = actual_cc.sum()
+                total_union += actual_size
+        
+        # Compute AJI
+        if total_union > 0:
+            aji = total_intersection / total_union
+        else:
+            aji = 0.0
+            
+        return [aji]
+
+    def default_name(self) -> str:
+        name = 'AJI'
+        if self.min_ref_size >= 2:
+            name += f' (min_ref_size={self.min_ref_size})'
+        if self.iou_threshold != 0.5:
+            name += f' (IoU≥{self.iou_threshold:.2f})'
+        return name

@@ -11,6 +11,7 @@ from segmetrics.detection import (
 )
 from segmetrics.regional import (
     AdjustedRandIndex,
+    AggregatedJaccardIndex,
     Dice,
     ISBIScore,
     JaccardCoefficient,

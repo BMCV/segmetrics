@@ -31,6 +31,7 @@ def create_full_study():
     study.add_measure(sm.JaccardCoefficient(), 'JC')
     study.add_measure(sm.JaccardIndex(), 'JI')
     study.add_measure(sm.JaccardIndex(aggregation='geometric-mean'), 'JI (geom)')
+    study.add_measure(sm.AggregatedJaccardIndex(), 'AJI')
     study.add_measure(sm.RandIndex(), 'Rand')
     study.add_measure(sm.AdjustedRandIndex(), 'ARI')
     study.add_measure(sm.Hausdorff(), 'HSD')
@@ -77,6 +78,9 @@ class MeasureTest(unittest.TestCase):
         self.assertEqual(sm.ISBIScore().symmetric().default_name(), 'Sym. SEG')
         self.assertEqual(sm.JaccardCoefficient().default_name(), 'Jaccard coef.')
         self.assertEqual(sm.JaccardIndex().default_name(), 'Jaccard index')
+        self.assertEqual(sm.AggregatedJaccardIndex().default_name(), 'AJI')
+        self.assertEqual(sm.AggregatedJaccardIndex(min_ref_size=2).default_name(), 'AJI (min_ref_size=2)')
+        self.assertEqual(sm.AggregatedJaccardIndex(iou_threshold=0.3).default_name(), 'AJI (IoU≥0.30)')
         self.assertEqual(sm.RandIndex().default_name(), 'Rand')
         self.assertEqual(sm.AdjustedRandIndex().default_name(), 'ARI')
         self.assertEqual(sm.Hausdorff().default_name(), 'HSD')
@@ -90,6 +94,89 @@ class MeasureTest(unittest.TestCase):
         self.assertEqual(sm.FalseMerge().default_name(), 'Merge')
         self.assertEqual(sm.FalsePositive().default_name(), 'Spurious')
         self.assertEqual(sm.FalseNegative().default_name(), 'Missing')
+
+    def test_aggregated_jaccard_index(self):
+        """Test AggregatedJaccardIndex with various scenarios."""
+        import numpy as np
+        
+        # Test case 1: Perfect match
+        expected = np.array([[1, 1, 0], [1, 1, 0], [0, 0, 2]], dtype=np.uint8)
+        actual = np.array([[1, 1, 0], [1, 1, 0], [0, 0, 2]], dtype=np.uint8)
+        
+        aji = sm.AggregatedJaccardIndex()
+        aji.set_expected(expected)
+        result = aji.compute(actual)
+        self.assertAlmostEqual(result[0], 1.0, places=6)
+        
+        # Test case 2: Partial overlap
+        expected = np.array([[1, 1, 0], [1, 1, 0], [0, 0, 2]], dtype=np.uint8)
+        actual = np.array([[1, 1, 0], [1, 0, 0], [0, 0, 2]], dtype=np.uint8)
+        
+        aji = sm.AggregatedJaccardIndex()
+        aji.set_expected(expected)
+        result = aji.compute(actual)
+        # Object 1: intersection=3, union=4; Object 2: intersection=1, union=1
+        # AJI = (3+1)/(4+1) = 4/5 = 0.8
+        self.assertAlmostEqual(result[0], 4.0/5.0, places=6)
+        
+        # Test case 3: No overlap
+        expected = np.array([[1, 1, 0], [1, 1, 0], [0, 0, 0]], dtype=np.uint8)
+        actual = np.array([[0, 0, 2], [0, 0, 2], [0, 0, 2]], dtype=np.uint8)
+        
+        aji = sm.AggregatedJaccardIndex()
+        aji.set_expected(expected)
+        result = aji.compute(actual)
+        # No intersection, but both GT object (size 4) and pred object (size 3) contribute to denominator
+        # AJI = 0 / (4 + 3) = 0
+        self.assertAlmostEqual(result[0], 0.0, places=6)
+        
+        # Test case 4: Empty images
+        expected = np.zeros((3, 3), dtype=np.uint8)
+        actual = np.zeros((3, 3), dtype=np.uint8)
+        
+        aji = sm.AggregatedJaccardIndex()
+        aji.set_expected(expected)
+        result = aji.compute(actual)
+        self.assertAlmostEqual(result[0], 1.0, places=6)  # Perfect match for empty images
+        
+        # Test case 5: Ground truth empty, prediction non-empty
+        expected = np.zeros((3, 3), dtype=np.uint8)
+        actual = np.array([[1, 1, 0], [1, 1, 0], [0, 0, 0]], dtype=np.uint8)
+        
+        aji = sm.AggregatedJaccardIndex()
+        aji.set_expected(expected)
+        result = aji.compute(actual)
+        self.assertAlmostEqual(result[0], 0.0, places=6)
+        
+        # Test case 6: Prediction empty, ground truth non-empty
+        expected = np.array([[1, 1, 0], [1, 1, 0], [0, 0, 0]], dtype=np.uint8)
+        actual = np.zeros((3, 3), dtype=np.uint8)
+        
+        aji = sm.AggregatedJaccardIndex()
+        aji.set_expected(expected)
+        result = aji.compute(actual)
+        self.assertAlmostEqual(result[0], 0.0, places=6)
+        
+        # Test case 7: IoU threshold test
+        expected = np.array([[1, 1, 0], [1, 1, 0], [0, 0, 2]], dtype=np.uint8)
+        actual = np.array([[1, 0, 0], [0, 0, 0], [0, 0, 2]], dtype=np.uint8)  # Low overlap for object 1
+        
+        # With default threshold (0.5), object 1 should not match (IoU = 1/5 = 0.2 < 0.5)
+        aji = sm.AggregatedJaccardIndex(iou_threshold=0.5)
+        aji.set_expected(expected)
+        result = aji.compute(actual)
+        # Object 1: no match (size 4 in denominator), Object 2: perfect match (intersection=1, union=1)
+        # Unmatched actual object 1 (size 1) also contributes to denominator
+        # AJI = 1 / (4 + 1 + 1) = 1/6
+        self.assertAlmostEqual(result[0], 1.0/6.0, places=6)
+        
+        # With lower threshold (0.1), object 1 should match
+        aji = sm.AggregatedJaccardIndex(iou_threshold=0.1)
+        aji.set_expected(expected)
+        result = aji.compute(actual)
+        # Object 1: intersection=1, union=4; Object 2: intersection=1, union=1
+        # AJI = (1+1)/(4+1) = 2/5 = 0.4
+        self.assertAlmostEqual(result[0], 2.0/5.0, places=6)
 
 
 class ObjMeanTest(unittest.TestCase):
