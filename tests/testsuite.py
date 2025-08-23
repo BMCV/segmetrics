@@ -54,14 +54,15 @@ def compare_study(test, study, *args, **kwargs):
     compare_dataframe(test, study.todf(), *args, **kwargs)
 
 
-def compare_dataframe(test, study_df, expected_csv_filepath, tag=None):
+def compare_dataframe(test, study_df, expected_csv_filepath, tag=None, precision=3):
+    study_df = study_df.round(precision)
     expected_csv_filepath = pathlib.Path(expected_csv_filepath)
     actual_csv_filepath = f'{expected_csv_filepath}-out-{tag}' if tag else f'{expected_csv_filepath}-out'
     failure_message = f'Obtained results written to: {actual_csv_filepath}'
     try:
         test.assertTrue(expected_csv_filepath.is_file(), failure_message)
         expected_df = pd.read_csv(str(expected_csv_filepath), sep=',', keep_default_na=False)
-        test.assertTrue(study_df.round(3).equals(expected_df.round(3)), failure_message)
+        test.assertTrue(study_df.equals(expected_df), failure_message)
     except:
         study_df.to_csv(actual_csv_filepath, index=False)
         raise
