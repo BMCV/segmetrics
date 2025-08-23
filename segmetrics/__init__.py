@@ -22,7 +22,7 @@ from segmetrics.study import Study
 
 VERSION_MAJOR = 1
 VERSION_MINOR = 5
-VERSION_PATCH = 0
+VERSION_PATCH = 1
 
 VERSION = '%d.%d%s' % (
     VERSION_MAJOR,
