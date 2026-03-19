@@ -314,8 +314,8 @@ class AggregatedJaccardCoefficient(AsymmetricMeasureMixin, Measure):
 
     In the original publication, the measure is called *Aggregated Jaccard
     Index*. Here, it is instead named *Aggregated Jaccard Coefficient* for
-    consistency with the :py:ref:`JaccardCoefficient` and :py:ref:`JaccardIndex`
-    measures.
+    consistency with the :py:ref:`JaccardCoefficient` and
+    :py:ref:`JaccardIndex` measures.
 
     Loosely citing the original publication, the measure computes an
     "aggregated intersection cardinality numerator, and an aggregated union
@@ -343,17 +343,17 @@ class AggregatedJaccardCoefficient(AsymmetricMeasureMixin, Measure):
             # The reference connected component
             ref_cc = (self.expected == ref_label)
 
-            # The segmented object we compare the reference to
-            actual_cc = None
-
+            # Determine the segmented object we compare the reference to
             jc_max = -np.inf
             jc_max_nominator = 0
             jc_max_denominator = ref_cc.sum()
             jc_max_label: Optional[actual.dtype] = None
             for actual_candidate_label in frozenset(actual[ref_cc]) - {0}:
                 actual_candidate_cc = (actual == actual_candidate_label)
-                jc_nominator = np.logical_and(actual_candidate_cc, ref_cc).sum()
-                jc_denominator = np.logical_or(actual_candidate_cc, ref_cc).sum()
+                jc_nominator, jc_denominator = (
+                    np.logical_and(actual_candidate_cc, ref_cc).sum(),
+                    np.logical_or(actual_candidate_cc, ref_cc).sum(),
+                )
                 jc = jc_nominator / jc_denominator
 
                 if jc > jc_max:
