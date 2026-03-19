@@ -1,6 +1,8 @@
 import warnings
 from typing import (
     List,
+    Optional,
+    Set,
     Tuple,
 )
 
@@ -105,7 +107,7 @@ class JaccardCoefficient(RegionalImageMeasure):
 
 class RandIndex(RegionalImageMeasure):
     r"""
-    Defines the Rand index.
+    Defines the Rand Index.
 
     Let :math:`R` be the set of all image pixels corresponding to the ground
     truth segmentation, and :math:`S` the set of those corresponding to the
@@ -304,3 +306,74 @@ class ISBIScore(AsymmetricMeasureMixin, Measure):
         if self.min_ref_size >= 2:
             name += f' (min_ref_size={self.min_ref_size})'
         return name
+
+
+class AggregatedJaccardCoefficient(AsymmetricMeasureMixin, Measure):
+    r"""
+    Defines the Aggregated Jaccard Coefficient proposed in Kumar et al. (2017).
+
+    In the original publication, the measure is called *Aggregated Jaccard
+    Index*. Here, it is instead named *Aggregated Jaccard Coefficient* for
+    consistency with the :py:ref:`JaccardCoefficient` and :py:ref:`JaccardIndex`
+    measures.
+
+    Loosely citing the original publication, the measure computes an
+    "aggregated intersection cardinality numerator, and an aggregated union
+    cardinality denominator" for all ground truth and segmented objects under
+    consideration".
+
+    References:
+
+    - N.\ Kumar et al. "A dataset and a technique for generalized nuclear
+      segmentation for computational pathology," IEEE Transactions on Medical
+      Imaging, vol. 36, no. 7, pp. 1550-1560, 2017.
+    """
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+
+    def compute(self, actual: LabelImage) -> List[float]:
+        ref_labels = frozenset(self.expected.reshape(-1)) - {0}
+        seg_labels = frozenset(actual.reshape(-1)) - {0}
+
+        seg_used: Set[actual.dtype] = set()
+        c, u = 0, 0
+        for ref_label in ref_labels:
+
+            # The reference connected component
+            ref_cc = (self.expected == ref_label)
+
+            # The segmented object we compare the reference to
+            actual_cc = None
+
+            jc_max = -np.inf
+            jc_max_nominator = 0
+            jc_max_denominator = ref_cc.sum()
+            jc_max_label: Optional[actual.dtype] = None
+            for actual_candidate_label in frozenset(actual[ref_cc]) - {0}:
+                actual_candidate_cc = (actual == actual_candidate_label)
+                jc_nominator = np.logical_and(actual_candidate_cc, ref_cc).sum()
+                jc_denominator = np.logical_or(actual_candidate_cc, ref_cc).sum()
+                jc = jc_nominator / jc_denominator
+
+                if jc > jc_max:
+                    jc_max = jc
+                    jc_max_nominator = jc_nominator
+                    jc_max_denominator = jc_denominator
+                    jc_max_label = actual_candidate_label
+
+            # Update pixel counts
+            c += jc_max_nominator
+            u += jc_max_denominator
+
+            # Mark actual candidate label as used
+            if jc_max_label is not None:
+                seg_used.add(jc_max_label)
+
+        for seg_label in seg_labels - seg_used:
+            u += (actual == seg_label).sum()
+
+        return [c / u]
+
+    def default_name(self) -> str:
+        return 'AJC'

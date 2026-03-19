@@ -27,6 +27,7 @@ def create_full_study():
     study.add_measure(sm.ISBIScore(), 'SEG')
     study.add_measure(sm.ISBIScore().reversed(), 'Rev. SEG')
     study.add_measure(sm.ISBIScore().symmetric(), 'Sym. SEG')
+    study.add_measure(sm.AggregatedJaccardCoefficient(), 'AJC')
     study.add_measure(sm.JaccardCoefficient(), 'JC')
     study.add_measure(sm.JaccardIndex(), 'JI')
     study.add_measure(sm.JaccardIndex(aggregation='geometric-mean'), 'JI (geom)')

@@ -6,3 +6,5 @@ __pycache__
 *.swp
 tests/*-out-*
 /.venv
+.DS_Store
+._.DS_Store
