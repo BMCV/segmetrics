@@ -166,6 +166,79 @@ class CLITest(unittest.TestCase):
             compare_dataframe(self, actual_df, 'tests/cli-test.csv')
 
 
-if __name__ == '__main__':
-    unittest.main()
+class AJCTest(unittest.TestCase):
 
+    def setUp(self):
+        self.ref = np.array(
+            [
+                [1, 1],
+                [0, 2],
+            ]
+        )
+        self.study = sm.Study()
+        self.study.add_measure(sm.AggregatedJaccardCoefficient(), 'AJC')
+        self.study.set_expected(self.ref, unique=True)
+
+    def test_identity(self):
+        res = self.study.process('s1', self.ref.copy(), unique=True)
+        self.assertEqual(res, {'AJC': [1.0]})
+
+    def test_missing(self):
+        seg = np.array(
+            [
+                [1, 1],
+                [0, 0],
+            ]
+        )
+        res = self.study.process('s1', seg, unique=True)
+        self.assertEqual(res, {'AJC': [(2 + 0) / (2 + 1)]})
+
+    def test_spurious(self):
+        seg = np.array(
+            [
+                [1, 1],
+                [3, 2],
+            ]
+        )
+        res = self.study.process('s1', seg, unique=True)
+        self.assertEqual(res, {'AJC': [(2 + 1) / (2 + 1 + 1)]})
+
+    def test_undersegmented(self):
+        seg = np.array(
+            [
+                [0, 1],
+                [0, 2],
+            ]
+        )
+        res = self.study.process('s1', seg, unique=True)
+        self.assertEqual(res, {'AJC': [(1 + 1) / (2 + 1)]})
+
+    def test_oversegmented(self):
+        seg = np.array(
+            [
+                [1, 1],
+                [1, 2],
+            ]
+        )
+        res = self.study.process('s1', seg, unique=True)
+        self.assertEqual(res, {'AJC': [(2 + 1) / (3 + 1)]})
+
+    def test_multiple_images(self):
+        seg1 = np.array(
+            [
+                [1, 1],
+                [0, 0],
+            ]
+        )
+        seg2 = np.array(
+            [
+                [1, 1],
+                [1, 2],
+            ]
+        )
+        res1 = self.study.process('s1', seg1, unique=True)
+        res2 = self.study.process('s2', seg2, unique=True)
+        df = self.study.todf().set_index(['Sample'])
+        self.assertAlmostEqual(df.loc['s1', 'AJC'], res1['AJC'])
+        self.assertAlmostEqual(df.loc['s2', 'AJC'], res2['AJC'])
+        self.assertEqual(df.loc['', 'AJC'], (2 + 0 + 2 + 1) / (2 + 1 + 3 + 1))
