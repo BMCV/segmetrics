@@ -332,11 +332,11 @@ class AggregatedJaccardCoefficient(AsymmetricMeasureMixin, Measure):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
-    def compute(self, actual: LabelImage) -> List[float]:
+    def compute(self, actual: LabelImage) -> List[Tuple[float, float]]:
         ref_labels = frozenset(self.expected.reshape(-1)) - {0}
         seg_labels = frozenset(actual.reshape(-1)) - {0}
 
-        seg_used: Set[actual.dtype] = set()
+        seg_used: Set[np.integer] = set()
         c, u = 0, 0
         for ref_label in ref_labels:
 
@@ -347,7 +347,7 @@ class AggregatedJaccardCoefficient(AsymmetricMeasureMixin, Measure):
             jc_max = -np.inf
             jc_max_nominator = 0
             jc_max_denominator = ref_cc.sum()
-            jc_max_label: Optional[actual.dtype] = None
+            jc_max_label: Optional[np.integer] = None
             for actual_candidate_label in frozenset(actual[ref_cc]) - {0}:
                 actual_candidate_cc = (actual == actual_candidate_label)
                 jc_nominator, jc_denominator = (
@@ -373,7 +373,21 @@ class AggregatedJaccardCoefficient(AsymmetricMeasureMixin, Measure):
         for seg_label in seg_labels - seg_used:
             u += (actual == seg_label).sum()
 
-        return [c / u]
+        return [(c, u)]
+
+    def postprocess(self, values: List[Tuple[float, float]]) -> List[float]:
+        c_list, u_list = zip(*values)
+        nominator, denominator = (
+            sum(c_list),
+            sum(u_list),
+        )
+        return [
+            (
+                nominator / denominator
+                if denominator > 0
+                else 0
+            ),
+        ]
 
     def default_name(self) -> str:
         return 'AJC'

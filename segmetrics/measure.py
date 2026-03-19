@@ -1,4 +1,5 @@
 from typing import (
+    Any,
     Callable,
     List,
     Literal,
@@ -51,7 +52,7 @@ class MeasureProtocol(Protocol):
         """
         ...
 
-    def compute(self, actual: LabelImage) -> List[float]:
+    def compute(self, actual: LabelImage) -> List[Any]:
         """
         Computes the performance measure for the given segmentation results
         based on the previously set expected result.
@@ -59,6 +60,11 @@ class MeasureProtocol(Protocol):
         :param actual:
             An image containing uniquely labeled object masks corresponding to
             the segmentation results.
+        """
+        ...
+
+    def postprocess(self, values: List[Any]) -> List[float]:
+        """
         """
         ...
 
@@ -92,8 +98,11 @@ class Measure(MeasureProtocol):
     def set_expected(self, expected: LabelImage) -> None:
         self.expected = expected
 
-    def compute(self, actual: LabelImage) -> List[float]:
+    def compute(self, actual: LabelImage) -> List[Any]:
         return NotImplemented
+
+    def postprocess(self, values: List[Any]) -> List[float]:
+        return values
 
     def default_name(self) -> str:
         return type(self).__name__

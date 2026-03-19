@@ -21,7 +21,7 @@ from segmetrics.regional import (
 from segmetrics.study import Study
 
 VERSION_MAJOR = 1
-VERSION_MINOR = 5
+VERSION_MINOR = 6
 VERSION_PATCH = 0
 
 VERSION = '%d.%d%s' % (
