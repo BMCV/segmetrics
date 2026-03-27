@@ -324,7 +324,7 @@ class AggregatedJaccardCoefficient(AsymmetricMeasureMixin, Measure):
 
     References:
 
-    - N.\ Kumar et al. "A dataset and a technique for generalized nuclear
+    - N\. Kumar et al. "A dataset and a technique for generalized nuclear
       segmentation for computational pathology," IEEE Transactions on Medical
       Imaging, vol. 36, no. 7, pp. 1550-1560, 2017.
     """
