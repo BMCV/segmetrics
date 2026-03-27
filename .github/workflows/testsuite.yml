@@ -78,8 +78,9 @@ jobs:
       gist-filename: segmetrics.json
       run: |
         echo "::add-mask::${{ vars.ISBI_EVALUATION_SOFTWARE_PASSWORD }}"
+        export ISBI_EVALUATION_SOFTWARE_PASSWORD=${{ vars.ISBI_EVALUATION_SOFTWARE_PASSWORD }}
         coverage run -m unittest discover
         python -m coverage json --omit "tests/*,segmetrics/deprecated.py"
-      env: '{ "ISBI_EVALUATION_SOFTWARE_PASSWORD": "${{ vars.ISBI_EVALUATION_SOFTWARE_PASSWORD }}" }'
+#      env: '{ "ISBI_EVALUATION_SOFTWARE_PASSWORD": "${{ vars.ISBI_EVALUATION_SOFTWARE_PASSWORD }}" }'
     secrets:
       gist-auth: ${{ secrets.GIST_SECRET }}
