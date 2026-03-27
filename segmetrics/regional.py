@@ -135,7 +135,7 @@ class RandIndex(RegionalImageMeasure):
 
     References:
 
-    - L\. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in
+    - L. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in
       microscope cell images: A hand-segmented dataset and comparison of
       algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
     """
@@ -222,7 +222,7 @@ class JaccardIndex(RandIndex):
 
     References:
 
-    - L\. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in
+    - L. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in
       microscope cell images: A hand-segmented dataset and comparison of
       algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
     """
@@ -261,7 +261,7 @@ class ISBIScore(AsymmetricMeasureMixin, Measure):
 
     References:
 
-    - M\. Maska et al., "A benchmark for comparison of cell tracking
+    - M. Maska et al., "A benchmark for comparison of cell tracking
       algorithms," Bioinformatics, vol. 30, no. 11, pp. 1609–1617, 2014.
     """
 
@@ -318,13 +318,13 @@ class AggregatedJaccardCoefficient(AsymmetricMeasureMixin, Measure):
     :py:class:`JaccardIndex` measures.
 
     Loosely citing the original publication, the measure computes an
-    "aggregated intersection cardinality numerator, and an aggregated union
-    cardinality denominator" for all ground truth and segmented objects under
-    consideration".
+    *"aggregated intersection cardinality numerator, and an aggregated union
+    cardinality denominator for all ground truth and segmented objects under
+    consideration"*.
 
     References:
 
-    - N\. Kumar et al. "A dataset and a technique for generalized nuclear
+    - N. Kumar et al. "A dataset and a technique for generalized nuclear
       segmentation for computational pathology," IEEE Transactions on Medical
       Imaging, vol. 36, no. 7, pp. 1550-1560, 2017.
     """
