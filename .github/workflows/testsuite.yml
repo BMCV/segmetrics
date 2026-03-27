@@ -17,9 +17,6 @@ on:
     branches:
       - master
 
-env:
-  ISBI_EVALUATION_SOFTWARE_PASSWORD: ${{ secrets.ISBI_EVALUATION_SOFTWARE_PASSWORD }}
-
 jobs:
   python_lint:
     name: Linting
@@ -81,6 +78,7 @@ jobs:
       gist-filename: segmetrics.json
       run: |
         coverage run -m unittest discover
+        export ISBI_EVALUATION_SOFTWARE_PASSWORD=${{ secrets.ISBI_EVALUATION_SOFTWARE_PASSWORD }}
         python -m coverage json --omit "tests/*,segmetrics/deprecated.py"
     secrets:
       gist-auth: ${{ secrets.GIST_SECRET }}
