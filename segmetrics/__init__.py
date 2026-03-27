@@ -1,5 +1,5 @@
 from . import parallel
-from .measures import *
+from .measures import *  # noqa: F403
 from .measures import __all__ as __all_measures__
 from .study import Study
 from .version import __version__
