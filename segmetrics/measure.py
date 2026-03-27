@@ -54,17 +54,31 @@ class MeasureProtocol(Protocol):
 
     def compute(self, actual: LabelImage) -> List[Any]:
         """
-        Computes the performance measure for the given segmentation results
-        based on the previously set expected result.
+        Computes the values of the performance measure (or an intermediate
+        representation thereof) for the given segmentation results based on
+        the previously set expected result.
+
+        Intermediate representations are useful, for example, if the measure
+        must take multiple images of a dataset into account and cannot be
+        computed by a mean value across those images. If an intermediate
+        representation is returned, the final performance values can be
+        obtained by calling :meth:`postprocess` on the list of intermediate
+        representations obtained for all images.
 
         :param actual:
             An image containing uniquely labeled object masks corresponding to
             the segmentation results.
+
+        :returns:
+            A list of `float` values representing the performance measure or
+            an intermediate representation thereof (any data type).
         """
         ...
 
     def postprocess(self, values: List[Any]) -> List[float]:
         """
+        Returns the final performance values by postprocessing the given list
+        of intermediate representations obtained for a set of images.
         """
         ...
 

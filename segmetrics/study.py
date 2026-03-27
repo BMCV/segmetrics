@@ -161,7 +161,7 @@ class Study:
         :param name:
             An arbitrary name which uniquely identifies the performance
             measure within this study. Uses ``measure.default_name()`` if
-            ``None`` is given.
+            `None` is given.
 
         :return:
             The name used for the measure (see above).
