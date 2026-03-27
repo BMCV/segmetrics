@@ -12,7 +12,6 @@ from . import (
 )
 from .measure import Measure
 
-
 # Build dictionary of measures
 measures_dict = dict()
 for measure_name in dir(measures):
