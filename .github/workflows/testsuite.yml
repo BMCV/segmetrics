@@ -82,3 +82,30 @@ jobs:
       env: '{ "ISBI_EVALUATION_SOFTWARE_PASSWORD": "${{ vars.ISBI_EVALUATION_SOFTWARE_PASSWORD }}" }'
     secrets:
       gist-auth: ${{ secrets.GIST_SECRET }}
+
+  test_setup:
+    name: Test setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python_version: ["3.9", "3.12"]
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python_version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Install package
+        run: |
+          pip install "."
+
+      - name: Verify installation
+        run: |
+          python -c "import segmetrics; print(segmetrics.__version__)"

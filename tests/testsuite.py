@@ -198,7 +198,7 @@ class CLITest(unittest.TestCase):
                     warnings.simplefilter('ignore', UserWarning)
                     skimage.io.imsave(f'{segdir}/img{img_num}.png', image)
             with tempfile.NamedTemporaryFile(suffix='.csv') as result_file:
-                os.system(fr'python -m segmetrics.cli {segdir} ".*img([0-9]+).png" {segdir}/img\\1.png {result_file.name} "sm.Dice()" "sm.ISBIScore()" "sm.FalseMerge()" "sm.FalseSplit()" >/dev/null')
+                os.system(fr'python -m segmetrics {segdir} ".*img([0-9]+).png" {segdir}/img\\1.png {result_file.name} "Dice()" "ISBIScore()" "FalseMerge()" "FalseSplit()" >/dev/null')
                 actual_df = pd.read_csv(result_file.name, sep=',', keep_default_na=False)
             compare_dataframe(self, actual_df, 'tests/cli-test.csv')
 
