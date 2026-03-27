@@ -6,10 +6,11 @@ import re
 
 import skimage.io
 
-from . import measures
-from . import Study
+from . import (
+    Study,
+    measures,
+)
 from .measure import Measure
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
