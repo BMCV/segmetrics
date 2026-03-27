@@ -82,10 +82,6 @@ for measure_name in dir(measures):
     if inspect.isclass(measure) and issubclass(measure, Measure):
         measures_dict[measure_name] = measure
 
-print('---')
-print(measures_dict)
-print('---')
-
 # Build study
 study = Study()
 for measure_spec in args.measures:
