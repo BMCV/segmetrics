@@ -334,7 +334,8 @@ class AggregatedJaccardCoefficient(AsymmetricMeasureMixin, Measure):
 
     def compute(self, actual: LabelImage) -> List[Tuple[float, float]]:
         """
-        Computes the numerator and denominator values of the performance measure.
+        Computes the numerator and denominator values of the performance
+        measure.
 
         The final performance values are obtained via the :meth:`postprocess`
         method for the list of numerator and denominator values.
