@@ -8,6 +8,7 @@ import unittest
 import warnings
 
 import numpy as np
+import numpy.testing as npt
 import pandas as pd
 import skimage.io
 
@@ -28,6 +29,7 @@ def create_full_study():
     study.add_measure(sm.ISBIScore(), 'SEG')
     study.add_measure(sm.ISBIScore().reversed(), 'Rev. SEG')
     study.add_measure(sm.ISBIScore().symmetric(), 'Sym. SEG')
+    study.add_measure(sm.AggregatedJaccardCoefficient(), 'AJC')
     study.add_measure(sm.JaccardCoefficient(), 'JC')
     study.add_measure(sm.JaccardIndex(), 'JI')
     study.add_measure(sm.JaccardIndex(aggregation='geometric-mean'), 'JI (geom)')
@@ -201,6 +203,83 @@ class CLITest(unittest.TestCase):
             compare_dataframe(self, actual_df, 'tests/cli-test.csv')
 
 
-if __name__ == '__main__':
-    unittest.main()
+class AJCTest(unittest.TestCase):
 
+    def setUp(self):
+        self.ref = np.array(
+            [
+                [1, 1],
+                [0, 2],
+            ]
+        )
+        self.study = sm.Study()
+        self.study.add_measure(sm.AggregatedJaccardCoefficient(), 'AJC')
+        self.study.set_expected(self.ref, unique=True)
+
+    def test__identity(self):
+        res = self.study.process('s1', self.ref.copy(), unique=True)
+        self.assertEqual(res, {'AJC': [1.0]})
+
+    def test__missing(self):
+        seg = np.array(
+            [
+                [1, 1],
+                [0, 0],
+            ]
+        )
+        res = self.study.process('s1', seg, unique=True)
+        self.assertEqual(res, {'AJC': [(2 + 0) / (2 + 1)]})
+
+    def test__spurious(self):
+        seg = np.array(
+            [
+                [1, 1],
+                [3, 2],
+            ]
+        )
+        res = self.study.process('s1', seg, unique=True)
+        self.assertEqual(res, {'AJC': [(2 + 1) / (2 + 1 + 1)]})
+
+    def test__undersegmented(self):
+        seg = np.array(
+            [
+                [0, 1],
+                [0, 2],
+            ]
+        )
+        res = self.study.process('s1', seg, unique=True)
+        self.assertEqual(res, {'AJC': [(1 + 1) / (2 + 1)]})
+
+    def test__oversegmented(self):
+        seg = np.array(
+            [
+                [1, 1],
+                [1, 2],
+            ]
+        )
+        res = self.study.process('s1', seg, unique=True)
+        self.assertEqual(res, {'AJC': [(2 + 1) / (3 + 1)]})
+
+    def test__multiple_images(self):
+        seg1 = np.array(
+            [
+                [1, 1],
+                [0, 0],
+            ]
+        )
+        seg2 = np.array(
+            [
+                [1, 1],
+                [1, 2],
+            ]
+        )
+        res1 = self.study.process('s1', seg1, unique=True)
+        res2 = self.study.process('s2', seg2, unique=True)
+        df = self.study.todf().set_index(['Sample'])
+        npt.assert_almost_equal([df.loc['s1', 'AJC']], res1['AJC'])
+        npt.assert_almost_equal([df.loc['s2', 'AJC']], res2['AJC'])
+        self.assertEqual(df.loc['', 'AJC'], (2 + 0 + 2 + 1) / (2 + 1 + 3 + 1))
+
+    def test__postprocess__empty(self):
+        m = sm.AggregatedJaccardCoefficient()
+        self.assertEqual(m.postprocess(list()), list())
