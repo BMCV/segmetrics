@@ -61,8 +61,6 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-measure_spec_pattern = re.compile(r'([a-zA-Z]+)((:?_o)?)')
-
 print(f'')
 print(f'Summary')
 print(f'*******')
