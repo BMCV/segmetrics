@@ -314,8 +314,8 @@ class AggregatedJaccardCoefficient(AsymmetricMeasureMixin, Measure):
 
     In the original publication, the measure is called *Aggregated Jaccard
     Index*. Here, it is instead named *Aggregated Jaccard Coefficient* for
-    consistency with the :py:ref:`JaccardCoefficient` and
-    :py:ref:`JaccardIndex` measures.
+    consistency with the :py:class:`.JaccardCoefficient` and
+    :py:class:`JaccardIndex` measures.
 
     Loosely citing the original publication, the measure computes an
     "aggregated intersection cardinality numerator, and an aggregated union
