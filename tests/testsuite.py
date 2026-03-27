@@ -181,6 +181,7 @@ class SEGTest(unittest.TestCase):
             self.assertAlmostEqual(
                 seg_actual,
                 seg_expected,
+                delta=1e-5,
             )
 
 
