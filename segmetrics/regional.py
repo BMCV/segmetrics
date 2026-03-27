@@ -376,18 +376,21 @@ class AggregatedJaccardCoefficient(AsymmetricMeasureMixin, Measure):
         return [(c, u)]
 
     def postprocess(self, values: List[Tuple[float, float]]) -> List[float]:
-        c_list, u_list = zip(*values)
-        numerator, denominator = (
-            sum(c_list),
-            sum(u_list),
-        )
-        return [
-            (
-                numerator / denominator
-                if denominator > 0
-                else 0
-            ),
-        ]
+        if len(values) == 0:
+            return list()
+        else:
+            c_list, u_list = zip(*values)
+            numerator, denominator = (
+                sum(c_list),
+                sum(u_list),
+            )
+            return [
+                (
+                    numerator / denominator
+                    if denominator > 0
+                    else 0
+                ),
+            ]
 
     def default_name(self) -> str:
         return 'AJC'

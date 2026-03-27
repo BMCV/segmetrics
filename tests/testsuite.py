@@ -215,11 +215,11 @@ class AJCTest(unittest.TestCase):
         self.study.add_measure(sm.AggregatedJaccardCoefficient(), 'AJC')
         self.study.set_expected(self.ref, unique=True)
 
-    def test_identity(self):
+    def test__identity(self):
         res = self.study.process('s1', self.ref.copy(), unique=True)
         self.assertEqual(res, {'AJC': [1.0]})
 
-    def test_missing(self):
+    def test__missing(self):
         seg = np.array(
             [
                 [1, 1],
@@ -229,7 +229,7 @@ class AJCTest(unittest.TestCase):
         res = self.study.process('s1', seg, unique=True)
         self.assertEqual(res, {'AJC': [(2 + 0) / (2 + 1)]})
 
-    def test_spurious(self):
+    def test__spurious(self):
         seg = np.array(
             [
                 [1, 1],
@@ -239,7 +239,7 @@ class AJCTest(unittest.TestCase):
         res = self.study.process('s1', seg, unique=True)
         self.assertEqual(res, {'AJC': [(2 + 1) / (2 + 1 + 1)]})
 
-    def test_undersegmented(self):
+    def test__undersegmented(self):
         seg = np.array(
             [
                 [0, 1],
@@ -249,7 +249,7 @@ class AJCTest(unittest.TestCase):
         res = self.study.process('s1', seg, unique=True)
         self.assertEqual(res, {'AJC': [(1 + 1) / (2 + 1)]})
 
-    def test_oversegmented(self):
+    def test__oversegmented(self):
         seg = np.array(
             [
                 [1, 1],
@@ -259,7 +259,7 @@ class AJCTest(unittest.TestCase):
         res = self.study.process('s1', seg, unique=True)
         self.assertEqual(res, {'AJC': [(2 + 1) / (3 + 1)]})
 
-    def test_multiple_images(self):
+    def test__multiple_images(self):
         seg1 = np.array(
             [
                 [1, 1],
@@ -278,3 +278,7 @@ class AJCTest(unittest.TestCase):
         self.assertAlmostEqual(df.loc['s1', 'AJC'], res1['AJC'])
         self.assertAlmostEqual(df.loc['s2', 'AJC'], res2['AJC'])
         self.assertEqual(df.loc['', 'AJC'], (2 + 0 + 2 + 1) / (2 + 1 + 3 + 1))
+
+    def test__postprocess__empty(self):
+        m = sm.AggregatedJaccardCoefficient()
+        self.assertEqual(m.postprocess(list()), list())
