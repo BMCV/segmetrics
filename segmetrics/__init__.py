@@ -1,15 +1,15 @@
-import segmetrics.parallel
-from segmetrics.contour import (
+from . import parallel
+from .contour import (
     NSD,
     Hausdorff,
 )
-from segmetrics.detection import (
+from .detection import (
     FalseMerge,
     FalseNegative,
     FalsePositive,
     FalseSplit,
 )
-from segmetrics.regional import (
+from .regional import (
     AdjustedRandIndex,
     AggregatedJaccardCoefficient,
     Dice,
@@ -18,14 +18,29 @@ from segmetrics.regional import (
     JaccardIndex,
     RandIndex,
 )
-from segmetrics.study import Study
+from .study import Study
+from .version import __version__
 
-VERSION_MAJOR = 1
-VERSION_MINOR = 6
-VERSION_PATCH = 0
+__all__ = [
+    '__version__',
+    'AdjustedRandIndex',
+    'AggregatedJaccardCoefficient',
+    'Dice',
+    'FalseMerge',
+    'FalseNegative',
+    'FalsePositive',
+    'FalseSplit',
+    'Hausdorff',
+    'ISBIScore',
+    'JaccardCoefficient',
+    'JaccardIndex',
+    'NSD',
+    'RandIndex',
+    'Study',
+    'VERSION',
+    'parallel',
+]
 
-VERSION = '%d.%d%s' % (
-    VERSION_MAJOR,
-    VERSION_MINOR,
-    '.%d' % VERSION_PATCH if VERSION_PATCH > 0 else '',
-)
+
+#: Alias for backward compatibility.
+VERSION = __version__
