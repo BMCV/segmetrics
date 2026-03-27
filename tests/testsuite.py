@@ -8,6 +8,7 @@ import unittest
 import warnings
 
 import numpy as np
+import numpy.testing as npt
 import pandas as pd
 import skimage.io
 
@@ -275,8 +276,8 @@ class AJCTest(unittest.TestCase):
         res1 = self.study.process('s1', seg1, unique=True)
         res2 = self.study.process('s2', seg2, unique=True)
         df = self.study.todf().set_index(['Sample'])
-        self.assertAlmostEqual(df.loc['s1', 'AJC'], res1['AJC'])
-        self.assertAlmostEqual(df.loc['s2', 'AJC'], res2['AJC'])
+        npt.assert_almost_equal([df.loc['s1', 'AJC']], res1['AJC'])
+        npt.assert_almost_equal([df.loc['s2', 'AJC']], res2['AJC'])
         self.assertEqual(df.loc['', 'AJC'], (2 + 0 + 2 + 1) / (2 + 1 + 3 + 1))
 
     def test__postprocess__empty(self):
