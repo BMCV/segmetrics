@@ -62,8 +62,8 @@ class MeasureProtocol(Protocol):
         must take multiple images of a dataset into account and cannot be
         computed by a mean value across those images. If an intermediate
         representation is returned, the final performance values can be
-        obtained by calling :meth:`postprocess` on the list of intermediate
-        representations obtained for all images.
+        obtained by feeding the list of intermediate representations obtained
+        for all images into the :meth:`postprocess` method.
 
         :param actual:
             An image containing uniquely labeled object masks corresponding to
