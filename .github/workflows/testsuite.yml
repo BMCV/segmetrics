@@ -83,7 +83,7 @@ jobs:
     secrets:
       gist-auth: ${{ secrets.GIST_SECRET }}
 
- test_setup:
+  test_setup:
     name: Test setup
     runs-on: ubuntu-latest
     strategy:
