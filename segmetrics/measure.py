@@ -71,7 +71,7 @@ class MeasureProtocol(Protocol):
 
         :returns:
             A list of `float` values representing the performance measure or
-            an intermediate representation thereof (any data type).
+            an intermediate representation thereof (arbitrary data type).
         """
         ...
 
