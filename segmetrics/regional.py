@@ -94,10 +94,10 @@ class JaccardCoefficient(RegionalImageMeasure):
     def compute(self, actual: LabelImage) -> List[float]:
         ref = self.expected > 0
         res = actual        > 0
-        nominator = np.logical_and(ref, res).sum().astype(np.float32)
-        denominator = ref.sum() + res.sum() - nominator
+        numerator = np.logical_and(ref, res).sum().astype(np.float32)
+        denominator = ref.sum() + res.sum() - numerator
         if denominator > 0:
-            return [nominator / denominator]
+            return [numerator / denominator]
         else:
             return [1.]  # result of zero/zero division
 
@@ -345,25 +345,25 @@ class AggregatedJaccardCoefficient(AsymmetricMeasureMixin, Measure):
 
             # Determine the segmented object we compare the reference to
             jc_max = -np.inf
-            jc_max_nominator = 0
+            jc_max_numerator = 0
             jc_max_denominator = ref_cc.sum()
             jc_max_label: Optional[np.integer] = None
             for actual_candidate_label in frozenset(actual[ref_cc]) - {0}:
                 actual_candidate_cc = (actual == actual_candidate_label)
-                jc_nominator, jc_denominator = (
+                jc_numerator, jc_denominator = (
                     np.logical_and(actual_candidate_cc, ref_cc).sum(),
                     np.logical_or(actual_candidate_cc, ref_cc).sum(),
                 )
-                jc = jc_nominator / jc_denominator
+                jc = jc_numerator / jc_denominator
 
                 if jc > jc_max:
                     jc_max = jc
-                    jc_max_nominator = jc_nominator
+                    jc_max_numerator = jc_numerator
                     jc_max_denominator = jc_denominator
                     jc_max_label = actual_candidate_label
 
             # Update pixel counts
-            c += jc_max_nominator
+            c += jc_max_numerator
             u += jc_max_denominator
 
             # Mark actual candidate label as used
@@ -377,13 +377,13 @@ class AggregatedJaccardCoefficient(AsymmetricMeasureMixin, Measure):
 
     def postprocess(self, values: List[Tuple[float, float]]) -> List[float]:
         c_list, u_list = zip(*values)
-        nominator, denominator = (
+        numerator, denominator = (
             sum(c_list),
             sum(u_list),
         )
         return [
             (
-                nominator / denominator
+                numerator / denominator
                 if denominator > 0
                 else 0
             ),
