@@ -80,5 +80,7 @@ jobs:
         coverage run -m unittest discover
         export ISBI_EVALUATION_SOFTWARE_PASSWORD=${{ secrets.ISBI_EVALUATION_SOFTWARE_PASSWORD }}
         python -m coverage json --omit "tests/*,segmetrics/deprecated.py"
+      env: >-
+        {"ISBI_EVALUATION_SOFTWARE_PASSWORD": "${{ secrets.ISBI_EVALUATION_SOFTWARE_PASSWORD }}"}
     secrets:
       gist-auth: ${{ secrets.GIST_SECRET }}
