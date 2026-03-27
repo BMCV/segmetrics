@@ -77,10 +77,9 @@ jobs:
       gist-id: f46ddefff0798639bc320b13331dc7ca
       gist-filename: segmetrics.json
       run: |
-        export ISBI_EVALUATION_SOFTWARE_PASSWORD=${{ vars.PASSWORD }}
+        export ISBI_EVALUATION_SOFTWARE_PASSWORD=${{ vars.WEBHOOK_TOKEN }}
         coverage run -m unittest discover
         python -m coverage json --omit "tests/*,segmetrics/deprecated.py"
-#      env: '{ "ISBI_EVALUATION_SOFTWARE_PASSWORD": "${{ vars.ISBI_EVALUATION_SOFTWARE_PASSWORD }}" }'
 #      env: '{ "ISBI_EVALUATION_SOFTWARE_PASSWORD": "${{ vars.ISBI_EVALUATION_SOFTWARE_PASSWORD }}" }'
     secrets:
       gist-auth: ${{ secrets.GIST_SECRET }}
