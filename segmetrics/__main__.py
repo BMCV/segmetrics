@@ -1,19 +1,17 @@
 import argparse
 import glob
+import inspect
 import pathlib
 import re
 
 import skimage.io
 
-import segmetrics as sm
+from . import measures
+from . import Study
+from .measure import Measure
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument(
-    '--version',
-    action='version',
-    version=f'{sm.__name__} {sm.VERSION}',
-)
 parser.add_argument(
     'seg_dir',
     help='directory containing the segmentation results',
@@ -76,10 +74,22 @@ print(f' Is segmentation result data uniquely labeled? {args.seg_unique}')
 print(f' Results will be written to: {args.output_file}')
 print(f' The following performance measures will be used:')
 
-study = sm.Study()
+# Build dictionary of measures
+measures_dict = dict()
+for measure_name in dir(measures):
+    measure = getattr(measures, measure_name)
+    if inspect.isclass(measure) and issubclass(measure, Measure):
+        measures_dict[measure_name] = measure
+
+print('---')
+print(measures_dict)
+print('---')
+
+# Build study
+study = Study()
 for measure_spec in args.measures:
     print(f' - {measure_spec}')
-    measure = eval(measure_spec)
+    measure = eval(measure_spec, dict(), measures_dict)
     study.add_measure(measure)
 
 seg_file_pattern = re.compile(args.seg_file)

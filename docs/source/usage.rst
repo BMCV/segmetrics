@@ -125,7 +125,7 @@ Then, an evaluation of the segmentation performance can be performed using the f
 
 .. code-block:: bash
 
-    python -m segmetrics.cli ./seg ".*t([0-9]+).png" ./gt/man_seg\\1.tif results.csv \
-        "sm.ISBIScore()" "sm.FalseMerge()" "sm.FalseSplit()"
+    python -m segmetrics ./seg ".*t([0-9]+).png" ./gt/man_seg\\1.tif results.csv \
+        "ISBIScore()" "FalseMerge()" "FalseSplit()"
 
 This will write the results to the file ``results.csv``. The list of performance measures is arbitrary. Refer to ``python -m segmetrics.cli --help`` for details.

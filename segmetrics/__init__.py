@@ -1,41 +1,11 @@
 from . import parallel
-from .contour import (
-    NSD,
-    Hausdorff,
-)
-from .detection import (
-    FalseMerge,
-    FalseNegative,
-    FalsePositive,
-    FalseSplit,
-)
-from .regional import (
-    AdjustedRandIndex,
-    AggregatedJaccardCoefficient,
-    Dice,
-    ISBIScore,
-    JaccardCoefficient,
-    JaccardIndex,
-    RandIndex,
-)
+from .measures import *
+from .measures import __all__ as __all_measures__
 from .study import Study
 from .version import __version__
 
-__all__ = [
+__all__ = __all_measures__ + [
     '__version__',
-    'AdjustedRandIndex',
-    'AggregatedJaccardCoefficient',
-    'Dice',
-    'FalseMerge',
-    'FalseNegative',
-    'FalsePositive',
-    'FalseSplit',
-    'Hausdorff',
-    'ISBIScore',
-    'JaccardCoefficient',
-    'JaccardIndex',
-    'NSD',
-    'RandIndex',
     'Study',
     'VERSION',
     'parallel',
