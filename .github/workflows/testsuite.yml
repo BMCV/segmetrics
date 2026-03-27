@@ -81,3 +81,5 @@ jobs:
         python -m coverage json --omit "tests/*,segmetrics/deprecated.py"
     secrets:
       gist-auth: ${{ secrets.GIST_SECRET }}
+    env:
+      ISBI_EVALUATION_SOFTWARE_PASSWORD: ${{ secrets.ISBI_EVALUATION_SOFTWARE_PASSWORD }}
