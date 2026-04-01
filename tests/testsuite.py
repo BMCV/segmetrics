@@ -8,6 +8,7 @@ import unittest
 import warnings
 
 import numpy as np
+import numpy.testing as npt
 import pandas as pd
 import skimage.io
 
@@ -28,6 +29,7 @@ def create_full_study():
     study.add_measure(sm.ISBIScore(), 'SEG')
     study.add_measure(sm.ISBIScore().reversed(), 'Rev. SEG')
     study.add_measure(sm.ISBIScore().symmetric(), 'Sym. SEG')
+    study.add_measure(sm.AggregatedJaccardCoefficient(), 'AJC')
     study.add_measure(sm.JaccardCoefficient(), 'JC')
     study.add_measure(sm.JaccardIndex(), 'JI')
     study.add_measure(sm.JaccardIndex(aggregation='geometric-mean'), 'JI (geom)')
@@ -53,14 +55,15 @@ def compare_study(test, study, *args, **kwargs):
     compare_dataframe(test, study.todf(), *args, **kwargs)
 
 
-def compare_dataframe(test, study_df, expected_csv_filepath, tag=None):
+def compare_dataframe(test, study_df, expected_csv_filepath, tag=None, precision=3):
+    study_df = study_df.round(precision)
     expected_csv_filepath = pathlib.Path(expected_csv_filepath)
     actual_csv_filepath = f'{expected_csv_filepath}-out-{tag}' if tag else f'{expected_csv_filepath}-out'
     failure_message = f'Obtained results written to: {actual_csv_filepath}'
     try:
         test.assertTrue(expected_csv_filepath.is_file(), failure_message)
         expected_df = pd.read_csv(str(expected_csv_filepath), sep=',', keep_default_na=False)
-        test.assertTrue(study_df.round(3).equals(expected_df.round(3)), failure_message)
+        test.assertTrue(study_df.equals(expected_df), failure_message)
     except:
         study_df.to_csv(actual_csv_filepath, index=False)
         raise
@@ -151,17 +154,37 @@ class FullStudyTest(unittest.TestCase):
 
 class SEGTest(unittest.TestCase):
 
+    env_password_var = 'ISBI_EVALUATION_SOFTWARE_PASSWORD'
+
     def setUp(self):
         self.study = sm.Study()
         self.study.add_measure(sm.ISBIScore(), 'SEG')
         self.sampler = CrossSampler(images, images)
 
     def test_parallel(self):
-        sm.parallel.process_all(self.study, lambda sid: self.sampler.img2(sid), lambda sid: self.sampler.img1(sid), self.sampler.sample_ids, num_forks=2, is_actual_unique=True, is_expected_unique=True)
-        seg_expected = isbi_seg_official(self.sampler.img2_list, self.sampler.img1_list)
-        seg_actual = np.mean(self.study['SEG'])
-        error = abs(seg_actual - seg_expected)
-        self.assertTrue(error < 1e-5, f'Expected {seg_expected}, but got {seg_actual} (error: {error}')
+        if self.env_password_var not in os.environ:
+            self.skipTest(f'Environment variable "{self.env_password_var}" not set')
+        else:
+            sm.parallel.process_all(
+                self.study,
+                lambda sid: self.sampler.img2(sid),
+                lambda sid: self.sampler.img1(sid),
+                self.sampler.sample_ids,
+                num_forks=2,
+                is_actual_unique=True,
+                is_expected_unique=True,
+            )
+            seg_expected = isbi_seg_official(
+                self.sampler.img2_list,
+                self.sampler.img1_list,
+                password=os.environ[self.env_password_var],
+            )
+            seg_actual = np.mean(self.study['SEG'])
+            self.assertAlmostEqual(
+                seg_actual,
+                seg_expected,
+                delta=1e-5,
+            )
 
 
 class CLITest(unittest.TestCase):
@@ -175,11 +198,88 @@ class CLITest(unittest.TestCase):
                     warnings.simplefilter('ignore', UserWarning)
                     skimage.io.imsave(f'{segdir}/img{img_num}.png', image)
             with tempfile.NamedTemporaryFile(suffix='.csv') as result_file:
-                os.system(fr'python -m segmetrics.cli {segdir} ".*img([0-9]+).png" {segdir}/img\\1.png {result_file.name} "sm.Dice()" "sm.ISBIScore()" "sm.FalseMerge()" "sm.FalseSplit()" >/dev/null')
+                os.system(fr'python -m segmetrics {segdir} ".*img([0-9]+).png" {segdir}/img\\1.png {result_file.name} "Dice()" "ISBIScore()" "FalseMerge()" "FalseSplit()" >/dev/null')
                 actual_df = pd.read_csv(result_file.name, sep=',', keep_default_na=False)
             compare_dataframe(self, actual_df, 'tests/cli-test.csv')
 
 
-if __name__ == '__main__':
-    unittest.main()
+class AJCTest(unittest.TestCase):
 
+    def setUp(self):
+        self.ref = np.array(
+            [
+                [1, 1],
+                [0, 2],
+            ]
+        )
+        self.study = sm.Study()
+        self.study.add_measure(sm.AggregatedJaccardCoefficient(), 'AJC')
+        self.study.set_expected(self.ref, unique=True)
+
+    def test__identity(self):
+        res = self.study.process('s1', self.ref.copy(), unique=True)
+        self.assertEqual(res, {'AJC': [1.0]})
+
+    def test__missing(self):
+        seg = np.array(
+            [
+                [1, 1],
+                [0, 0],
+            ]
+        )
+        res = self.study.process('s1', seg, unique=True)
+        self.assertEqual(res, {'AJC': [(2 + 0) / (2 + 1)]})
+
+    def test__spurious(self):
+        seg = np.array(
+            [
+                [1, 1],
+                [3, 2],
+            ]
+        )
+        res = self.study.process('s1', seg, unique=True)
+        self.assertEqual(res, {'AJC': [(2 + 1) / (2 + 1 + 1)]})
+
+    def test__undersegmented(self):
+        seg = np.array(
+            [
+                [0, 1],
+                [0, 2],
+            ]
+        )
+        res = self.study.process('s1', seg, unique=True)
+        self.assertEqual(res, {'AJC': [(1 + 1) / (2 + 1)]})
+
+    def test__oversegmented(self):
+        seg = np.array(
+            [
+                [1, 1],
+                [1, 2],
+            ]
+        )
+        res = self.study.process('s1', seg, unique=True)
+        self.assertEqual(res, {'AJC': [(2 + 1) / (3 + 1)]})
+
+    def test__multiple_images(self):
+        seg1 = np.array(
+            [
+                [1, 1],
+                [0, 0],
+            ]
+        )
+        seg2 = np.array(
+            [
+                [1, 1],
+                [1, 2],
+            ]
+        )
+        res1 = self.study.process('s1', seg1, unique=True)
+        res2 = self.study.process('s2', seg2, unique=True)
+        df = self.study.todf().set_index(['Sample'])
+        npt.assert_almost_equal([df.loc['s1', 'AJC']], res1['AJC'])
+        npt.assert_almost_equal([df.loc['s2', 'AJC']], res2['AJC'])
+        self.assertEqual(df.loc['', 'AJC'], (2 + 0 + 2 + 1) / (2 + 1 + 3 + 1))
+
+    def test__postprocess__empty(self):
+        m = sm.AggregatedJaccardCoefficient()
+        self.assertEqual(m.postprocess(list()), list())

@@ -4,7 +4,7 @@ from typing import (
 )
 
 import numpy as np
-from scipy import ndimage
+import scipy.ndimage as ndi
 from skimage import morphology as morph
 
 from segmetrics.measure import (
@@ -19,7 +19,7 @@ from segmetrics.typing import (
 
 
 def _compute_binary_contour(mask: BinaryImage, width: int = 1) -> BinaryImage:
-    dilation = morph.binary_dilation(mask, morph.disk(width))
+    dilation = ndi.binary_dilation(mask, morph.disk(width))
     return np.logical_and(dilation, np.logical_not(mask))
 
 
@@ -80,7 +80,7 @@ class Hausdorff(ContourMeasure):
 
     def set_expected(self, expected: LabelImage) -> None:
         self.expected_contour = _compute_binary_contour(expected > 0)
-        self.expected_contour_distance_map = ndimage.distance_transform_edt(
+        self.expected_contour_distance_map = ndi.distance_transform_edt(
             np.logical_not(self.expected_contour)
         )
 
@@ -132,7 +132,7 @@ class NSD(ContourMeasure):
     def set_expected(self, expected: LabelImage) -> None:
         self.expected_binary: BinaryImage = (expected > 0)
         self.expected_contour = _compute_binary_contour(self.expected_binary)
-        self.expected_contour_distance_map = ndimage.distance_transform_edt(
+        self.expected_contour_distance_map = ndi.distance_transform_edt(
             np.logical_not(self.expected_contour)
         )
 

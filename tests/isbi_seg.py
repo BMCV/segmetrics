@@ -1,4 +1,5 @@
 import os
+import pathlib
 import re
 import subprocess
 import tempfile
@@ -8,7 +9,8 @@ import py7zr
 from skimage import io
 
 
-def isbi_seg_official(result_list, groundtruth_list, verbose=False):
+def isbi_seg_official(result_list, groundtruth_list, password: str, verbose=False):
+    repo_path = pathlib.Path.cwd()
     assert len(groundtruth_list) == len(result_list), 'data mismatch'
     subprocess_kwargs = dict() if verbose else dict(stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     with tempfile.TemporaryDirectory() as tmp_dir:
@@ -23,8 +25,11 @@ def isbi_seg_official(result_list, groundtruth_list, verbose=False):
                 io.imsave('data/01_RES/mask%03d.tif'       % i, result     [None, :, :].astype('uint16'), plugin='tifffile')
                 io.imsave('data/01_GT/SEG/man_seg%03d.tif' % i, groundtruth[None, :, :].astype('uint16'), plugin='tifffile')
 
-        subprocess.call(['wget', 'http://evoid.de/isbi_evaluation_software.7z'], **subprocess_kwargs)
-        with py7zr.SevenZipFile('isbi_evaluation_software.7z', mode='r', password='ppy42wGfcrHG9W4Z') as z:
+        with py7zr.SevenZipFile(
+            repo_path / 'tests/lib/isbi_evaluation_software.7z',
+            mode='r',
+            password=password,
+        ) as z:
             z.extractall()
         subprocess.call(['chmod', '+w', '-R', '.'], **subprocess_kwargs)
 
