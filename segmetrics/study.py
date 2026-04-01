@@ -105,8 +105,8 @@ class Study:
 
         self._num_objects: Dict[Any, int] = dict()
         self._sample_ids: List[Any] = list()
-        self._results: Dict[str, Dict[Any, List[float]]] = dict()
-        self._results_cache: Dict[str, List[float]] = dict()
+        self._results: Dict[str, Dict[Any, List[Any]]] = dict()
+        self._results_cache: Dict[str, List[Any]] = dict()
 
     def merge(
         self,
@@ -161,7 +161,7 @@ class Study:
         :param name:
             An arbitrary name which uniquely identifies the performance
             measure within this study. Uses ``measure.default_name()`` if
-            ``None`` is given.
+            `None` is given.
 
         :return:
             The name used for the measure (see above).
@@ -174,7 +174,7 @@ class Study:
         if name is None:
             name = measure.default_name()
         self.measures[name] = measure
-        self._results [name] = {None: list()}
+        self._results[name] = {None: list()}
         return name
 
     def reset(self) -> None:
@@ -216,7 +216,9 @@ class Study:
         """
         assert expected.min() == 0, 'mis-labeled ground truth'
         expected = expected.squeeze()
-        assert expected.ndim == 2, 'ground truth has wrong dimensions'
+        assert expected.ndim == 2, (
+            f'ground truth has wrong dimensions ({expected.ndim})'
+        )
         expected = _get_labeled(expected, unique, 'ground truth')
         self.expected_objects = len(
             frozenset(expected.reshape(-1)) - frozenset([0])
@@ -271,16 +273,16 @@ class Study:
         intermediate_results: Dict[str, List[float]] = dict()
         for measure_name in self.measures:
             measure: MeasureProtocol = self.measures[measure_name]
-            result: List[float] = measure.compute(actual)
+            result: List[Any] = measure.compute(actual)
             self._results[measure_name][sample_id] = result
-            intermediate_results[measure_name] = result
+            intermediate_results[measure_name] = measure.postprocess(result)
 
         self._results_cache.clear()
         self._sample_ids.append(sample_id)
         self._num_objects[sample_id] = self.expected_objects
         return intermediate_results
 
-    def __getitem__(self, measure: str) -> List[float]:
+    def __getitem__(self, measure: str) -> List[Any]:
         """Returns list of all values recorded for ``measure``.
         """
         if measure not in self._results_cache:
@@ -320,7 +322,7 @@ class Study:
             measure = self.measures[measure_name]
             val: float = _aggregate(
                 measure,
-                self[measure_name],
+                measure.postprocess(self[measure_name]),
                 sum(self._num_objects.values())
             )
             write((fmt % (measure_name, val)) + line_suffix)
@@ -376,7 +378,7 @@ class Study:
                     row += [
                         _aggregate(
                             measure,
-                            samples[sample_id],
+                            measure.postprocess(samples[sample_id]),
                             self._num_objects[sample_id]
                         )
                     ]
@@ -389,7 +391,7 @@ class Study:
                 measure = self.measures[measure_name]
                 value = _aggregate(
                     measure,
-                    self[measure_name],
+                    measure.postprocess(self[measure_name]),
                     sum(self._num_objects.values())
                 )
                 rows[-1].append(str(value))

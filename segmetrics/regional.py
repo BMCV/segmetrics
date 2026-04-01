@@ -1,6 +1,8 @@
 import warnings
 from typing import (
     List,
+    Optional,
+    Set,
     Tuple,
 )
 
@@ -92,10 +94,10 @@ class JaccardCoefficient(RegionalImageMeasure):
     def compute(self, actual: LabelImage) -> List[float]:
         ref = self.expected > 0
         res = actual        > 0
-        nominator = np.logical_and(ref, res).sum().astype(np.float32)
-        denominator = ref.sum() + res.sum() - nominator
+        numerator = np.logical_and(ref, res).sum().astype(np.float32)
+        denominator = ref.sum() + res.sum() - numerator
         if denominator > 0:
-            return [nominator / denominator]
+            return [numerator / denominator]
         else:
             return [1.]  # result of zero/zero division
 
@@ -105,7 +107,7 @@ class JaccardCoefficient(RegionalImageMeasure):
 
 class RandIndex(RegionalImageMeasure):
     r"""
-    Defines the Rand index.
+    Defines the Rand Index.
 
     Let :math:`R` be the set of all image pixels corresponding to the ground
     truth segmentation, and :math:`S` the set of those corresponding to the
@@ -133,7 +135,7 @@ class RandIndex(RegionalImageMeasure):
 
     References:
 
-    - L\. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in
+    - L. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in
       microscope cell images: A hand-segmented dataset and comparison of
       algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
     """
@@ -220,7 +222,7 @@ class JaccardIndex(RandIndex):
 
     References:
 
-    - L\. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in
+    - L. Coelho, A. Shariff, and R. Murphy, "Nuclear segmentation in
       microscope cell images: A hand-segmented dataset and comparison of
       algorithms," in Proc. Int. Symp. Biomed. Imag., 2009, pp. 518–521.
     """
@@ -259,7 +261,7 @@ class ISBIScore(AsymmetricMeasureMixin, Measure):
 
     References:
 
-    - M\. Maska et al., "A benchmark for comparison of cell tracking
+    - M. Maska et al., "A benchmark for comparison of cell tracking
       algorithms," Bioinformatics, vol. 30, no. 11, pp. 1609–1617, 2014.
     """
 
@@ -304,3 +306,98 @@ class ISBIScore(AsymmetricMeasureMixin, Measure):
         if self.min_ref_size >= 2:
             name += f' (min_ref_size={self.min_ref_size})'
         return name
+
+
+class AggregatedJaccardCoefficient(AsymmetricMeasureMixin, Measure):
+    r"""
+    Defines the Aggregated Jaccard Coefficient proposed in Kumar et al. (2017).
+
+    In the original publication, the measure is called *Aggregated Jaccard
+    Index*. Here, it is instead named *Aggregated Jaccard Coefficient* for
+    consistency with the :py:class:`JaccardCoefficient` and
+    :py:class:`JaccardIndex` measures.
+
+    Loosely citing the original publication, the measure computes an
+    *"aggregated intersection cardinality numerator, and an aggregated union
+    cardinality denominator for all ground truth and segmented objects under
+    consideration"*.
+
+    References:
+
+    - N. Kumar et al. "A dataset and a technique for generalized nuclear
+      segmentation for computational pathology," IEEE Transactions on Medical
+      Imaging, vol. 36, no. 7, pp. 1550-1560, 2017.
+    """
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+
+    def compute(self, actual: LabelImage) -> List[Tuple[float, float]]:
+        """
+        Computes the numerator and denominator values of the performance
+        measure.
+
+        The final performance values are obtained via the :meth:`postprocess`
+        method for the list of numerator and denominator values.
+        """
+        ref_labels = frozenset(self.expected.reshape(-1)) - {0}
+        seg_labels = frozenset(actual.reshape(-1)) - {0}
+
+        seg_used: Set[np.integer] = set()
+        c, u = 0, 0
+        for ref_label in ref_labels:
+
+            # The reference connected component
+            ref_cc = (self.expected == ref_label)
+
+            # Determine the segmented object we compare the reference to
+            jc_max = -np.inf
+            jc_max_numerator = 0
+            jc_max_denominator = ref_cc.sum()
+            jc_max_label: Optional[np.integer] = None
+            for actual_candidate_label in frozenset(actual[ref_cc]) - {0}:
+                actual_candidate_cc = (actual == actual_candidate_label)
+                jc_numerator, jc_denominator = (
+                    np.logical_and(actual_candidate_cc, ref_cc).sum(),
+                    np.logical_or(actual_candidate_cc, ref_cc).sum(),
+                )
+                jc = jc_numerator / jc_denominator
+
+                if jc > jc_max:
+                    jc_max = jc
+                    jc_max_numerator = jc_numerator
+                    jc_max_denominator = jc_denominator
+                    jc_max_label = actual_candidate_label
+
+            # Update pixel counts
+            c += jc_max_numerator
+            u += jc_max_denominator
+
+            # Mark actual candidate label as used
+            if jc_max_label is not None:
+                seg_used.add(jc_max_label)
+
+        for seg_label in seg_labels - seg_used:
+            u += (actual == seg_label).sum()
+
+        return [(c, u)]
+
+    def postprocess(self, values: List[Tuple[float, float]]) -> List[float]:
+        if len(values) == 0:
+            return list()
+        else:
+            c_list, u_list = zip(*values)
+            numerator, denominator = (
+                sum(c_list),
+                sum(u_list),
+            )
+            return [
+                (
+                    numerator / denominator
+                    if denominator > 0
+                    else 0
+                ),
+            ]
+
+    def default_name(self) -> str:
+        return 'AJC'
